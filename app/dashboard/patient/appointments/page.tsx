@@ -11,6 +11,9 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import AppointmentsList from "@/components/appointments/AppointmentsList"
 import AppointmentCalendarView from "@/components/appointments/AppointmentCalendarView"
+import AppointmentReminders from "@/components/appointments/AppointmentReminders"
+import AppointmentHistory from "@/components/appointments/AppointmentHistory"
+import AppointmentPayment from "@/components/appointments/AppointmentPayment"
 import NewAppointmentDialog from "@/components/appointments/NewAppointmentDialog"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import type { Appointment } from "@/lib/types"
@@ -93,6 +96,15 @@ export default function PatientAppointmentsPage() {
     )
   }
 
+  // Gérer la mise à jour du statut de paiement
+  const handleUpdatePaymentStatus = (appointmentId: string, paymentStatus: "pending" | "paid" | "refunded") => {
+    setAppointments(
+      appointments.map((appointment) =>
+        appointment.id === appointmentId ? { ...appointment, paymentStatus } : appointment,
+      ),
+    )
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -158,36 +170,50 @@ export default function PatientAppointmentsPage() {
         </div>
       </div>
 
-      {view === "list" ? (
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Rendez-vous à venir</h2>
-            <AppointmentsList
-              appointments={upcomingAppointments}
-              onCancel={handleCancelAppointment}
-              onUpdate={handleUpdateAppointment}
-              emptyMessage="Aucun rendez-vous à venir. Prenez un rendez-vous pour commencer."
-            />
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          {view === "list" ? (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-semibold mb-4">Rendez-vous à venir</h2>
+                <AppointmentsList
+                  appointments={upcomingAppointments}
+                  onCancel={handleCancelAppointment}
+                  onUpdate={handleUpdateAppointment}
+                  emptyMessage="Aucun rendez-vous à venir. Prenez un rendez-vous pour commencer."
+                />
+              </div>
 
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Rendez-vous passés</h2>
-            <AppointmentsList
-              appointments={pastAppointments}
-              isPast={true}
+              <div>
+                <h2 className="text-lg font-semibold mb-4">Rendez-vous passés</h2>
+                <AppointmentsList
+                  appointments={pastAppointments}
+                  isPast={true}
+                  onCancel={handleCancelAppointment}
+                  onUpdate={handleUpdateAppointment}
+                  emptyMessage="Aucun rendez-vous passé."
+                />
+              </div>
+            </div>
+          ) : (
+            <AppointmentCalendarView
+              appointments={sortedAppointments}
               onCancel={handleCancelAppointment}
               onUpdate={handleUpdateAppointment}
-              emptyMessage="Aucun rendez-vous passé."
             />
-          </div>
+          )}
         </div>
-      ) : (
-        <AppointmentCalendarView
-          appointments={sortedAppointments}
-          onCancel={handleCancelAppointment}
-          onUpdate={handleUpdateAppointment}
-        />
-      )}
+
+        <div className="space-y-6">
+          <AppointmentReminders appointments={appointments} />
+          <AppointmentPayment appointments={appointments} onUpdatePayment={handleUpdatePaymentStatus} />
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold mb-4">Historique détaillé</h2>
+        <AppointmentHistory appointments={appointments} onUpdate={handleUpdateAppointment} />
+      </div>
 
       <NewAppointmentDialog
         open={isNewAppointmentOpen}

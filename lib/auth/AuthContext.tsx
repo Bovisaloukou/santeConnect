@@ -68,8 +68,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return
         }
 
+        // En développement, ne pas essayer de récupérer l'utilisateur depuis l'API
+        // si nous n'avons pas d'utilisateur dans le localStorage
+        if (process.env.NODE_ENV === "development") {
+          setIsLoading(false)
+          return
+        }
+
         // Sinon, essayer de récupérer l'utilisateur depuis l'API
+        console.log("Appel API checkAuth")
         const response = await api.checkAuth()
+        console.log("Réponse API checkAuth:", response)
+
         if (response.data) {
           setUser(response.data.user)
           localStorage.setItem("user", JSON.stringify(response.data.user))

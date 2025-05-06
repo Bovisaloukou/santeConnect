@@ -38,8 +38,29 @@ async function fetchApi<T>(endpoint: string, options: RequestInit, mockData?: T)
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, options)
-    const data = await response.json()
+    // Log de l'URL complète
+    const fullUrl = `${API_BASE_URL}${endpoint}`
+    console.log("Appel API vers:", fullUrl)
+
+    const response = await fetch(fullUrl, options)
+
+    // Vérifier le type de contenu avant de parser comme JSON
+    const contentType = response.headers.get("content-type")
+
+    // Si la réponse n'est pas du JSON, gérer l'erreur
+    if (!contentType || !contentType.includes("application/json")) {
+      const responseText = await response.text().catch(() => "Impossible de lire la réponse")
+      console.error("Réponse non-JSON reçue:", responseText)
+      return {
+        error: "Le serveur a renvoyé une réponse non-JSON",
+        status: response.status,
+      }
+    }
+
+    const data = await response.json().catch((error) => {
+      console.error("Erreur lors du parsing JSON:", error)
+      return { error: "Format de réponse invalide" }
+    })
 
     if (!response.ok) {
       // Gérer les erreurs d'authentification
