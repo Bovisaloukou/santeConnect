@@ -77,66 +77,48 @@ const getAuthToken = (): string | null => {
 
 // API Service
 const api = {
-  // Méthodes HTTP génériques\
-  get: async <T>(endpoint: string, mockData?: T): Promise<ApiResponse<T>> => {
+  // Méthodes HTTP génériques
+  get: <T,>(endpoint: string, mockData?: T): Promise<ApiResponse<T>> => {
     const token = getAuthToken()
     const options = buildRequestOptions("GET", undefined, token)
     return fetchApi<T>(endpoint, options, mockData)
   },
 
-  post: async <T>
-;
-;(endpoint: string, data: any, mockData?: T): Promise<ApiResponse<T>> => {
-  const token = getAuthToken()
-  const options = buildRequestOptions("POST", data, token)
-  return fetchApi<T>(endpoint, options, mockData)
-},
-  put
-: async <T>(endpoint: string, data: any, mockData?: T): Promise<ApiResponse<T>> =>
-{
-  const token = getAuthToken()
-  const options = buildRequestOptions("PUT", data, token)
-  return fetchApi<T>(endpoint, options, mockData)
-}
-,
+  post: <T,>(endpoint: string, data: any, mockData?: T): Promise<ApiResponse<T>> => {
+    const token = getAuthToken()
+    const options = buildRequestOptions("POST", data, token)
+    return fetchApi<T>(endpoint, options, mockData)
+  },
 
-  delete: async <T>(endpoint: string, mockData?: T): Promise<ApiResponse<T>> =>
-{
-  const token = getAuthToken()
-  const options = buildRequestOptions("DELETE", undefined, token)
-  return fetchApi<T>(endpoint, options, mockData)
-}
-,
+  put: <T,>(endpoint: string, data: any, mockData?: T): Promise<ApiResponse<T>> => {
+    const token = getAuthToken()
+    const options = buildRequestOptions("PUT", data, token)
+    return fetchApi<T>(endpoint, options, mockData)
+  },
+
+  delete: <T,>(endpoint: string, mockData?: T): Promise<ApiResponse<T>> => {
+    const token = getAuthToken()
+    const options = buildRequestOptions("DELETE", undefined, token)
+    return fetchApi<T>(endpoint, options, mockData)
+  },
 
   // Méthodes spécifiques pour l'authentification
-  login: async (email: string, password: string) =>
-{
-  return api.post<{ user: any; token: string }>("/auth/login", { email, password })
-}
-,
+  login: (email: string, password: string) =>
+    api.post<{ user: any; token: string }>("/auth/login", { email, password }),
 
-  register: async (userData: any) =>
-{
-  return api.post<{ user: any; token: string }>("/auth/register", userData)
-}
-,
+  register: (userData: any) => api.post<{ user: any; token: string }>("/auth/register", userData),
 
-  logout: async () =>
-{
-  const token = getAuthToken()
-  if (token) {
-    await api.post("/auth/logout", {})
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("auth_token")
+  logout: async () => {
+    const token = getAuthToken()
+    if (token) {
+      await api.post("/auth/logout", {})
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("auth_token")
+      }
     }
-  }
-}
-,
+  },
 
-  checkAuth: async () =>
-{
-  return api.get("/auth/me")
-}
+  checkAuth: () => api.get("/auth/me"),
 }
 
 export default api

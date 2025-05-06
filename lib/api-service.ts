@@ -93,16 +93,16 @@ async function simulateApiCall<T>(endpoint: string, method: string, body?: any):
 
 // Fonctions d'aide pour les méthodes HTTP courantes
 export const api = {
-  get: <T>(endpoint: string, customHeaders?: Record<string, string>) =>\
+  get: <T,>(endpoint: string, customHeaders?: Record<string, string>) =>
     apiRequest<T>(endpoint, "GET", undefined, customHeaders),
 
-  post: <T>(endpoint: string, data: any, customHeaders?: Record<string, string>) =>
+  post: <T,>(endpoint: string, data: any, customHeaders?: Record<string, string>) =>
     apiRequest<T>(endpoint, "POST", data, customHeaders),
 
-  put: <T>(endpoint: string, data: any, customHeaders?: Record<string, string>) =>
+  put: <T,>(endpoint: string, data: any, customHeaders?: Record<string, string>) =>
     apiRequest<T>(endpoint, "PUT", data, customHeaders),
 
-  delete: <T>(endpoint: string, customHeaders?: Record<string, string>) =>
+  delete: <T,>(endpoint: string, customHeaders?: Record<string, string>) =>
     apiRequest<T>(endpoint, "DELETE", undefined, customHeaders),
 
   // Fonction utilitaire pour gérer les erreurs API et afficher des toasts
@@ -114,7 +114,7 @@ export const api = {
         variant: "destructive",
       })
     }
-  }
+  },
 }
 
 export default api
