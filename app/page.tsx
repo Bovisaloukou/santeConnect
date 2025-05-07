@@ -7,33 +7,33 @@ import { CurrentYear } from "@/components/CurrentYear"
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="bg-white border-b sticky top-0 z-10">
+    <div className="flex flex-col min-h-screen bg-neutral-light-gray">
+      <header className="bg-neutral-white sticky top-0 z-20">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <Pill className="h-6 w-6 text-emerald-600" />
-            <span className="text-xl font-bold text-emerald-600">SantéConnect</span>
+            <Pill className="h-6 w-6 text-primary-blue" />
+            <span className="text-xl font-bold text-primary-blue">SantéConnect</span>
           </div>
           <nav className="hidden md:flex space-x-6">
-            <Link href="/" className="text-gray-700 hover:text-emerald-600">
+            <Link href="/" className="text-neutral-dark-gray hover:text-primary-blue">
               Accueil
             </Link>
-            <Link href="/services" className="text-gray-700 hover:text-emerald-600">
+            <Link href="/services" className="text-neutral-dark-gray hover:text-primary-blue">
               Services
             </Link>
-            <Link href="/pharmacies" className="text-gray-700 hover:text-emerald-600">
+            <Link href="/pharmacies" className="text-neutral-dark-gray hover:text-primary-blue">
               Pharmacies
             </Link>
-            <Link href="/about" className="text-gray-700 hover:text-emerald-600">
+            <Link href="/about" className="text-neutral-dark-gray hover:text-primary-blue">
               À propos
             </Link>
           </nav>
           <div className="flex space-x-2">
             <Link href="/login" passHref>
-              <Button variant="outline">Connexion</Button>
+              <Button variant="outline" className="hover:border-primary-blue hover:bg-primary-blue hover:text-neutral-white">Connexion</Button>
             </Link>
             <Link href="/register" passHref>
-              <Button>Inscription</Button>
+              <Button className="bg-primary-blue text-neutral-white hover:bg-opacity-90">Inscription</Button>
             </Link>
           </div>
         </div>
@@ -41,26 +41,28 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero Section Apple Style */}
-        <section className="relative bg-gradient-to-br from-white via-blue-50 to-blue-100 py-32 overflow-hidden">
+        <section className="relative bg-gradient-to-br from-neutral-white via-primary-blue/10 to-primary-blue/20 py-36 overflow-hidden">
           <div className="absolute inset-0 pointer-events-none select-none">
-            <svg width="100%" height="100%" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute top-0 left-0 w-full h-full opacity-60">
+            <svg width="100%" height="100%" viewBox="0 0 1440 400" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute top-0 left-0 w-full h-full opacity-60">
               <defs>
                 <linearGradient id="heroGradient" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#e0e7ff" />
-                  <stop offset="100%" stopColor="#fff" />
+                  <stop offset="0%" stopColor="var(--color-primary-blue-light)" />
+                  <stop offset="100%" stopColor="var(--color-neutral-white)" />
                 </linearGradient>
               </defs>
-              <ellipse cx="720" cy="160" rx="700" ry="160" fill="url(#heroGradient)" />
+              <ellipse cx="720" cy="200" rx="700" ry="200" fill="url(#heroGradient)" />
             </svg>
           </div>
           <div className="container mx-auto px-4 flex flex-col items-center text-center gap-10 relative z-10">
-            <img src="/placeholder.svg" alt="SantéConnect" className="w-40 h-40 mb-6 drop-shadow-2xl rounded-3xl bg-white/70 backdrop-blur-lg border border-blue-100 object-cover" />
-            <h1 className="text-6xl md:text-8xl font-extralight tracking-tight mb-6 text-blue-900" style={{letterSpacing: '-0.04em'}}>Votre santé, <span className="font-bold text-blue-600">simplement</span>.</h1>
-            <p className="text-2xl md:text-3xl text-blue-800/80 mb-10 max-w-2xl mx-auto font-light">
+            <img src="/placeholder.svg" alt="SantéConnect" className="w-40 h-40 mb-6 drop-shadow-2xl rounded-3xl bg-neutral-white/70 backdrop-blur-lg border border-primary-blue/30 object-cover" />
+            <h1 className="text-6xl md:text-8xl font-extralight tracking-tight mb-6 text-neutral-dark-gray" style={{letterSpacing: '-0.04em'}}>
+              Votre santé, <span className="font-bold text-primary-blue">simplement</span>.
+            </h1>
+            <p className="text-2xl md:text-3xl text-neutral-medium-gray mb-10 max-w-2xl mx-auto font-light">
               Découvrez une nouvelle expérience de soins, élégante, fluide et connectée.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" className="bg-blue-600 text-white shadow-xl hover:bg-blue-700 transition-all text-xl px-12 py-6 rounded-full font-semibold tracking-wide">
+              <Button size="lg" className="bg-accent-turquoise text-neutral-white shadow-xl hover:bg-opacity-90 transition-all text-xl px-12 py-6 rounded-full font-semibold tracking-wide">
                 Commencer maintenant
               </Button>
             </div>
@@ -68,37 +70,37 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section className="py-16 bg-white">
+        <section className="py-16 bg-neutral-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">Nos Services</h2>
+            <h2 className="text-3xl font-bold text-center mb-12 text-neutral-dark-gray">Nos Services</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <FeatureCard
-                icon={<Users className="h-10 w-10 text-emerald-600" />}
+                icon={<Users className="h-10 w-10 text-primary-blue" />}
                 title="Gestion des Utilisateurs"
                 description="Créez votre profil patient ou professionnel de santé pour accéder à tous nos services."
               />
               <FeatureCard
-                icon={<Calendar className="h-10 w-10 text-emerald-600" />}
+                icon={<Calendar className="h-10 w-10 text-primary-blue" />}
                 title="Rendez-vous Médicaux"
                 description="Prenez rendez-vous avec des professionnels de santé et gérez votre calendrier médical."
               />
               <FeatureCard
-                icon={<Pill className="h-10 w-10 text-emerald-600" />}
+                icon={<Pill className="h-10 w-10 text-secondary-green" />}
                 title="Gestion des Médicaments"
                 description="Consultez la disponibilité des médicaments dans les pharmacies proches de chez vous."
               />
               <FeatureCard
-                icon={<Bell className="h-10 w-10 text-emerald-600" />}
+                icon={<Bell className="h-10 w-10 text-accent-orange" />}
                 title="Alertes et Notifications"
                 description="Recevez des rappels pour vos rendez-vous et prises de médicaments."
               />
               <FeatureCard
-                icon={<CreditCard className="h-10 w-10 text-emerald-600" />}
+                icon={<CreditCard className="h-10 w-10 text-primary-blue" />}
                 title="Paiements Sécurisés"
                 description="Effectuez des paiements sécurisés pour vos consultations et médicaments."
               />
               <FeatureCard
-                icon={<FileText className="h-10 w-10 text-emerald-600" />}
+                icon={<FileText className="h-10 w-10 text-primary-blue" />}
                 title="Dossier Médical"
                 description="Accédez à votre dossier médical et partagez-le avec vos professionnels de santé."
               />
@@ -107,9 +109,9 @@ export default function Home() {
         </section>
 
         {/* How It Works Section */}
-        <section className="py-16">
+        <section className="py-16 bg-neutral-light-gray">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">Comment ça marche</h2>
+            <h2 className="text-3xl font-bold text-center mb-12 text-neutral-dark-gray">Comment ça marche</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <StepCard
                 number="1"
@@ -131,9 +133,9 @@ export default function Home() {
         </section>
 
         {/* Testimonials Section */}
-        <section className="py-16 bg-white">
+        <section className="py-16 bg-neutral-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">Témoignages</h2>
+            <h2 className="text-3xl font-bold text-center mb-12 text-neutral-dark-gray">Témoignages</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <TestimonialCard
                 name="Marie Koné"
@@ -155,13 +157,13 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-16 bg-emerald-600 text-white">
+        <section className="py-16 bg-primary-blue text-neutral-white">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold mb-6">Prêt à améliorer votre expérience de santé ?</h2>
             <p className="text-xl mb-8 max-w-3xl mx-auto">
               Rejoignez notre plateforme dès aujourd'hui et bénéficiez d'un accès simplifié aux soins de santé.
             </p>
-            <Button size="lg" className="bg-white text-emerald-600 hover:bg-gray-100">
+            <Button size="lg" className="bg-neutral-white text-primary-blue hover:bg-neutral-light-gray hover:text-opacity-90">
               <Link href="/register" className="flex items-center">
                 S'inscrire maintenant <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -170,69 +172,69 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-white text-foreground py-12">
+      <footer className="bg-neutral-dark-gray text-neutral-light-gray py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-4">SantéConnect</h3>
-              <p className="text-gray-300">
+              <h3 className="text-lg font-semibold mb-4 text-neutral-white">SantéConnect</h3>
+              <p className="text-neutral-medium-gray">
                 Facilitez et accélérez votre prise en charge médicale grâce à notre plateforme intuitive.
               </p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-4">Liens rapides</h3>
+              <h3 className="text-lg font-semibold mb-4 text-neutral-white">Liens rapides</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/" className="text-gray-300 hover:text-white">
+                  <Link href="/" className="text-neutral-medium-gray hover:text-accent-turquoise">
                     Accueil
                   </Link>
                 </li>
                 <li>
-                  <Link href="/services" className="text-gray-300 hover:text-white">
+                  <Link href="/services" className="text-neutral-medium-gray hover:text-accent-turquoise">
                     Services
                   </Link>
                 </li>
                 <li>
-                  <Link href="/pharmacies" className="text-gray-300 hover:text-white">
+                  <Link href="/pharmacies" className="text-neutral-medium-gray hover:text-accent-turquoise">
                     Pharmacies
                   </Link>
                 </li>
                 <li>
-                  <Link href="/about" className="text-gray-300 hover:text-white">
+                  <Link href="/about" className="text-neutral-medium-gray hover:text-accent-turquoise">
                     À propos
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-4">Légal</h3>
+              <h3 className="text-lg font-semibold mb-4 text-neutral-white">Légal</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/terms" className="text-gray-300 hover:text-white">
+                  <Link href="/terms" className="text-neutral-medium-gray hover:text-accent-turquoise">
                     Conditions d'utilisation
                   </Link>
                 </li>
                 <li>
-                  <Link href="/privacy" className="text-gray-300 hover:text-white">
+                  <Link href="/privacy" className="text-neutral-medium-gray hover:text-accent-turquoise">
                     Politique de confidentialité
                   </Link>
                 </li>
                 <li>
-                  <Link href="/cookies" className="text-gray-300 hover:text-white">
+                  <Link href="/cookies" className="text-neutral-medium-gray hover:text-accent-turquoise">
                     Politique de cookies
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-4">Contact</h3>
+              <h3 className="text-lg font-semibold mb-4 text-neutral-white">Contact</h3>
               <ul className="space-y-2">
-                <li className="text-gray-300">contact@santeconnect.com</li>
-                <li className="text-gray-300">+123 456 789</li>
+                <li className="text-neutral-medium-gray">contact@santeconnect.com</li>
+                <li className="text-neutral-medium-gray">+123 456 789</li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
+          <div className="border-t border-neutral-medium-gray/50 mt-8 pt-8 text-center text-neutral-medium-gray">
             <p>&copy; <CurrentYear /> SantéConnect. Tous droits réservés.</p>
           </div>
         </div>
@@ -243,13 +245,13 @@ export default function Home() {
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <Card className="h-full bg-white/70 backdrop-blur-lg shadow-2xl border-0 rounded-3xl transition-transform hover:scale-105 hover:shadow-blue-200/60 duration-300">
+    <Card className="h-full bg-neutral-white/70 backdrop-blur-lg shadow-2xl border-0 rounded-3xl transition-transform hover:scale-105 hover:shadow-primary-blue/20 duration-300">
       <CardContent className="pt-8 pb-6 flex flex-col items-center text-center gap-2">
-        <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-50 shadow-inner">
+        <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-blue/10 shadow-inner">
           {icon}
         </div>
-        <h3 className="text-2xl font-semibold mb-1 text-blue-900">{title}</h3>
-        <p className="text-blue-800/80 text-base font-light">{description}</p>
+        <h3 className="text-xl font-semibold text-neutral-dark-gray">{title}</h3>
+        <p className="text-neutral-medium-gray">{description}</p>
       </CardContent>
     </Card>
   )
@@ -257,32 +259,25 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode; titl
 
 function StepCard({ number, title, description }: { number: string; title: string; description: string }) {
   return (
-    <div className="flex flex-col items-center text-center">
-      <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center text-2xl font-bold mb-4">
-        {number}
-      </div>
-      <div className="bg-white shadow-lg border-0 rounded-xl px-6 py-4 w-full">
-        <h3 className="text-xl font-semibold mb-2">{title}</h3>
-        <p className="text-muted-foreground">{description}</p>
-      </div>
-    </div>
+    <Card className="bg-neutral-white shadow-lg rounded-xl overflow-hidden">
+      <CardContent className="p-6">
+        <div className="flex items-center mb-4">
+          <span className="text-3xl font-bold text-primary-blue mr-4 bg-primary-blue/10 px-3 py-1 rounded-md">{number}</span>
+          <h3 className="text-xl font-semibold text-neutral-dark-gray">{title}</h3>
+        </div>
+        <p className="text-neutral-medium-gray">{description}</p>
+      </CardContent>
+    </Card>
   )
 }
 
 function TestimonialCard({ name, role, quote }: { name: string; role: string; quote: string }) {
   return (
-    <Card className="h-full bg-white shadow-lg border-0">
-      <CardContent className="pt-6">
-        <div className="flex flex-col h-full">
-          <div className="mb-4">
-            <MessageSquare className="h-8 w-8 text-emerald-600" />
-          </div>
-          <p className="text-muted-foreground italic mb-4 flex-grow">"{quote}"</p>
-          <div>
-            <p className="font-semibold">{name}</p>
-            <p className="text-gray-500 text-sm">{role}</p>
-          </div>
-        </div>
+    <Card className="bg-neutral-white shadow-lg rounded-xl overflow-hidden">
+      <CardContent className="p-6">
+        <p className="italic text-neutral-medium-gray mb-4">"{quote}"</p>
+        <p className="font-semibold text-neutral-dark-gray">{name}</p>
+        <p className="text-sm text-primary-blue">{role}</p>
       </CardContent>
     </Card>
   )

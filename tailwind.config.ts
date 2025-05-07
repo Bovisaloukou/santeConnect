@@ -11,6 +11,14 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
+  			'primary-blue': '#3498DB',
+  			'secondary-green': '#2ECC71',
+  			'accent-turquoise': '#1ABC9C',
+  			'accent-orange': '#F39C12',
+  			'neutral-light-gray': '#F4F6F6',
+  			'neutral-medium-gray': '#95A5A6',
+  			'neutral-dark-gray': '#34495E',
+  			'neutral-white': '#FFFFFF',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

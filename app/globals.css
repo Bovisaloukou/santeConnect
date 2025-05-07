@@ -42,6 +42,18 @@ body {
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 212 100% 53%;
+
+    /* Nouvelles variables pour le dégradé SVG et la palette */
+    --color-primary-blue: #3498DB; 
+    --color-primary-blue-light: #A9CCE3; /* Teinte claire de primary-blue */
+    --color-secondary-green: #2ECC71;
+    --color-accent-turquoise: #1ABC9C;
+    --color-accent-orange: #F39C12;
+    --color-neutral-light-gray: #F4F6F6;
+    --color-neutral-medium-gray: #95A5A6;
+    --color-neutral-dark-gray: #34495E;
+    --color-neutral-white: #FFFFFF;
+    /* Fin des nouvelles variables */
   }
   .dark {
     --background: 220 13% 18%;
@@ -71,6 +83,14 @@ body {
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 220 13% 24%;
     --sidebar-ring: 212 100% 53%;
+
+    /* Vous pourriez vouloir définir des équivalents sombres pour vos nouvelles couleurs ici aussi */
+    /* Par exemple :
+    --color-primary-blue: #217dbb; 
+    --color-primary-blue-light: #5c9ac7;
+    --color-neutral-light-gray: #2c3e50; 
+    ...etc.
+    */
   }
 }
 
