@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Users, Calendar, Pill, Bell, CreditCard, FileText, MessageSquare, ArrowRight } from "lucide-react"
+import { CurrentYear } from "@/components/CurrentYear"
 
 export default function Home() {
   return (
@@ -39,27 +40,35 @@ export default function Home() {
       </header>
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-20">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">Accédez facilement aux soins de santé</h1>
-            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-              Une plateforme intuitive qui connecte patients et professionnels de santé pour une prise en charge
-              médicale optimisée.
+        {/* Hero Section Apple Style */}
+        <section className="relative bg-gradient-to-br from-white via-blue-50 to-blue-100 py-32 overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none select-none">
+            <svg width="100%" height="100%" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute top-0 left-0 w-full h-full opacity-60">
+              <defs>
+                <linearGradient id="heroGradient" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#e0e7ff" />
+                  <stop offset="100%" stopColor="#fff" />
+                </linearGradient>
+              </defs>
+              <ellipse cx="720" cy="160" rx="700" ry="160" fill="url(#heroGradient)" />
+            </svg>
+          </div>
+          <div className="container mx-auto px-4 flex flex-col items-center text-center gap-10 relative z-10">
+            <img src="/placeholder.svg" alt="SantéConnect" className="w-40 h-40 mb-6 drop-shadow-2xl rounded-3xl bg-white/70 backdrop-blur-lg border border-blue-100 object-cover" />
+            <h1 className="text-6xl md:text-8xl font-extralight tracking-tight mb-6 text-blue-900" style={{letterSpacing: '-0.04em'}}>Votre santé, <span className="font-bold text-blue-600">simplement</span>.</h1>
+            <p className="text-2xl md:text-3xl text-blue-800/80 mb-10 max-w-2xl mx-auto font-light">
+              Découvrez une nouvelle expérience de soins, élégante, fluide et connectée.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" className="bg-white text-emerald-600 hover:bg-gray-100">
-                Trouver un médecin
-              </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-emerald-700">
-                Consulter les pharmacies
+              <Button size="lg" className="bg-blue-600 text-white shadow-xl hover:bg-blue-700 transition-all text-xl px-12 py-6 rounded-full font-semibold tracking-wide">
+                Commencer maintenant
               </Button>
             </div>
           </div>
         </section>
 
         {/* Features Section */}
-        <section className="py-16 bg-gray-50">
+        <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-12">Nos Services</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -122,7 +131,7 @@ export default function Home() {
         </section>
 
         {/* Testimonials Section */}
-        <section className="py-16 bg-gray-50">
+        <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-12">Témoignages</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -161,7 +170,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-gray-800 text-white py-12">
+      <footer className="bg-white text-foreground py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -224,7 +233,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-            <p>&copy; {new Date().getFullYear()} SantéConnect. Tous droits réservés.</p>
+            <p>&copy; <CurrentYear /> SantéConnect. Tous droits réservés.</p>
           </div>
         </div>
       </footer>
@@ -234,13 +243,13 @@ export default function Home() {
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <Card className="h-full transition-transform hover:scale-[1.02]">
-      <CardContent className="pt-6">
-        <div className="flex flex-col items-center text-center">
-          <div className="mb-4">{icon}</div>
-          <h3 className="text-xl font-semibold mb-2">{title}</h3>
-          <p className="text-gray-600">{description}</p>
+    <Card className="h-full bg-white/70 backdrop-blur-lg shadow-2xl border-0 rounded-3xl transition-transform hover:scale-105 hover:shadow-blue-200/60 duration-300">
+      <CardContent className="pt-8 pb-6 flex flex-col items-center text-center gap-2">
+        <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-50 shadow-inner">
+          {icon}
         </div>
+        <h3 className="text-2xl font-semibold mb-1 text-blue-900">{title}</h3>
+        <p className="text-blue-800/80 text-base font-light">{description}</p>
       </CardContent>
     </Card>
   )
@@ -252,21 +261,23 @@ function StepCard({ number, title, description }: { number: string; title: strin
       <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center text-2xl font-bold mb-4">
         {number}
       </div>
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
-      <p className="text-gray-600">{description}</p>
+      <div className="bg-white shadow-lg border-0 rounded-xl px-6 py-4 w-full">
+        <h3 className="text-xl font-semibold mb-2">{title}</h3>
+        <p className="text-muted-foreground">{description}</p>
+      </div>
     </div>
   )
 }
 
 function TestimonialCard({ name, role, quote }: { name: string; role: string; quote: string }) {
   return (
-    <Card className="h-full">
+    <Card className="h-full bg-white shadow-lg border-0">
       <CardContent className="pt-6">
         <div className="flex flex-col h-full">
           <div className="mb-4">
             <MessageSquare className="h-8 w-8 text-emerald-600" />
           </div>
-          <p className="text-gray-600 italic mb-4 flex-grow">"{quote}"</p>
+          <p className="text-muted-foreground italic mb-4 flex-grow">"{quote}"</p>
           <div>
             <p className="font-semibold">{name}</p>
             <p className="text-gray-500 text-sm">{role}</p>
