@@ -13,16 +13,31 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/components/ui/use-toast"
-import { Pill } from "lucide-react"
+import Header from "@/components/layout/Header"
+import Footer from "@/components/layout/Footer"
+
+import { CalendarIcon, Eye, EyeOff } from "lucide-react"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+import { cn } from "@/lib/utils"
 
 export default function RegisterPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [birthDate, setBirthDate] = useState<Date | undefined>(undefined)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
+
+    const formData = new FormData(e.currentTarget)
+    const data = Object.fromEntries(formData.entries())
+    console.log("Données du formulaire:", { ...data, birthDate: birthDate?.toISOString().split('T')[0] })
 
     try {
       // Simuler l'enregistrement
@@ -47,16 +62,8 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-white border-b py-4">
-        <div className="container mx-auto px-4">
-          <Link href="/" className="flex items-center space-x-2">
-            <Pill className="h-6 w-6 text-emerald-600" />
-            <span className="text-xl font-bold text-emerald-600">SantéConnect</span>
-          </Link>
-        </div>
-      </header>
-
-      <main className="flex-1 flex items-center justify-center p-4 py-8">
+      <Header />
+      <main className="flex-1 flex items-center justify-center p-4 py-8 md:py-12">
         <div className="w-full max-w-md">
           <Tabs defaultValue="patient" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
@@ -91,7 +98,29 @@ export default function RegisterPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="birthdate">Date de naissance</Label>
-                      <Input id="birthdate" name="birthdate" type="date" required />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !birthDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {birthDate ? format(birthDate, "PPP", { locale: fr }) : <span>Sélectionner une date</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={birthDate}
+                            onSelect={setBirthDate}
+                            initialFocus
+                            locale={fr}
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     <div className="space-y-2">
                       <Label>Genre</Label>
@@ -114,11 +143,43 @@ export default function RegisterPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="password">Mot de passe</Label>
-                      <Input id="password" name="password" type="password" required />
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          name="password"
+                          type={showPassword ? "text" : "password"}
+                          required
+                          disabled={isLoading}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                          aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                        >
+                          {showPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
+                        </button>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
-                      <Input id="confirm-password" name="confirmPassword" type="password" required />
+                      <div className="relative">
+                        <Input
+                          id="confirm-password"
+                          name="confirmPassword"
+                          type={showConfirmPassword ? "text" : "password"}
+                          required
+                          disabled={isLoading}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                          aria-label={showConfirmPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
+                        </button>
+                      </div>
                     </div>
                   </CardContent>
                   <CardFooter className="flex flex-col space-y-4">
@@ -192,11 +253,43 @@ export default function RegisterPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="pro-password">Mot de passe</Label>
-                      <Input id="pro-password" name="password" type="password" required />
+                      <div className="relative">
+                        <Input
+                          id="pro-password"
+                          name="password"
+                          type={showPassword ? "text" : "password"}
+                          required
+                          disabled={isLoading}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                          aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                        >
+                          {showPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
+                        </button>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="pro-confirm-password">Confirmer le mot de passe</Label>
-                      <Input id="pro-confirm-password" name="confirmPassword" type="password" required />
+                      <div className="relative">
+                        <Input
+                          id="pro-confirm-password"
+                          name="confirmPassword"
+                          type={showConfirmPassword ? "text" : "password"}
+                          required
+                          disabled={isLoading}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                          aria-label={showConfirmPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
+                        </button>
+                      </div>
                     </div>
                   </CardContent>
                   <CardFooter className="flex flex-col space-y-4">
@@ -216,12 +309,7 @@ export default function RegisterPage() {
           </Tabs>
         </div>
       </main>
-
-      <footer className="bg-gray-100 py-4 text-center text-gray-600 text-sm">
-        <div className="container mx-auto px-4">
-          <p>&copy; {new Date().getFullYear()} SantéConnect. Tous droits réservés.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

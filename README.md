@@ -32,6 +32,7 @@ SantéConnect est une plateforme de santé numérique conçue pour simplifier et
 *   **Frontend :** Next.js (React Framework)
 *   **Langage :** TypeScript
 *   **Styling :** Tailwind CSS
+*   **Composants UI :** [shadcn/ui](https://ui.shadcn.com/) - *Privilégier l'utilisation des composants de cette bibliothèque pour assurer la cohérence et l'efficacité du développement UI.*
 *   **Développement UI assisté par :** v0.dev
 *   **Déploiement :** Vercel
 

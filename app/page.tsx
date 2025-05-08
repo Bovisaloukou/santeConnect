@@ -3,42 +3,13 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Users, Calendar, Pill, Bell, CreditCard, FileText, MessageSquare, ArrowRight } from "lucide-react"
-import { CurrentYear } from "@/components/CurrentYear"
+import Header from "@/components/layout/Header"
+import Footer from "@/components/layout/Footer"
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-neutral-light-gray">
-      <header className="bg-neutral-white sticky top-0 z-20">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Pill className="h-6 w-6 text-primary-blue" />
-            <span className="text-xl font-bold text-primary-blue">SantéConnect</span>
-          </div>
-          <nav className="hidden md:flex space-x-6">
-            <Link href="/" className="text-neutral-dark-gray hover:text-primary-blue">
-              Accueil
-            </Link>
-            <Link href="/centres-medicaux" className="text-neutral-dark-gray hover:text-primary-blue">
-              Centres médicaux
-            </Link>
-            <Link href="/pharmacies" className="text-neutral-dark-gray hover:text-primary-blue">
-              Pharmacies
-            </Link>
-            <Link href="/about" className="text-neutral-dark-gray hover:text-primary-blue">
-              À propos
-            </Link>
-          </nav>
-          <div className="flex space-x-2">
-            <Link href="/login" passHref>
-              <Button variant="outline" className="hover:border-primary-blue hover:bg-primary-blue hover:text-neutral-white">Connexion</Button>
-            </Link>
-            <Link href="/register" passHref>
-              <Button className="bg-primary-blue text-neutral-white hover:bg-opacity-90">Inscription</Button>
-            </Link>
-          </div>
-        </div>
-      </header>
-
+      <Header />
       <main className="flex-1">
         {/* Hero Section Apple Style */}
         <section className="relative bg-gradient-to-br from-neutral-white via-primary-blue/10 to-primary-blue/20 py-36 overflow-hidden">
@@ -171,74 +142,7 @@ export default function Home() {
           </div>
         </section>
       </main>
-
-      <footer className="bg-neutral-dark-gray text-neutral-light-gray py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-neutral-white">SantéConnect</h3>
-              <p className="text-neutral-medium-gray">
-                Facilitez et accélérez votre prise en charge médicale grâce à notre plateforme intuitive.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-neutral-white">Liens rapides</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/" className="text-neutral-medium-gray hover:text-accent-turquoise">
-                    Accueil
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/services" className="text-neutral-medium-gray hover:text-accent-turquoise">
-                    Services
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/pharmacies" className="text-neutral-medium-gray hover:text-accent-turquoise">
-                    Pharmacies
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/about" className="text-neutral-medium-gray hover:text-accent-turquoise">
-                    À propos
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-neutral-white">Légal</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/terms" className="text-neutral-medium-gray hover:text-accent-turquoise">
-                    Conditions d'utilisation
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="text-neutral-medium-gray hover:text-accent-turquoise">
-                    Politique de confidentialité
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/cookies" className="text-neutral-medium-gray hover:text-accent-turquoise">
-                    Politique de cookies
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-neutral-white">Contact</h3>
-              <ul className="space-y-2">
-                <li className="text-neutral-medium-gray">contact@santeconnect.com</li>
-                <li className="text-neutral-medium-gray">+123 456 789</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-neutral-medium-gray/50 mt-8 pt-8 text-center text-neutral-medium-gray">
-            <p>&copy; <CurrentYear /> SantéConnect. Tous droits réservés.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

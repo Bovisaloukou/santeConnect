@@ -10,8 +10,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/lib/auth/AuthContext"
-import { Pill } from "lucide-react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
+import Header from "@/components/layout/Header"
+import Footer from "@/components/layout/Footer"
+import { Eye, EyeOff } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -22,6 +24,7 @@ export default function LoginPage() {
   })
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
   const [activeTab, setActiveTab] = useState<string>("patient")
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -91,16 +94,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-white border-b py-4">
-        <div className="container mx-auto px-4">
-          <Link href="/" className="flex items-center space-x-2">
-            <Pill className="h-6 w-6 text-emerald-600" />
-            <span className="text-xl font-bold text-emerald-600">SantéConnect</span>
-          </Link>
-        </div>
-      </header>
-
-      <main className="flex-1 flex items-center justify-center p-4">
+      <Header />
+      <main className="flex-1 flex items-center justify-center p-4 md:p-8">
         <div className="w-full max-w-md">
           <Tabs defaultValue="patient" className="w-full" onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2">
@@ -148,12 +143,7 @@ export default function LoginPage() {
           </div>
         </div>
       </main>
-
-      <footer className="bg-gray-100 py-4 text-center text-gray-600 text-sm">
-        <div className="container mx-auto px-4">
-          <p>&copy; {new Date().getFullYear()} SantéConnect. Tous droits réservés.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
@@ -175,6 +165,8 @@ interface LoginFormProps {
 }
 
 function LoginForm({ title, description, formData, errors, isLoading, onChange, onSubmit }: LoginFormProps) {
+  const [showPasswordLocal, setShowPasswordLocal] = useState(false)
+
   return (
     <Card>
       <CardHeader>
@@ -204,15 +196,25 @@ function LoginForm({ title, description, formData, errors, isLoading, onChange, 
                 Mot de passe oublié?
               </Link>
             </div>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={onChange}
-              disabled={isLoading}
-              className={errors.password ? "border-red-500" : ""}
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                name="password"
+                type={showPasswordLocal ? "text" : "password"}
+                value={formData.password}
+                onChange={onChange}
+                disabled={isLoading}
+                className={errors.password ? "border-red-500" : ""}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswordLocal(!showPasswordLocal)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                aria-label={showPasswordLocal ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              >
+                {showPasswordLocal ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
+              </button>
+            </div>
             {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
           </div>
         </CardContent>
