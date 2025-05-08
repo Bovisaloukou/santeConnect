@@ -18,8 +18,8 @@ export default function Home() {
             <Link href="/" className="text-neutral-dark-gray hover:text-primary-blue">
               Accueil
             </Link>
-            <Link href="/services" className="text-neutral-dark-gray hover:text-primary-blue">
-              Services
+            <Link href="/centres-medicaux" className="text-neutral-dark-gray hover:text-primary-blue">
+              Centres médicaux
             </Link>
             <Link href="/pharmacies" className="text-neutral-dark-gray hover:text-primary-blue">
               Pharmacies
