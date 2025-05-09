@@ -43,7 +43,7 @@ export default function Header() {
         {/* Desktop Auth Buttons */}
         <div className="hidden md:flex space-x-2">
           <Link href="/login" passHref>
-            <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white">
+            <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white mr-2">
               Connexion
             </Button>
           </Link>
