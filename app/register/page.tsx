@@ -22,6 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { cn } from "@/lib/utils"
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -63,7 +64,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 flex items-center justify-center p-4 py-8 md:py-12">
+      <main className="flex-1 flex items-center justify-center p-4 py-8 md:py-12 mt-9">
         <div className="w-full max-w-md">
           <Tabs defaultValue="patient" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
@@ -186,6 +187,7 @@ export default function RegisterPage() {
                     <Button type="submit" className="w-full" disabled={isLoading}>
                       {isLoading ? "Inscription en cours..." : "S'inscrire"}
                     </Button>
+                    <GoogleSignInButton text="S'inscrire avec Google" />
                     <p className="text-center text-sm text-gray-600">
                       Déjà inscrit?{" "}
                       <Link href="/login" className="text-emerald-600 hover:underline">
@@ -296,6 +298,7 @@ export default function RegisterPage() {
                     <Button type="submit" className="w-full" disabled={isLoading}>
                       {isLoading ? "Inscription en cours..." : "S'inscrire"}
                     </Button>
+                    <GoogleSignInButton text="S'inscrire avec Google" />
                     <p className="text-center text-sm text-gray-600">
                       Déjà inscrit?{" "}
                       <Link href="/login" className="text-emerald-600 hover:underline">

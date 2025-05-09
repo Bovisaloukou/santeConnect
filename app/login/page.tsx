@@ -14,6 +14,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import { Eye, EyeOff } from "lucide-react"
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -95,7 +96,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 flex items-center justify-center p-4 md:p-8">
+      <main className="flex-1 flex items-center justify-center p-4 md:p-8 mt-9">
         <div className="w-full max-w-md">
           <Tabs defaultValue="patient" className="w-full" onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2">
@@ -112,6 +113,9 @@ export default function LoginPage() {
                 onChange={handleChange}
                 onSubmit={handleSubmit}
               />
+              <div className="mt-4">
+                <GoogleSignInButton text="Se connecter avec Google" />
+              </div>
             </TabsContent>
             <TabsContent value="healthcare">
               <LoginForm
@@ -123,6 +127,9 @@ export default function LoginPage() {
                 onChange={handleChange}
                 onSubmit={handleSubmit}
               />
+              <div className="mt-4">
+                <GoogleSignInButton text="Se connecter avec Google" />
+              </div>
             </TabsContent>
           </Tabs>
 
