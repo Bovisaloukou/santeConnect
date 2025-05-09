@@ -94,7 +94,7 @@ export default function Header() {
                     </SheetClose>
                   ))}
                 </nav>
-                <div className="p-6 border-t border-neutral-medium-gray/20 space-y-3">
+                <div className="p-6 border-t border-neutral-medium-gray/20 space-y-4">
                   <SheetClose asChild>
                     <Link href="/login" passHref className="w-full">
                       <Button variant="outline" className="w-full border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white">
