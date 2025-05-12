@@ -10,15 +10,18 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/lib/auth/AuthContext"
-import LoadingSpinner from "@/components/ui/loading-spinner"
-import Header from "@/components/layout/Header"
-import Footer from "@/components/layout/Footer"
+import { useToast } from "@/components/ui/use-toast";
 import { Eye, EyeOff } from "lucide-react"
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton"
+import LoadingSpinner from "@/components/ui/loading-spinner";
+import Header from "@/components/layout/Header"
+import Footer from "@/components/layout/Footer"
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login, isLoading } = useAuth()
+  const { login } = useAuth()
+  const { toast } = useToast();
+  const [formSubmitLoading, setFormSubmitLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -60,10 +63,15 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    console.log("[handleSubmit] Called");
 
     if (!validateForm()) {
+      console.log("[handleSubmit] Validation failed");
       return
     }
+    console.log("[handleSubmit] Validation passed");
+    setFormSubmitLoading(true);
+    console.log("[handleSubmit] formSubmitLoading set to true");
 
     // Préremplir l'email en fonction de l'onglet actif
     let email = formData.email
@@ -77,7 +85,9 @@ export default function LoginPage() {
       }
     }
 
+    console.log(`[handleSubmit] Attempting login for email: ${email}`);
     const success = await login(email, formData.password)
+    console.log(`[handleSubmit] Login success: ${success}`);
 
     if (success) {
       // Rediriger vers le tableau de bord approprié
@@ -90,7 +100,16 @@ export default function LoginPage() {
       } else {
         router.push(`/dashboard/${activeTab}`)
       }
+    } else {
+      toast({
+        title: "Échec de la connexion",
+        description: "L\'email ou le mot de passe est incorrect.",
+        variant: "destructive",
+      });
+      console.log("[handleSubmit] Login failed, toast shown.");
     }
+    setFormSubmitLoading(false);
+    console.log("[handleSubmit] formSubmitLoading set to false");
   }
 
   return (
@@ -109,7 +128,7 @@ export default function LoginPage() {
                 description="Accédez à votre espace patient pour gérer vos rendez-vous et consultations."
                 formData={formData}
                 errors={errors}
-                isLoading={isLoading}
+                isLoading={formSubmitLoading}
                 onChange={handleChange}
                 onSubmit={handleSubmit}
               />
@@ -123,7 +142,7 @@ export default function LoginPage() {
                 description="Accédez à votre espace professionnel pour gérer vos patients et rendez-vous."
                 formData={formData}
                 errors={errors}
-                isLoading={isLoading}
+                isLoading={formSubmitLoading}
                 onChange={handleChange}
                 onSubmit={handleSubmit}
               />

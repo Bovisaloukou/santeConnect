@@ -100,6 +100,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       // En développement, utiliser des données fictives
       if (process.env.NODE_ENV === "development") {
+        console.log(`[AuthContext Login DEV] Email: '${email}', Password: '${password}'`);
+        const isPasswordCorrect = password === "password123" || password === "demo";
+        console.log(`[AuthContext Login DEV] Is password '${password}' correct (===\'password123\' || ===\'demo\')? ${isPasswordCorrect}`);
+
         // Simuler un délai réseau
         await new Promise((resolve) => setTimeout(resolve, 800))
 
@@ -114,10 +118,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           let mockUser: User
 
           if (email === "demo" || email === "patient@example.com") {
+            console.log("[AuthContext Login DEV] Assigning MOCK_USERS.patient");
             mockUser = MOCK_USERS.patient
           } else if (email === "doctor@example.com") {
+            console.log("[AuthContext Login DEV] Assigning MOCK_USERS.healthcare");
             mockUser = MOCK_USERS.healthcare
-          } else {
+          } else { // Implies pharmacy@example.com
+            console.log("[AuthContext Login DEV] Assigning MOCK_USERS.pharmacy");
             mockUser = MOCK_USERS.pharmacy
           }
 
@@ -133,6 +140,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
           return true
         } else {
+          console.log("[AuthContext Login DEV] Credentials INCORRECT. Triggering toast.");
           toast({
             title: "Erreur de connexion",
             description: "Identifiants incorrects. Veuillez réessayer.",

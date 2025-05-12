@@ -20,7 +20,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
   return (
     <Button
       variant="outline"
-      className="w-full bg-white text-gray-700 hover:bg-gray-100 mt-4"
+      className="w-full bg-white text-gray-700 hover:bg-primary mt-4"
       onClick={handleSignIn}
     >
       <ChromeIcon className="mr-2 h-5 w-5" /> {/* Using ChromeIcon for Google */}
