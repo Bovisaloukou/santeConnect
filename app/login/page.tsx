@@ -79,7 +79,7 @@ export default function LoginPage() {
       if (activeTab === "patient") {
         email = "patient@example.com"
       } else if (activeTab === "healthcare") {
-        email = "doctor@example.com"
+        // email = "doctor@example.com"
       } else if (activeTab === "pharmacy") {
         email = "pharmacy@example.com"
       }
@@ -94,7 +94,7 @@ export default function LoginPage() {
       if (email === "patient@example.com" || (email === "demo" && activeTab === "patient")) {
         router.push("/dashboard/patient")
       } else if (email === "doctor@example.com" || (email === "demo" && activeTab === "healthcare")) {
-        router.push("/dashboard/healthcare")
+        // router.push("/dashboard/healthcare")
       } else if (email === "pharmacy@example.com" || (email === "demo" && activeTab === "pharmacy")) {
         router.push("/dashboard/pharmacy")
       } else {
@@ -117,40 +117,18 @@ export default function LoginPage() {
       <Header />
       <main className="flex-1 flex items-center justify-center p-4 md:p-8 mt-9">
         <div className="w-full max-w-md">
-          <Tabs defaultValue="patient" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="patient">Patient</TabsTrigger>
-              <TabsTrigger value="healthcare">Professionnel</TabsTrigger>
-            </TabsList>
-            <TabsContent value="patient">
-              <LoginForm
-                title="Connexion Patient"
-                description="Accédez à votre espace patient pour gérer vos rendez-vous et consultations."
-                formData={formData}
-                errors={errors}
-                isLoading={formSubmitLoading}
-                onChange={handleChange}
-                onSubmit={handleSubmit}
-              />
-              <div className="mt-4">
-                <GoogleSignInButton text="Se connecter avec Google" />
-              </div>
-            </TabsContent>
-            <TabsContent value="healthcare">
-              <LoginForm
-                title="Connexion Professionnel"
-                description="Accédez à votre espace professionnel pour gérer vos patients et rendez-vous."
-                formData={formData}
-                errors={errors}
-                isLoading={formSubmitLoading}
-                onChange={handleChange}
-                onSubmit={handleSubmit}
-              />
-              <div className="mt-4">
-                <GoogleSignInButton text="Se connecter avec Google" />
-              </div>
-            </TabsContent>
-          </Tabs>
+          <LoginForm
+            title="Connexion Patient"
+            description="Accédez à votre espace patient pour gérer vos rendez-vous et consultations."
+            formData={formData}
+            errors={errors}
+            isLoading={formSubmitLoading}
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+          />
+          <div className="mt-4">
+            <GoogleSignInButton text="Se connecter avec Google" />
+          </div>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">Pour la démo, utilisez:</p>
@@ -196,8 +174,8 @@ function LoginForm({ title, description, formData, errors, isLoading, onChange, 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardTitle className="text-center py-2">{title}</CardTitle>
+        <CardDescription className="text-center">{description}</CardDescription>
       </CardHeader>
       <form onSubmit={onSubmit}>
         <CardContent className="space-y-4">

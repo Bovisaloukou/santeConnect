@@ -81,8 +81,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.log("Réponse API checkAuth:", response)
 
         if (response.data) {
-          setUser(response.data.user)
-          localStorage.setItem("user", JSON.stringify(response.data.user))
+          // Ajouter une assertion de type pour informer TypeScript de la structure de response.data
+          const authData = response.data as { user: User };
+          setUser(authData.user)
+          localStorage.setItem("user", JSON.stringify(authData.user))
         }
       } catch (error) {
         console.error("Erreur d'authentification:", error)
@@ -98,89 +100,90 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true)
 
-      // En développement, utiliser des données fictives
-      if (process.env.NODE_ENV === "development") {
-        console.log(`[AuthContext Login DEV] Email: '${email}', Password: '${password}'`);
-        const isPasswordCorrect = password === "password123" || password === "demo";
-        console.log(`[AuthContext Login DEV] Is password '${password}' correct (===\'password123\' || ===\'demo\')? ${isPasswordCorrect}`);
+      // Vérifier si les identifiants correspondent aux utilisateurs de démonstration
+      const isDemoUser = (
+        (email === "patient@example.com" ||
+          email === "doctor@example.com" ||
+          email === "pharmacy@example.com" ||
+          email === "demo") &&
+        (password === "password123" || password === "demo")
+      )
+
+      if (isDemoUser) {
+        console.log(`[AuthContext Login DEMO] Attempting login for demo user: ${email}`);
+        let mockUser: User
+
+        if (email === "demo" || email === "patient@example.com") {
+          console.log("[AuthContext Login DEMO] Assigning MOCK_USERS.patient");
+          mockUser = MOCK_USERS.patient
+        } else if (email === "doctor@example.com") {
+          console.log("[AuthContext Login DEMO] Assigning MOCK_USERS.healthcare");
+          mockUser = MOCK_USERS.healthcare
+        } else { // Implies pharmacy@example.com
+          console.log("[AuthContext Login DEMO] Assigning MOCK_USERS.pharmacy");
+          mockUser = MOCK_USERS.pharmacy
+        }
 
         // Simuler un délai réseau
         await new Promise((resolve) => setTimeout(resolve, 800))
 
-        // Vérifier les identifiants
-        if (
-          (email === "patient@example.com" ||
-            email === "doctor@example.com" ||
-            email === "pharmacy@example.com" ||
-            email === "demo") &&
-          (password === "password123" || password === "demo")
-        ) {
-          let mockUser: User
+        // Stocker l'utilisateur et le token fictifs
+        setUser(mockUser)
+        localStorage.setItem("user", JSON.stringify(mockUser))
+        localStorage.setItem("auth_token", "mock-jwt-token")
 
-          if (email === "demo" || email === "patient@example.com") {
-            console.log("[AuthContext Login DEV] Assigning MOCK_USERS.patient");
-            mockUser = MOCK_USERS.patient
-          } else if (email === "doctor@example.com") {
-            console.log("[AuthContext Login DEV] Assigning MOCK_USERS.healthcare");
-            mockUser = MOCK_USERS.healthcare
-          } else { // Implies pharmacy@example.com
-            console.log("[AuthContext Login DEV] Assigning MOCK_USERS.pharmacy");
-            mockUser = MOCK_USERS.pharmacy
-          }
+        toast({
+          title: "Connexion réussie (Démo)",
+          description: `Bienvenue, ${mockUser.name}! (Mode Démo)`,
+        })
 
-          // Stocker l'utilisateur et le token
-          setUser(mockUser)
-          localStorage.setItem("user", JSON.stringify(mockUser))
-          localStorage.setItem("auth_token", "mock-jwt-token")
+        console.log("[AuthContext Login DEMO] Demo login successful.");
+        return true // Connexion réussie avec les identifiants de démo
+      } else {
+        // Sinon, tenter de se connecter via l'API réelle
+        console.log(`[AuthContext Login API] Attempting login via API for email: ${email}`);
+        const response = await api.login(email, password)
+        console.log("[AuthContext Login API] API response:", response);
 
-          toast({
-            title: "Connexion réussie",
-            description: `Bienvenue, ${mockUser.name}!`,
-          })
-
-          return true
-        } else {
-          console.log("[AuthContext Login DEV] Credentials INCORRECT. Triggering toast.");
+        if (response.error) {
+          console.log("[AuthContext Login API] API returned error. Triggering toast.");
           toast({
             title: "Erreur de connexion",
-            description: "Identifiants incorrects. Veuillez réessayer.",
+            description: response.error, // Utiliser l'erreur retournée par l'API
             variant: "destructive",
           })
           return false
         }
+
+        // Assurer que response.data et response.data.user existent avant d'y accéder
+        if (response.data && response.data.user) {
+          console.log("[AuthContext Login API] API returned success. Setting user.");
+          setUser(response.data.user as User) // Assurer le type correct
+          localStorage.setItem("user", JSON.stringify(response.data.user))
+          localStorage.setItem("auth_token", response.data.token)
+
+          toast({
+            title: "Connexion réussie",
+            description: `Bienvenue, ${response.data.user.name}!`,
+          })
+
+          return true
+        } else {
+             // Gérer le cas où l'API ne renvoie pas les données attendues même sans erreur
+             console.log("[AuthContext Login API] API response missing expected data. Triggering toast.");
+             toast({
+                title: "Erreur de connexion",
+                description: "Réponse API inattendue.",
+                variant: "destructive",
+             });
+             return false;
+        }
       }
-
-      // En production, appeler l'API réelle
-      const response = await api.login(email, password)
-
-      if (response.error) {
-        toast({
-          title: "Erreur de connexion",
-          description: response.error,
-          variant: "destructive",
-        })
-        return false
-      }
-
-      if (response.data) {
-        setUser(response.data.user)
-        localStorage.setItem("user", JSON.stringify(response.data.user))
-        localStorage.setItem("auth_token", response.data.token)
-
-        toast({
-          title: "Connexion réussie",
-          description: `Bienvenue, ${response.data.user.name}!`,
-        })
-
-        return true
-      }
-
-      return false
     } catch (error) {
-      console.error("Erreur de connexion:", error)
+      console.error("Erreur de connexion inattendue:", error)
       toast({
         title: "Erreur de connexion",
-        description: "Une erreur est survenue. Veuillez réessayer.",
+        description: "Une erreur inattendue est survenue lors de la connexion.",
         variant: "destructive",
       })
       return false

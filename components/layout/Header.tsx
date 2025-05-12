@@ -6,9 +6,11 @@ import { Menu } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import Image from 'next/image';
+import { useAuth } from "@/lib/auth/AuthContext";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const navLinks = [
     { href: "/", label: "Accueil" },
@@ -38,20 +40,33 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+          {user && (
+            <Link href="/dashboard/patient" className="text-neutral-dark-gray hover:text-primary-blue transition-colors">
+              Tableau de bord
+            </Link>
+          )}
         </nav>
 
-        {/* Desktop Auth Buttons */}
+        {/* Desktop Auth Buttons / User Info */}
         <div className="hidden md:flex space-x-2">
-          <Link href="/login" passHref>
-            <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white mr-2">
-              Connexion
+          {user ? (
+            <Button variant="outline" onClick={logout} className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white">
+              Déconnexion
             </Button>
-          </Link>
-          <Link href="/register" passHref>
-            <Button className="bg-primary-blue text-neutral-white hover:bg-opacity-90">
-              Inscription
-            </Button>
-          </Link>
+          ) : (
+            <>
+              <Link href="/login" passHref>
+                <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white mr-2">
+                  Connexion
+                </Button>
+              </Link>
+              <Link href="/register" passHref>
+                <Button className="bg-primary-blue text-neutral-white hover:bg-opacity-90">
+                  Inscription
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -93,22 +108,43 @@ export default function Header() {
                       </Link>
                     </SheetClose>
                   ))}
+                  {user && (
+                    <SheetClose asChild>
+                      <Link
+                        href="/dashboard/patient"
+                        className="flex items-center py-2 text-lg text-neutral-dark-gray hover:text-primary-blue transition-colors"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Tableau de bord
+                      </Link>
+                    </SheetClose>
+                  )}
                 </nav>
                 <div className="p-6 border-t border-neutral-medium-gray/20">
-                  <SheetClose asChild>
-                    <Link href="/login" passHref className="w-full">
-                      <Button variant="outline" className="w-full border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white mb-3">
-                        Connexion
+                  {user ? (
+                    <SheetClose asChild>
+                      <Button variant="outline" onClick={logout} className="w-full border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white">
+                        Déconnexion
                       </Button>
-                    </Link>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Link href="/register" passHref className="w-full">
-                      <Button className="w-full bg-primary-blue text-neutral-white hover:bg-opacity-90">
-                        Inscription
-                      </Button>
-                    </Link>
-                  </SheetClose>
+                    </SheetClose>
+                  ) : (
+                    <>
+                      <SheetClose asChild>
+                        <Link href="/login" passHref className="w-full">
+                          <Button variant="outline" className="w-full border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white mb-3">
+                            Connexion
+                          </Button>
+                        </Link>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Link href="/register" passHref className="w-full">
+                          <Button className="w-full bg-primary-blue text-neutral-white hover:bg-opacity-90">
+                            Inscription
+                          </Button>
+                        </Link>
+                      </SheetClose>
+                    </>
+                  )}
                 </div>
               </div>
             </SheetContent>

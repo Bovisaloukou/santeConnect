@@ -33,8 +33,15 @@ export default function Home() {
               Découvrez une nouvelle expérience de soins, élégante, fluide et connectée.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Button size="lg" className="bg-neutral-white text-primary-blue hover:bg-neutral-light-gray hover:text-opacity-90">
+                <Link href="/register" className="flex items-center">
+                  S'inscrire maintenant <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
               <Button size="lg" className="bg-accent-turquoise text-neutral-white shadow-xl hover:bg-opacity-90 transition-all text-xl px-12 py-6 rounded-full font-semibold tracking-wide">
-                Commencer maintenant
+                <Link href="/register-center" className="flex items-center">
+                  Inscrire un centre <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </div>
@@ -112,16 +119,19 @@ export default function Home() {
                 name="Marie Koné"
                 role="Patiente"
                 quote="Grâce à cette plateforme, j'ai pu trouver rapidement un médecin disponible près de chez moi et prendre rendez-vous en quelques clics."
+                avatarSrc="/avatar.jpg"
               />
               <TestimonialCard
                 name="Dr. Amadou Diallo"
                 role="Médecin généraliste"
                 quote="La gestion des rendez-vous et des dossiers patients est devenue beaucoup plus simple. Je peux me concentrer davantage sur mes patients."
+                avatarSrc="/avatar.jpg"
               />
               <TestimonialCard
                 name="Fatou Sow"
                 role="Pharmacienne"
                 quote="Nous pouvons maintenant informer facilement les patients de la disponibilité de leurs médicaments, ce qui a considérablement amélioré notre service."
+                avatarSrc="/avatar.jpg"
               />
             </div>
           </div>
@@ -175,12 +185,15 @@ function StepCard({ number, title, description }: { number: string; title: strin
   )
 }
 
-function TestimonialCard({ name, role, quote }: { name: string; role: string; quote: string }) {
+function TestimonialCard({ name, role, quote, avatarSrc }: { name: string; role: string; quote: string; avatarSrc: string }) {
   return (
     <Card className="bg-neutral-white shadow-lg rounded-xl overflow-hidden">
       <CardContent className="p-6">
+        <div className="flex items-center mb-4">
+          <img src={avatarSrc} alt={name} className="w-12 h-12 rounded-full mr-4" />
+          <h3 className="text-xl font-semibold text-neutral-dark-gray">{name}</h3>
+        </div>
         <p className="italic text-neutral-medium-gray mb-4">"{quote}"</p>
-        <p className="font-semibold text-neutral-dark-gray">{name}</p>
         <p className="text-sm text-primary-blue">{role}</p>
       </CardContent>
     </Card>

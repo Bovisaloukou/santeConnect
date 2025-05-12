@@ -54,6 +54,13 @@ export default function PatientDashboard() {
     <div>
       <h1 className="text-2xl font-bold mb-6">Tableau de bord</h1>
 
+      {/* Bouton pour les professionnels de santé */}
+      <div className="mb-6 text-center">
+        <Button variant="outline" size="sm">
+          <Link href="/register/professional">Je suis un professionnel de santé</Link>
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card>
           <CardHeader className="pb-2">
