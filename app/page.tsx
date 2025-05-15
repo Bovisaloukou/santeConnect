@@ -1,3 +1,5 @@
+'use client';
+
 import type React from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -5,8 +7,11 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Users, Calendar, Pill, Bell, CreditCard, FileText, MessageSquare, ArrowRight } from "lucide-react"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
+import { useAuth } from "@/lib/auth/AuthContext"
 
 export default function Home() {
+  const { user } = useAuth();
+
   return (
     <div className="flex flex-col min-h-screen bg-neutral-light-gray">
       <Header />
@@ -33,12 +38,14 @@ export default function Home() {
               Découvrez une nouvelle expérience de soins, élégante, fluide et connectée.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" className="bg-neutral-white text-primary-blue hover:bg-neutral-light-gray hover:text-opacity-90">
-                <Link href="/register" className="flex items-center">
-                  S'inscrire maintenant <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button size="lg" className="bg-accent-turquoise text-neutral-white shadow-xl hover:bg-opacity-90 transition-all text-xl px-12 py-6 rounded-full font-semibold tracking-wide">
+              {!user && (
+                <Button size="lg" className="bg-neutral-white text-primary-blue shadow-xl hover:bg-accent-turquoise hover:text-neutral-white hover:bg-opacity-90 transition-all text-xl px-12 py-6 rounded-full font-semibold tracking-wide">
+                  <Link href="/register" className="flex items-center">
+                    S'inscrire maintenant <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              )}
+              <Button size="lg" className="bg-accent-turquoise text-neutral-white shadow-xl hover:bg-neutral-white hover:text-primary-blue hover:bg-opacity-90 transition-all text-xl px-12 py-6 rounded-full font-semibold tracking-wide">
                 <Link href="/register-center" className="flex items-center">
                   Inscrire un centre <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -144,11 +151,13 @@ export default function Home() {
             <p className="text-xl mb-8 max-w-3xl mx-auto">
               Rejoignez notre plateforme dès aujourd'hui et bénéficiez d'un accès simplifié aux soins de santé.
             </p>
-            <Button size="lg" className="bg-neutral-white text-primary-blue hover:bg-neutral-light-gray hover:text-opacity-90">
-              <Link href="/register" className="flex items-center">
-                S'inscrire maintenant <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            {!user && (
+              <Button size="lg" className="bg-neutral-white text-primary-blue hover:bg-neutral-light-gray hover:text-opacity-90">
+                <Link href="/register" className="flex items-center">
+                  S'inscrire maintenant <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            )}
           </div>
         </section>
       </main>
