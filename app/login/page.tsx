@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/lib/auth/AuthContext"
 import { useToast } from "@/components/ui/use-toast";
 import { Eye, EyeOff } from "lucide-react"
@@ -63,15 +62,11 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    console.log("[handleSubmit] Called");
 
     if (!validateForm()) {
-      console.log("[handleSubmit] Validation failed");
       return
     }
-    console.log("[handleSubmit] Validation passed");
     setFormSubmitLoading(true);
-    console.log("[handleSubmit] formSubmitLoading set to true");
 
     // Préremplir l'email en fonction de l'onglet actif
     let email = formData.email
@@ -85,9 +80,7 @@ export default function LoginPage() {
       }
     }
 
-    console.log(`[handleSubmit] Attempting login for email: ${email}`);
     const success = await login(email, formData.password)
-    console.log(`[handleSubmit] Login success: ${success}`);
 
     if (success) {
       // Rediriger vers le tableau de bord approprié
@@ -106,10 +99,8 @@ export default function LoginPage() {
         description: "L\'email ou le mot de passe est incorrect.",
         variant: "destructive",
       });
-      console.log("[handleSubmit] Login failed, toast shown.");
     }
     setFormSubmitLoading(false);
-    console.log("[handleSubmit] formSubmitLoading set to false");
   }
 
   return (

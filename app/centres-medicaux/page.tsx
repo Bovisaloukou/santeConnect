@@ -1,14 +1,9 @@
-import type { Metadata } from "next"
 import { Hospital, Stethoscope, HomeIcon, Phone, MapPin, Clock } from "lucide-react"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
+import Link from "next/link"
 
-export const metadata: Metadata = {
-  title: "Centres Médicaux à Proximité - SantéConnect",
-  description: "Trouvez facilement les centres médicaux proches de chez vous et consultez leurs informations.",
-}
-
-interface MedicalCenter {
+export interface MedicalCenter {
   id: string
   name: string
   type: "Hôpital" | "Clinique" | "Centre de santé"
@@ -17,9 +12,11 @@ interface MedicalCenter {
   address: string
   phone: string
   icon: React.ElementType
+  images: string[]
+  services: { name: string; description?: string }[]
 }
 
-const mockMedicalCenters: MedicalCenter[] = [
+export const mockMedicalCenters: MedicalCenter[] = [
   {
     id: "1",
     name: "Hôpital Central de la Ville",
@@ -29,6 +26,12 @@ const mockMedicalCenters: MedicalCenter[] = [
     address: "123 Rue de la Santé, 75001 Paris",
     phone: "0123456789",
     icon: Hospital,
+    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png", "/images/hopital-central-4.png"],
+    services: [
+      { name: "Consultation Générale", description: "Consultation médicale de routine pour les problèmes de santé courants." },
+      { name: "Pédiatrie", description: "Soins médicaux spécialisés pour les nourrissons, les enfants et les adolescents." },
+      { name: "Cardiologie", description: "Diagnostic et traitement des maladies cardiaques et vasculaires." },
+    ],
   },
   {
     id: "2",
@@ -39,6 +42,11 @@ const mockMedicalCenters: MedicalCenter[] = [
     address: "45 Avenue des Champs, 75008 Paris",
     phone: "0987654321",
     icon: Stethoscope,
+    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png"],
+    services: [
+      { name: "Ophtalmologie", description: "Diagnostic et traitement des maladies des yeux." },
+      { name: "Dermatologie", description: "Diagnostic et traitement des maladies de la peau." },
+    ],
   },
   {
     id: "3",
@@ -49,6 +57,11 @@ const mockMedicalCenters: MedicalCenter[] = [
     address: "789 Boulevard Voltaire, 75011 Paris",
     phone: "0112233445",
     icon: HomeIcon,
+    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png", "/images/hopital-central-4.png"],
+    services: [
+      { name: "Médecine Générale", description: "Premier point de contact pour les soins de santé, diagnostic et orientation." },
+      { name: "Nutrition", description: "Conseils et suivi pour une alimentation saine et équilibrée." },
+    ],
   },
   {
     id: "4",
@@ -56,9 +69,15 @@ const mockMedicalCenters: MedicalCenter[] = [
     type: "Hôpital",
     isOpen: true,
     distance: 5.1,
-    address: "10 Rue de l\'Hôpital, 67000 Strasbourg",
+    address: "10 Rue de l'Hôpital, 67000 Strasbourg",
     phone: "0388000000",
     icon: Hospital,
+    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png"],
+    services: [
+      { name: "Urgences", description: "Prise en charge immédiate des problèmes de santé aigus et graves." },
+      { name: "Radiologie", description: "Examens d'imagerie médicale (radios, scanners, IRM, etc.)." },
+      { name: "Chirurgie", description: "Interventions chirurgicales dans diverses spécialités." },
+    ],
   },
   {
     id: "5",
@@ -69,6 +88,11 @@ const mockMedicalCenters: MedicalCenter[] = [
     address: "22 Allée de la Robertsau, 67000 Strasbourg",
     phone: "0388112233",
     icon: Stethoscope,
+    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png"],
+    services: [
+      { name: "Gynécologie", description: "Soins de santé pour les femmes, y compris la grossesse et la reproduction." },
+      { name: "Pédicure-podologue", description: "Soins des pieds et traitement des affections podologiques." },
+    ],
   },
 ]
 
@@ -115,11 +139,14 @@ export default function CentresMedicauxPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-neutral-medium-gray/20">
+                <div className="mt-4 pt-3 border-t border-neutral-medium-gray/20 flex justify-between items-center">
                   <a href={`tel:${center.phone}`} className="flex items-center space-x-2 text-sm text-primary-blue hover:underline hover:text-accent-turquoise transition-colors">
                     <Phone className="w-4 h-4" />
                     <span>{center.phone}</span>
                   </a>
+                  <Link href={`/centres-medicaux/${center.id}`} className="text-sm text-primary-blue hover:underline hover:text-accent-turquoise transition-colors">
+                    Plus d'infos
+                  </Link>
                 </div>
               </div>
             ))}
