@@ -1,4 +1,3 @@
-import type { Metadata } from "next"
 import { Hospital, Stethoscope, HomeIcon, Phone, MapPin, Clock } from "lucide-react"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
@@ -13,8 +12,8 @@ export interface MedicalCenter {
   address: string
   phone: string
   icon: React.ElementType
-  services: { id: string; name: string; description: string }[]
   images: string[]
+  services: { name: string; description?: string }[]
 }
 
 export const mockMedicalCenters: MedicalCenter[] = [
@@ -27,23 +26,11 @@ export const mockMedicalCenters: MedicalCenter[] = [
     address: "123 Rue de la Santé, 75001 Paris",
     phone: "0123456789",
     icon: Hospital,
+    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png", "/images/hopital-central-4.png"],
     services: [
-      { id: "s2", name: "Pédiatrie", description: "Consultations pour enfants" },
-      { id: "s3", name: "Dermatologie", description: "Consultations pour problèmes de peau" },
-      { id: "s12", name: "Ophtalmologie", description: "Consultations pour les yeux" },
-      { id: "s13", name: "Oto-rhino-laryngologie (ORL)", description: "Consultations pour les oreilles, le nez et la gorge" },
-      { id: "s14", name: "Cardiologie", description: "Consultations et examens cardiaques" },
-      { id: "s15", name: "Radiologie", description: "Examens d'imagerie médicale" },
-      { id: "s16", name: "Vaccination", description: "Vaccinations tout âge" },
-      { id: "s17", name: "Chirurgie", description: "Interventions chirurgicales diverses" },
-      { id: "s18", name: "Anesthésiologie", description: "Consultations pré-opératoires" },
-      { id: "s19", name: "Gynécologie", description: "Consultations gynécologiques" },
-      { id: "s20", name: "Obstétrique", description: "Suivi de grossesse" },
-    ],
-    images: [
-      "/images/hopital-central-1.jpg",
-      "/images/hopital-central-2.jpg",
-      "/images/hopital-central-3.jpg",
+      { name: "Consultation Générale", description: "Consultation médicale de routine pour les problèmes de santé courants." },
+      { name: "Pédiatrie", description: "Soins médicaux spécialisés pour les nourrissons, les enfants et les adolescents." },
+      { name: "Cardiologie", description: "Diagnostic et traitement des maladies cardiaques et vasculaires." },
     ],
   },
   {
@@ -55,13 +42,10 @@ export const mockMedicalCenters: MedicalCenter[] = [
     address: "45 Avenue des Champs, 75008 Paris",
     phone: "0987654321",
     icon: Stethoscope,
+    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png"],
     services: [
-      { id: "s4", name: "Cardiologie", description: "Consultations et examens cardiaques" },
-      { id: "s5", name: "Radiologie", description: "Examens d'imagerie médicale" },
-    ],
-    images: [
-      "/images/clinique-parc-1.jpg",
-      "/images/clinique-parc-2.jpg",
+      { name: "Ophtalmologie", description: "Diagnostic et traitement des maladies des yeux." },
+      { name: "Dermatologie", description: "Diagnostic et traitement des maladies de la peau." },
     ],
   },
   {
@@ -73,12 +57,10 @@ export const mockMedicalCenters: MedicalCenter[] = [
     address: "789 Boulevard Voltaire, 75011 Paris",
     phone: "0112233445",
     icon: HomeIcon,
+    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png", "/images/hopital-central-4.png"],
     services: [
-      { id: "s6", name: "Médecine Générale", description: "Suivi médical général" },
-      { id: "s7", name: "Vaccination", description: "Vaccinations tout âge" },
-    ],
-    images: [
-      "/images/centre-sante-1.jpg",
+      { name: "Médecine Générale", description: "Premier point de contact pour les soins de santé, diagnostic et orientation." },
+      { name: "Nutrition", description: "Conseils et suivi pour une alimentation saine et équilibrée." },
     ],
   },
   {
@@ -87,17 +69,14 @@ export const mockMedicalCenters: MedicalCenter[] = [
     type: "Hôpital",
     isOpen: true,
     distance: 5.1,
-    address: "10 Rue de l\'Hôpital, 67000 Strasbourg",
+    address: "10 Rue de l'Hôpital, 67000 Strasbourg",
     phone: "0388000000",
     icon: Hospital,
+    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png"],
     services: [
-      { id: "s8", name: "Chirurgie", description: "Interventions chirurgicales diverses" },
-      { id: "s9", name: "Anesthésiologie", description: "Consultations pré-opératoires" },
-    ],
-    images: [
-      "/images/hopital-universitaire-1.jpg",
-      "/images/hopital-universitaire-2.jpg",
-      "/images/hopital-universitaire-3.jpg",
+      { name: "Urgences", description: "Prise en charge immédiate des problèmes de santé aigus et graves." },
+      { name: "Radiologie", description: "Examens d'imagerie médicale (radios, scanners, IRM, etc.)." },
+      { name: "Chirurgie", description: "Interventions chirurgicales dans diverses spécialités." },
     ],
   },
   {
@@ -109,12 +88,10 @@ export const mockMedicalCenters: MedicalCenter[] = [
     address: "22 Allée de la Robertsau, 67000 Strasbourg",
     phone: "0388112233",
     icon: Stethoscope,
+    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png"],
     services: [
-      { id: "s10", name: "Gynécologie", description: "Consultations gynécologiques" },
-      { id: "s11", name: "Obstétrique", description: "Suivi de grossesse" },
-    ],
-    images: [
-      "/images/clinique-sainte-anne-1.jpg",
+      { name: "Gynécologie", description: "Soins de santé pour les femmes, y compris la grossesse et la reproduction." },
+      { name: "Pédicure-podologue", description: "Soins des pieds et traitement des affections podologiques." },
     ],
   },
 ]
@@ -167,7 +144,7 @@ export default function CentresMedicauxPage() {
                     <Phone className="w-4 h-4" />
                     <span>{center.phone}</span>
                   </a>
-                  <Link href={`/centres-medicaux/${center.id}`} className="text-primary-blue hover:underline hover:text-accent-turquoise transition-colors">
+                  <Link href={`/centres-medicaux/${center.id}`} className="text-sm text-primary-blue hover:underline hover:text-accent-turquoise transition-colors">
                     Plus d'infos
                   </Link>
                 </div>
