@@ -56,7 +56,7 @@ export default function PatientDashboard() {
 
       {/* Bouton pour les professionnels de santé */}
       <div className="mb-6 text-center">
-        <Button variant="outline" size="sm">
+        <Button variant="default" size="sm">
           <Link href="/register/professional">Je suis un professionnel de santé</Link>
         </Button>
       </div>
