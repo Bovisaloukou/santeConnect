@@ -98,16 +98,6 @@ export default function CentresMedicauxPage() {
                   <h2 className="text-xl font-semibold text-neutral-dark-gray flex-grow pr-2">
                     {center.name}
                   </h2>
-                  <span
-                    className={`px-2.5 py-0.5 text-xs font-semibold rounded-full whitespace-nowrap flex items-center ${
-                      center.isOpen
-                        ? "bg-secondary-green/15 text-secondary-green border border-secondary-green/40"
-                        : "bg-red-500/15 text-red-600 border border-red-500/40"
-                    }`}
-                  >
-                    <Clock className={`inline-block w-3 h-3 mr-1 ${center.isOpen ? "text-secondary-green" : "text-red-600"}`} />
-                    {center.isOpen ? "Ouvert" : "Fermé"}
-                  </span>
                 </div>
 
                 <div className="space-y-2.5 text-sm text-neutral-dark-gray/90 flex-grow">
