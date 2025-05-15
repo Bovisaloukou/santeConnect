@@ -25,7 +25,7 @@ export default function DashboardNavbar() {
   if (!user) return null
 
   return (
-    <header className="bg-white border-b p-4 flex items-center justify-between sticky top-0 z-10">
+    <header className="bg-white border-b p-3 flex items-center justify-between sticky top-0 z-10">
       <div className="flex items-center">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
