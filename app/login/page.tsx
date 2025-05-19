@@ -82,18 +82,7 @@ export default function LoginPage() {
 
     const success = await login(email, formData.password)
 
-    if (success) {
-      // Rediriger vers le tableau de bord approprié
-      if (email === "patient@example.com" || (email === "demo" && activeTab === "patient")) {
-        router.push("/dashboard/patient")
-      } else if (email === "doctor@example.com" || (email === "demo" && activeTab === "healthcare")) {
-        // router.push("/dashboard/healthcare")
-      } else if (email === "pharmacy@example.com" || (email === "demo" && activeTab === "pharmacy")) {
-        router.push("/dashboard/pharmacy")
-      } else {
-        router.push(`/dashboard/${activeTab}`)
-      }
-    } else {
+    if (!success) {
       toast({
         title: "Échec de la connexion",
         description: "L\'email ou le mot de passe est incorrect.",

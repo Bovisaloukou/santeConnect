@@ -39,8 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         redirect: false,
         email,
         password,
-      })
-
+      });
 
       if (result?.error) {
         toast({
@@ -51,20 +50,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return false;
       }
 
+      // Si la connexion (next-auth ou simulée côté login page) réussit, rediriger vers la page de vérification 2FA
+      // On passe l'email en paramètre pour déterminer le rôle sur la page de vérification (temporaire pour la démo)
+      router.push(`/verify-2fa?email=${encodeURIComponent(email)}`);
 
-      const userRole = (session?.user as any)?.role;
-      if (userRole === "patient") {
-        router.push("/dashboard/patient");
-      } else if (userRole === "healthcare") {
-        // router.push("/dashboard/healthcare");
-      } else if (userRole === "pharmacy") {
-        router.push("/dashboard/pharmacy");
-      } else {
-        // Gérer d'autres rôles ou un tableau de bord par défaut
-        // router.push("/dashboard");
-      }
+      return true; // Indiquer que la première étape de login est réussie
 
-      return true;
     } catch (error) {
       console.error("Erreur de connexion inattendue:", error);
       toast({
