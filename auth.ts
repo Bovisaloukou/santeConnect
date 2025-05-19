@@ -55,52 +55,58 @@ export const config: NextAuthConfig = {
         password: { label: "Mot de passe", type: "password" },
       },
       async authorize(credentials, req): Promise<User | null> {
-        if (!credentials?.email || !credentials?.password) {
-          return null; // Aucune information d'identification fournie
-        }
-
-        const email = credentials.email as string;
-        const password = credentials.password as string;
-
-        // N'affichez PAS le mot de passe en clair dans les logs en production pour des raisons de sécurité,
-        // mais pour le débogage local c'est acceptable. Soyez prudent.
-
-        // Gérer le cas de l'utilisateur de démo
-        let user = users.find((u) => u.email === email);
-
-        if (email === "demo") {
-          // Trouver un utilisateur de démo basé sur le mot de passe (simplifié pour la démo)
-          if (password === "demo" || password === "password123") {
-            // Ici, on pourrait choisir un utilisateur par défaut pour la démo si l'email est 'demo'
-            // Pour l'instant, utilisons patient par défaut si 'demo' est utilisé comme email
-            user = users.find(u => u.email === "patient@example.com");
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            console.error("Authorize error: Missing credentials.");
+            return null; // Aucune information d'identification fournie
           }
+
+          const email = credentials.email as string;
+          const password = credentials.password as string;
+
+          // N'affichez PAS le mot de passe en clair dans les logs en production pour des raisons de sécurité,
+          // mais pour le débogage local c'est acceptable. Soyez prudent.
+
+          // Gérer le cas de l'utilisateur de démo
+          let user = users.find((u) => u.email === email);
+
+          if (email === "demo") {
+            // Trouver un utilisateur de démo basé sur le mot de passe (simplifié pour la démo)
+            if (password === "demo" || password === "password123") {
+              // Ici, on pourrait choisir un utilisateur par défaut pour la démo si l'email est 'demo'
+              // Pour l'instant, utilisons patient par défaut si 'demo' est utilisé comme email
+              user = users.find(u => u.email === "patient@example.com");
+            }
+          }
+          
+
+          // Si l'utilisateur n'est toujours pas trouvé (pas un utilisateur de démo valide)
+          if (!user) {
+            return null; // Utilisateur non trouvé
+          }
+
+          // Vérifier le mot de passe (en utilisant votre fonction personnalisée)
+          const passwordValid = await verifyPassword(password, user.password);
+
+
+          if (!passwordValid) {
+            return null; // Mot de passe incorrect
+          }
+
+          // Retourner l'objet utilisateur si l'authentification réussit
+          // C'est l'objet qui sera ajouté au token et à la session
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+        } catch (error) {
+          console.error("Error during authorize:", error);
+          return null; // Retourner null en cas d'erreur
         }
-        
-
-        // Si l'utilisateur n'est toujours pas trouvé (pas un utilisateur de démo valide)
-        if (!user) {
-          return null; // Utilisateur non trouvé
-        }
-
-        // Vérifier le mot de passe (en utilisant votre fonction personnalisée)
-        const passwordValid = await verifyPassword(password, user.password);
-
-
-        if (!passwordValid) {
-          return null; // Mot de passe incorrect
-        }
-
-        // Retourner l'objet utilisateur si l'authentification réussit
-        // C'est l'objet qui sera ajouté au token et à la session
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
       },
     }),
   ],
@@ -110,23 +116,33 @@ export const config: NextAuthConfig = {
   // },
   callbacks: {
     async jwt({ token, user }) {
-      // Ajouter des informations utilisateur au token JWT
-      if (user) {
-        token.id = user.id;
-        token.role = (user as any).role; // Ajouter le rôle au token
+      try {
+        // Ajouter des informations utilisateur au token JWT
+        if (user) {
+          token.id = user.id;
+          token.role = (user as any).role; // Ajouter le rôle au token
+        }
+        return token;
+      } catch (error) {
+        console.error("Error during jwt callback:", error);
+        return token; // Retourner le token actuel même en cas d'erreur
       }
-      return token;
     },
     async session({ session, token }) {
-      // Exposer les informations du token à la session côté client
-      if (session.user) {
-        session.user.id = token.id as string;
-        (session.user as any).role = token.role; // Exposer le rôle à la session
+      try {
+        // Exposer les informations du token à la session côté client
+        if (session.user) {
+          session.user.id = token.id as string;
+          (session.user as any).role = token.role; // Exposer le rôle à la session
+        }
+        return session;
+      } catch (error) {
+        console.error("Error during session callback:", error);
+        return session; // Retourner la session actuelle même en cas d'erreur
       }
-      return session;
     },
   },
-  // secret: process.env.AUTH_SECRET, // Assurez-vous d'avoir cette variable dans votre .env.local
+  secret: process.env.AUTH_SECRET, // Assurez-vous d'avoir cette variable dans votre .env.local
 };
 
 // Initialisez NextAuth avec la configuration
