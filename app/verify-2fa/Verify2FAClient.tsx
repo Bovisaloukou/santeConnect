@@ -69,53 +69,57 @@ export default function Verify2FAClient() {
   // Afficher un indicateur de chargement ou un message si l'email n'est pas encore chargé
   if (!userEmail) {
       return (
-          <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex flex-col">
+          <main className="flex-1 flex items-center justify-center">
               <LoadingSpinner />
               <p className="ml-2">Chargement des informations de vérification...</p>
-          </div>
+          </main>
+        </div>
       );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center py-2">Vérification requise</CardTitle>
-          <CardDescription className="text-center">Un code de vérification a été envoyé à votre numéro de téléphone associé à {userEmail}. Veuillez le saisir ci-dessous.</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="2fa-code">Code de vérification</Label>
-              <Input
-                id="2fa-code"
-                name="2fa-code"
-                type="text"
-                placeholder="Entrez votre code"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                disabled={isLoading}
-                className={error ? "border-red-500" : ""}
-              />
-              {error && <p className="text-sm text-red-500">{error}</p>}
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <span className="flex items-center">
-                  <LoadingSpinner size="sm" className="mr-2" />
-                  Vérification en cours...
-                </span>
-              ) : (
-                "Vérifier le code"
-              )}
-            </Button>
-            {/* TODO: Add a link/button to resend the code */}
-            {/* <button type="button" className="text-sm text-emerald-600 hover:underline" disabled={isLoading}>Renvoyer le code</button> */}
-          </CardFooter>
-        </form>
-      </Card>
+    <div className="min-h-screen flex flex-col">
+      <main className="flex-1 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-center py-2">Vérification requise</CardTitle>
+            <CardDescription className="text-center">Un code de vérification a été envoyé à votre numéro de téléphone associé à {userEmail}. Veuillez le saisir ci-dessous.</CardDescription>
+          </CardHeader>
+          <form onSubmit={handleSubmit}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="2fa-code">Code de vérification</Label>
+                <Input
+                  id="2fa-code"
+                  name="2fa-code"
+                  type="text"
+                  placeholder="Entrez votre code"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  disabled={isLoading}
+                  className={error ? "border-red-500" : ""}
+                />
+                {error && <p className="text-sm text-red-500">{error}</p>}
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-4">
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    Vérification en cours...
+                  </span>
+                ) : (
+                  "Vérifier le code"
+                )}
+              </Button>
+              {/* TODO: Add a link/button to resend the code */}
+              {/* <button type="button" className="text-sm text-emerald-600 hover:underline" disabled={isLoading}>Renvoyer le code</button> */}
+            </CardFooter>
+          </form>
+        </Card>
+      </main>
     </div>
   );
 } 
