@@ -109,8 +109,8 @@ export default function LoginPage() {
       <main className="flex-1 flex items-center justify-center p-4 md:p-8 mt-9">
         <div className="w-full max-w-md">
           <LoginForm
-            title="Connexion Patient"
-            description="Accédez à votre espace patient pour gérer vos rendez-vous et consultations."
+            title="Connexion"
+            description="Accédez à votre espace pour gérer vos rendez-vous et consultations."
             formData={formData}
             errors={errors}
             isLoading={formSubmitLoading}
