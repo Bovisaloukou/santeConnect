@@ -30,34 +30,35 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Vérifier l'authentification au chargement
     const checkAuth = async () => {
-      try {
-        // Vérifier d'abord si nous avons un utilisateur dans le localStorage
-        const storedUser = localStorage.getItem("user")
-        if (storedUser) {
-          setUser(JSON.parse(storedUser))
-          setIsLoading(false)
-          return
-        }
+      console.log("checkAuth: Starting simulation...") // Log pour indiquer que nous sommes en mode simulation
 
-        // Sinon, essayer de récupérer l'utilisateur depuis l'API
-        const response = await fetch("/api/auth/me")
-        if (response.ok) {
-          const data = await response.json()
-          setUser(data.user)
-          // Stocker l'utilisateur dans le localStorage pour la persistance
-          localStorage.setItem("user", JSON.stringify(data.user))
-        }
-      } catch (error) {
-        console.error("Erreur d'authentification:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+      // --- Début de la modification ---
+      // Simuler un délai de chargement
+      await new Promise(resolve => setTimeout(resolve, 500)); // Délai fictif
 
-    checkAuth()
-  }, [])
+      // Fournir un utilisateur fictif puisque le backend n'est pas là
+      const mockUser: User = {
+        id: "user-1", // Assurez-vous que cet ID correspond à celui utilisé dans vos données fictives (ex: dans les messages)
+        name: "Patient Fictif",
+        email: "patient@example.com",
+        role: "patient", // Rôle important pour la redirection
+        avatar: "/placeholder-user.jpg",
+      };
+
+      console.log("checkAuth: Providing mock user:", mockUser);
+      setUser(mockUser);
+      setIsLoading(false);
+      // --- Fin de la modification ---
+
+      // Les parties du code qui vérifient localStorage et appellent l'API
+      // sont temporairement ignorées dans ce mode de développement sans backend.
+      // Lorsque le backend sera prêt, vous pourrez restaurer la logique originale.
+
+    };
+
+    checkAuth();
+  }, []);
 
   const logout = async () => {
     try {

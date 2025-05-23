@@ -56,7 +56,7 @@ export default function PatientComplaintsPage() {
   })
 
   const handleComplaintSubmit = (newComplaint: Complaint) => {
-    setComplaints([newComplaint, ...complaints])
+    setComplaints([newComplaint, ...(complaints || [])])
   }
 
   if (isLoading) {
@@ -74,11 +74,11 @@ export default function PatientComplaintsPage() {
 
         <div className="lg:col-span-2">
           <h2 className="text-xl font-semibold mb-4">Historique des plaintes</h2>
-          {complaints.length === 0 ? (
+          {(complaints || []).length === 0 ? (
             <p className="text-gray-500">Vous n'avez soumis aucune plainte.</p>
           ) : (
             <div className="space-y-4">
-              {complaints.map((complaint) => (
+              {(complaints || []).map((complaint) => (
                 <ComplaintCard key={complaint.id} complaint={complaint} />
               ))}
             </div>
