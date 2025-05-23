@@ -24,8 +24,8 @@ export function Sidebar({ forMobile = false, onClose }: SidebarProps) {
     <aside className="flex flex-col h-full bg-white border-r">
       <div className="p-4 border-b">
         <Link href="/" className="flex items-center space-x-2" onClick={forMobile ? onClose : undefined}>
-          <Pill className="h-6 w-6 text-emerald-600" />
-          <span className="text-xl font-bold text-emerald-600">SantéConnect</span>
+          <Pill className="h-6 w-6 text-primary" />
+          <span className="text-xl font-bold text-primary">SantéConnect</span>
         </Link>
       </div>
       <nav className="flex-1 p-4 space-y-1 overflow-auto">
@@ -34,7 +34,7 @@ export function Sidebar({ forMobile = false, onClose }: SidebarProps) {
             key={link.href}
             href={link.href}
             className={`flex items-center space-x-2 px-3 py-2 rounded-md ${
-              pathname === link.href ? "bg-emerald-50 text-emerald-600" : "text-gray-700 hover:bg-gray-100"
+              pathname === link.href ? "bg-primary/10 text-primary" : "text-gray-700 hover:bg-gray-100"
             }`}
             onClick={forMobile ? onClose : undefined}
           >

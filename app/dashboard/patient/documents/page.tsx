@@ -107,7 +107,7 @@ export default function PatientDocumentsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Mes Documents Médicaux</h1>
+      <h1 className="text-2xl font-bold text-[#34495E] mb-6">Mes Documents Médicaux</h1>
 
       <Tabs defaultValue="all">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">

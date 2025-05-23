@@ -121,7 +121,7 @@ export default function HealthcareDashboard() {
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <header className="bg-white border-b p-4 flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Tableau de bord professionnel</h1>
+          <h1 className="text-2xl font-bold text-[#34495E]">Tableau de bord professionnel</h1>
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />

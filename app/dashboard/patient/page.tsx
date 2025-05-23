@@ -52,7 +52,7 @@ export default function PatientDashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Tableau de bord</h1>
+      <h1 className="text-2xl font-bold text-[#34495E] mb-6">Tableau de bord</h1>
 
       {/* Bouton pour les professionnels de santé */}
       <div className="mb-6 text-center">

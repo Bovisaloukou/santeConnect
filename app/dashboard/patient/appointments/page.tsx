@@ -17,6 +17,7 @@ import AppointmentPayment from "@/components/appointments/AppointmentPayment"
 import NewAppointmentDialog from "@/components/appointments/NewAppointmentDialog"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import type { Appointment } from "@/lib/types"
+import { Tabs } from "@/components/ui/tabs"
 
 export default function PatientAppointmentsPage() {
   const { user } = useAuth()
@@ -116,7 +117,7 @@ export default function PatientAppointmentsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold">Mes Rendez-vous</h1>
+        <h1 className="text-2xl font-bold mb-6">Mes Rendez-vous</h1>
         <Button onClick={() => setIsNewAppointmentOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Nouveau rendez-vous
@@ -125,24 +126,24 @@ export default function PatientAppointmentsPage() {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
         <div className="flex items-center space-x-2">
-          <TabsList>
-            <TabsTrigger
-              value="list"
-              onClick={() => setView("list")}
-              className={view === "list" ? "bg-emerald-50 text-emerald-600" : ""}
-            >
-              <List className="h-4 w-4 mr-2" />
-              Liste
-            </TabsTrigger>
-            <TabsTrigger
-              value="calendar"
-              onClick={() => setView("calendar")}
-              className={view === "calendar" ? "bg-emerald-50 text-emerald-600" : ""}
-            >
-              <CalendarIcon className="h-4 w-4 mr-2" />
-              Calendrier
-            </TabsTrigger>
-          </TabsList>
+          <Tabs defaultValue={view} onValueChange={(value) => setView(value as "list" | "calendar")}>
+            <TabsList>
+              <TabsTrigger
+                value="list"
+                className={view === "list" ? "bg-emerald-50 text-emerald-600" : ""}
+              >
+                <List className="h-4 w-4 mr-2" />
+                Liste
+              </TabsTrigger>
+              <TabsTrigger
+                value="calendar"
+                className={view === "calendar" ? "bg-emerald-50 text-emerald-600" : ""}
+              >
+                <CalendarIcon className="h-4 w-4 mr-2" />
+                Calendrier
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
