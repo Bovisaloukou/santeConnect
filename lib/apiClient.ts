@@ -25,6 +25,13 @@ export const authApi = {
     });
     return response.data;
   },
+  forgotPassword: async (email: string) => {
+    const response = await apiClient.post(API_CONFIG.ENDPOINTS.AUTH.FORGOT_PASSWORD, {
+      email,
+      link: `${window.location.origin}/reset-password`
+    });
+    return response.data;
+  },
 };
 
 export default apiClient; 
