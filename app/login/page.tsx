@@ -8,17 +8,16 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useAuth } from "@/lib/auth/AuthContext"
 import { useToast } from "@/components/ui/use-toast";
 import { Eye, EyeOff } from "lucide-react"
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton"
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
+import { signIn } from "next-auth/react"
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login } = useAuth()
   const { toast } = useToast();
   const [formSubmitLoading, setFormSubmitLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -74,21 +73,43 @@ export default function LoginPage() {
       if (activeTab === "patient") {
         email = "patient@example.com"
       } else if (activeTab === "healthcare") {
-        // email = "doctor@example.com"
+        setFormSubmitLoading(false);
+        toast({
+          title: "Démo Docteur non disponible",
+          description: "La démo pour les professionnels de santé n'est pas encore implémentée.",
+          variant: "default",
+        });
+        return;
       } else if (activeTab === "pharmacy") {
         email = "pharmacy@example.com"
       }
     }
 
-    const success = await login(email, formData.password)
+    // Utiliser signIn de NextAuth.js
+    const result = await signIn("credentials", {
+      redirect: false,
+      email: email,
+      password: formData.password,
+    });
 
-    if (!success) {
+    if (result?.error) {
+      // Gérer les erreurs de connexion de NextAuth
+      console.error("NextAuth signIn error:", result.error);
       toast({
         title: "Échec de la connexion",
-        description: "L\'email ou le mot de passe est incorrect.",
+        description: "L'email ou le mot de passe est incorrect.",
         variant: "destructive",
       });
+    } else if (result?.ok) {
+      // Connexion réussie, rediriger l'utilisateur
+      toast({
+        title: "Connexion réussie",
+        description: "Bienvenue !",
+        variant: "default",
+      });
+      router.push("/");
     }
+
     setFormSubmitLoading(false);
   }
 

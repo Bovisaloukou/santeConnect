@@ -6,11 +6,13 @@ import { Menu } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import Image from 'next/image';
-import { useAuth } from "@/lib/auth/AuthContext";
+import { useSession, signOut } from "next-auth/react";
+import { usePathname } from 'next/navigation';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { data: session, status } = useSession();
+  const pathname = usePathname();
 
   const navLinks = [
     { href: "/", label: "Accueil" },
@@ -36,11 +38,19 @@ export default function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-6 items-center">
           {navLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="text-neutral-dark-gray hover:text-primary-blue transition-colors">
+            <Link 
+              key={link.href} 
+              href={link.href} 
+              className={`${
+                pathname === link.href
+                  ? 'text-primary-blue font-semibold'
+                  : 'text-neutral-dark-gray'
+              } hover:text-primary-blue transition-colors`}
+            >
               {link.label}
             </Link>
           ))}
-          {user && (
+          {status === 'authenticated' && (
             <Link href="/dashboard/patient" className="text-neutral-dark-gray hover:text-primary-blue transition-colors">
               Tableau de bord
             </Link>
@@ -49,8 +59,8 @@ export default function Header() {
 
         {/* Desktop Auth Buttons / User Info */}
         <div className="hidden md:flex space-x-2">
-          {user ? (
-            <Button variant="outline" onClick={logout} className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white">
+          {status === 'authenticated' ? (
+            <Button variant="outline" onClick={() => signOut()} className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white">
               Déconnexion
             </Button>
           ) : (
@@ -101,18 +111,26 @@ export default function Header() {
                     <SheetClose asChild key={link.href}>
                       <Link
                         href={link.href}
-                        className="flex items-center py-2 text-lg text-neutral-dark-gray hover:text-primary-blue transition-colors"
+                        className={`flex items-center py-2 text-lg ${
+                          pathname === link.href
+                            ? 'text-primary-blue font-semibold'
+                            : 'text-neutral-dark-gray'
+                        } hover:text-primary-blue transition-colors`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         {link.label}
                       </Link>
                     </SheetClose>
                   ))}
-                  {user && (
+                  {status === 'authenticated' && (
                     <SheetClose asChild>
                       <Link
                         href="/dashboard/patient"
-                        className="flex items-center py-2 text-lg text-neutral-dark-gray hover:text-primary-blue transition-colors"
+                        className={`flex items-center py-2 text-lg ${
+                          pathname === '/dashboard/patient'
+                            ? 'text-primary-blue font-semibold'
+                            : 'text-neutral-dark-gray'
+                        } hover:text-primary-blue transition-colors`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         Tableau de bord
@@ -121,9 +139,9 @@ export default function Header() {
                   )}
                 </nav>
                 <div className="p-6 border-t border-neutral-medium-gray/20">
-                  {user ? (
+                  {status === 'authenticated' ? (
                     <SheetClose asChild>
-                      <Button variant="outline" onClick={logout} className="w-full border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white">
+                      <Button variant="outline" onClick={() => signOut()} className="w-full border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white">
                         Déconnexion
                       </Button>
                     </SheetClose>
