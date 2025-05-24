@@ -20,21 +20,23 @@ interface NavigationItem {
 }
 
 export function getNavigationItems(role: UserRole): NavigationItem[] {
+  const defaultRole = role || 'patient'
+  
   const topLinks = [
     {
-      href: `/dashboard/${role}`,
+      href: `/dashboard/${defaultRole}`,
       icon: <Home className="h-5 w-5" />,
       label: "Tableau de bord",
     },
     {
-      href: `/dashboard/${role}/profile`,
+      href: `/dashboard/${defaultRole}/profile`,
       icon: <User className="h-5 w-5" />,
       label: "Profil",
     },
   ]
 
   const settingsLink = {
-    href: `/dashboard/${role}/settings`,
+    href: `/dashboard/${defaultRole}/settings`,
     icon: <Settings className="h-5 w-5" />,
     label: "Paramètres",
   }
@@ -130,5 +132,5 @@ export function getNavigationItems(role: UserRole): NavigationItem[] {
     ],
   }
 
-  return [...topLinks, ...roleSpecificLinks[role], settingsLink]
+  return [...topLinks, ...(roleSpecificLinks[defaultRole] || roleSpecificLinks.patient), settingsLink]
 }
