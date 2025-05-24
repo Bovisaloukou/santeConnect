@@ -25,6 +25,7 @@ import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton"
 import PhoneInput from 'react-phone-input-2'
 import type { CountryData } from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
+import axios from "axios"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -37,6 +38,7 @@ export default function RegisterPage() {
   const [selectedDay, setSelectedDay] = useState<string>("")
   const [selectedMonth, setSelectedMonth] = useState<string>("")
   const [selectedYear, setSelectedYear] = useState<string>("")
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
   // State variables for errors
   const [firstNameError, setFirstNameError] = useState<string>("")
@@ -154,9 +156,31 @@ export default function RegisterPage() {
     if (!value) {
       return "Le mot de passe est requis."
     }
-    // Add more password complexity rules if needed
-    setPasswordError("")
-    return ""
+
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(value);
+    const hasLowerCase = /[a-z]/.test(value);
+    const hasNumbers = /\d/.test(value);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+
+    if (value.length < minLength) {
+      return "Le mot de passe doit contenir au moins 8 caractères.";
+    }
+    if (!hasUpperCase) {
+      return "Le mot de passe doit contenir au moins une lettre majuscule.";
+    }
+    if (!hasLowerCase) {
+      return "Le mot de passe doit contenir au moins une lettre minuscule.";
+    }
+    if (!hasNumbers) {
+      return "Le mot de passe doit contenir au moins un chiffre.";
+    }
+    if (!hasSpecialChar) {
+      return "Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*(),.?\":{}|<>).";
+    }
+
+    setPasswordError("");
+    return "";
   }
 
   const validateConfirmPassword = (password: string, confirmPassword: string): string => {
@@ -226,38 +250,22 @@ export default function RegisterPage() {
     }
 
     try {
-      const response = await fetch("https://med-api-exy6.onrender.com/api/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-      })
-
-      const result = await response.json()
-
-      if (response.ok) { // Status codes 200-299
-        toast({
-          title: "Inscription réussie!",
-          description: result.message || "Vous allez être redirigé vers la page de connexion.",
+      const response = await axios.post("https://med-api-exy6.onrender.com/api/auth/signup", userData)
+      
+      if (response.status === 201) {
+        setMessage({
+          type: 'success',
+          text: response.data.message || "Inscription réussie ! Vous allez être redirigé vers la page de connexion."
         })
         setTimeout(() => {
           router.push("/login")
         }, 2000)
-      } else {
-        // Handle API errors (e.g., validation errors, user already exists)
-        toast({
-          title: "Erreur d'inscription",
-          description: result.message || "Une erreur est survenue. Veuillez réessayer.",
-          variant: "destructive",
-        })
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur lors de l'inscription:", error)
-      toast({
-        title: "Erreur réseau",
-        description: "Impossible de se connecter au serveur. Veuillez vérifier votre connexion.",
-        variant: "destructive",
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.message || "Une erreur est survenue lors de l'inscription. Veuillez réessayer."
       })
     } finally {
       setIsLoading(false)
@@ -278,6 +286,13 @@ export default function RegisterPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <GoogleSignInButton text="S'inscrire avec Google" />
+                  {message && (
+                    <div className={`p-4 mb-4 rounded-md ${
+                      message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {message.text}
+                    </div>
+                  )}
                   <form onSubmit={handleRegister} id="register-form">
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
@@ -446,6 +461,9 @@ export default function RegisterPage() {
                           {showPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
                         </button>
                       </div>
+                      {/*<p className="text-sm text-gray-500 mt-1">
+                        Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.
+                      </p>*/}
                       {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
                     </div>
                     <div className="space-y-2 mb-4">
