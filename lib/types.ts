@@ -5,12 +5,11 @@ export type UserRole = "patient" | "healthcare" | "pharmacy" | "admin"
 
 export interface User {
   id: string
+  firstName: string
+  lastName: string
   email: string
   name: string
-  role: UserRole
   avatar?: string
-  createdAt: string
-  updatedAt: string
 }
 
 // Types pour les patients

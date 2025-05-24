@@ -20,7 +20,7 @@ interface NavigationItem {
 }
 
 export function getNavigationItems(role: UserRole): NavigationItem[] {
-  const baseLinks = [
+  const topLinks = [
     {
       href: `/dashboard/${role}`,
       icon: <Home className="h-5 w-5" />,
@@ -31,12 +31,13 @@ export function getNavigationItems(role: UserRole): NavigationItem[] {
       icon: <User className="h-5 w-5" />,
       label: "Profil",
     },
-    {
-      href: `/dashboard/${role}/settings`,
-      icon: <Settings className="h-5 w-5" />,
-      label: "Paramètres",
-    },
   ]
+
+  const settingsLink = {
+    href: `/dashboard/${role}/settings`,
+    icon: <Settings className="h-5 w-5" />,
+    label: "Paramètres",
+  }
 
   const roleSpecificLinks: Record<UserRole, NavigationItem[]> = {
     patient: [
@@ -129,5 +130,5 @@ export function getNavigationItems(role: UserRole): NavigationItem[] {
     ],
   }
 
-  return [...baseLinks, ...roleSpecificLinks[role]]
+  return [...topLinks, ...roleSpecificLinks[role], settingsLink]
 }
