@@ -8,6 +8,7 @@ export const API_CONFIG = {
     AUTH: {
       LOGIN: '/api/auth/login',
       FORGOT_PASSWORD: '/api/auth/forgot-password',
+      RESET_PASSWORD: '/api/auth/reset-password',
       // Autres endpoints d'authentification à ajouter si nécessaire
     },
     // Autres catégories d'endpoints à ajouter si nécessaire

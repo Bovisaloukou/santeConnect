@@ -32,6 +32,13 @@ export const authApi = {
     });
     return response.data;
   },
+  resetPassword: async (token: string, password: string) => {
+    const response = await apiClient.post(API_CONFIG.ENDPOINTS.AUTH.RESET_PASSWORD, {
+      token,
+      password,
+    });
+    return response.data;
+  },
 };
 
 export default apiClient; 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { useRouter, useSearchParams } from "next/navigation";
+import { authApi } from "@/lib/apiClient";
 
 export default function ResetPasswordPage() {
   const [newPassword, setNewPassword] = useState("");
@@ -15,7 +17,17 @@ export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errors, setErrors] = useState<{ newPassword?: string; confirmPassword?: string }>({});
+  const [errors, setErrors] = useState<{ newPassword?: string; confirmPassword?: string; general?: string }>({});
+  const [isSuccess, setIsSuccess] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
+
+  useEffect(() => {
+    if (!token) {
+      setErrors({ general: "Token de réinitialisation manquant" });
+    }
+  }, [token]);
 
   const validateForm = () => {
     const newErrors: { newPassword?: string; confirmPassword?: string } = {};
@@ -23,6 +35,9 @@ export default function ResetPasswordPage() {
 
     if (!newPassword) {
       newErrors.newPassword = "Le nouveau mot de passe est requis.";
+      isValid = false;
+    } else if (newPassword.length < 8) {
+      newErrors.newPassword = "Le mot de passe doit contenir au moins 8 caractères.";
       isValid = false;
     }
 
@@ -41,21 +56,37 @@ export default function ResetPasswordPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    if (!validateForm() || !token) {
       return;
     }
 
     setIsLoading(true);
 
-    // TODO: Add actual password reset logic here
-    console.log("New Password:", newPassword);
-    console.log("Confirm Password:", confirmPassword);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    setIsLoading(false);
-    // TODO: Handle success or error (e.g., redirect, show toast)
+    try {
+      await authApi.resetPassword(token, newPassword);
+      setIsSuccess(true);
+      setErrors({
+        general: "Votre mot de passe a été réinitialisé avec succès. Vous allez être redirigé vers la page de connexion."
+      });
+      
+      // Rediriger vers la page de connexion après 3 secondes
+      setTimeout(() => {
+        router.push('/login');
+      }, 3000);
+    } catch (error: any) {
+      setIsSuccess(false);
+      if (error.response?.status === 401) {
+        setErrors({
+          general: "Token invalide ou expiré. Veuillez demander un nouveau lien de réinitialisation."
+        });
+      } else {
+        setErrors({
+          general: "Une erreur est survenue lors de la réinitialisation du mot de passe."
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -70,6 +101,19 @@ export default function ResetPasswordPage() {
             </CardHeader>
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-4">
+                {errors.general && (
+                  <div className={`p-3 border rounded-md ${
+                    isSuccess 
+                      ? 'bg-green-50 border-green-200' 
+                      : 'bg-red-50 border-red-200'
+                  }`}>
+                    <p className={`text-sm ${
+                      isSuccess 
+                        ? 'text-green-600' 
+                        : 'text-red-600'
+                    }`}>{errors.general}</p>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="new-password">Nouveau mot de passe</Label>
                   <div className="relative">
