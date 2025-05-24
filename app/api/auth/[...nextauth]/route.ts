@@ -32,7 +32,7 @@ const authConfig: NextAuthConfig = { // <--- Changement ici (plus d'export direc
           try {
             const data = await authApi.login(email, password);
 
-            if (!data.user || !data.access_token) {
+            if (!data.user || !data.accessToken) {
               console.error("Backend login response missing user or access_token:", data);
               throw new Error("Réponse du serveur invalide");
             }
@@ -43,7 +43,7 @@ const authConfig: NextAuthConfig = { // <--- Changement ici (plus d'export direc
               firstName: data.user.firstName,
               lastName: data.user.lastName,
               name: `${data.user.firstName} ${data.user.lastName}`.trim() || data.user.email,
-              accessToken: data.access_token,
+              accessToken: data.accessToken,
             };
 
             console.log("Backend login successful, user:", user);
