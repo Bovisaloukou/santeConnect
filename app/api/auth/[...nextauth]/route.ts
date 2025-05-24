@@ -2,15 +2,12 @@ import NextAuth from "next-auth";
 import type { NextAuthConfig } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-// N'importe plus la fonction de vérification du mot de passe locale car le backend s'en chargera
-// import { verifyPassword } from "./lib/auth";
-import type { UserRole, User } from "@/lib/types"; // Assurez-vous que ce chemin est correct
+import type { User } from "@/lib/types"; // Assurez-vous que ce chemin est correct
+import { authApi } from "@/lib/apiClient";
 
-// Supprimez la simulation de la base de données locale
-// const users = [...];
-
-// Configurez les options d'authentification
-export const config: NextAuthConfig = {
+// RENOMMEZ CECI et ne l'exportez pas directement si ce n'est pas nécessaire ailleurs.
+// Si vous devez l'exporter, utilisez un autre nom comme `authOptions`.
+const authConfig: NextAuthConfig = { // <--- Changement ici (plus d'export direct en tant que 'config')
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -32,75 +29,69 @@ export const config: NextAuthConfig = {
           const email = credentials.email as string;
           const password = credentials.password as string;
 
-          // Appeler votre API backend pour la connexion
-          const response = await fetch("https://med-api-exy6.onrender.com/api/auth/login", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, password }),
-          });
+          try {
+            const data = await authApi.login(email, password);
 
-          // Vérifier si la réponse est OK (statut 200 ou 201)
-          if (!response.ok) {
-            const errorData = await response.json();
-            console.error("Backend login failed:", errorData);
-            return null; // Retourner null si l'API signale un échec de connexion
+            if (!data.user || !data.access_token) {
+              console.error("Backend login response missing user or access_token:", data);
+              return null;
+            }
+            
+            const user = {
+              id: data.user.id.toString(),
+              email: data.user.email,
+              firstName: data.user.firstName,
+              lastName: data.user.lastName,
+              name: `${data.user.firstName} ${data.user.lastName}`.trim() || data.user.email,
+              accessToken: data.access_token,
+            };
+
+            console.log("Backend login successful, user:", user);
+            return user as User;
+          } catch (error) {
+            console.error("Error calling backend login API:", error);
+            return null;
           }
-
-          const data = await response.json();
-
-          // L'API backend a réussi la connexion, retourner l'objet utilisateur et l'access_token
-          // Assurez-vous que l'objet retourné ici correspond à la structure User attendue ou est compatible
-          // J'ajoute l'access_token à l'objet utilisateur temporairement pour le passer aux callbacks
-          const user = {
-            id: data.user.id,
-            email: data.user.email,
-            firstName: data.user.firstName,
-            lastName: data.user.lastName,
-            name: `${data.user.firstName} ${data.user.lastName}`.trim() || data.user.email, // Créer un nom si possible
-            accessToken: data.access_token, // Stocker l'access_token
-            // Ajoutez d'autres champs de l'utilisateur si nécessaire
-          };
-
-          console.log("Backend login successful, user:", user);
-          return user as User; // Retourner l'objet utilisateur pour que NextAuth crée une session
-
         } catch (error) {
           console.error("Error calling backend login API:", error);
-          return null; // Retourner null en cas d'erreur pendant l'appel API
+          return null;
         }
       },
     }),
   ],
-  // Ajoutez d'autres configurations comme les pages personnalisées, les callbacks, etc.
   pages: {
-    signIn: "/login", // Redirige vers votre page de connexion personnalisée si non authentifié
+    signIn: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
-      // Ajouter des informations utilisateur et l'access_token au token JWT
-      if (user) {
-        (token as any).accessToken = (user as any).accessToken; // Ajouter l'access_token au token
+    async jwt({ token, user, account }) { // account peut être utile ici
+      if (account && user) { // Souvent, le accessToken vient avec `account` lors de la connexion OAuth ou d'un retour `authorize`
+        // Pour le provider Credentials, l'accessToken est ajouté à l'objet `user` dans `authorize`
+        token.accessToken = (user as any).accessToken;
+        token.id = user.id; // Stockez l'ID utilisateur dans le token si besoin
+        // Ajoutez d'autres propriétés de l'utilisateur au token si nécessaire
+        // token.firstName = (user as any).firstName;
+        // token.lastName = (user as any).lastName;
       }
       return token;
     },
     async session({ session, token }) {
-      // Exposer les informations du token (y compris access_token) à la session côté client
-      if (session.user) {
-        (session.user as any).accessToken = (token as any).accessToken; // Exposer l'access_token à la session
+      if (token && session.user) {
+        (session.user as any).accessToken = token.accessToken;
+        (session.user as any).id = token.id; // Exposez l'ID à la session
+        // (session.user as any).firstName = token.firstName;
+        // (session.user as any).lastName = token.lastName;
       }
       return session;
     },
   },
   secret: process.env.AUTH_SECRET,
-  // Ajouter cette option pour les environnements de production
-  // session: { strategy: "jwt" }, // Utiliser la stratégie JWT pour les sessions
+  session: { strategy: "jwt" }, // C'est une bonne pratique de le spécifier
 };
 
-// Initialisez NextAuth avec la configuration
-export const { handlers, auth, signIn, signOut } = NextAuth(config);
+// Initialisez NextAuth avec la configuration renommée
+export const { handlers, auth, signIn, signOut } = NextAuth(authConfig); // <--- Utilisez authConfig ici
 
 // Exporter les gestionnaires pour les routes API
+// NextAuth v5 retourne directement les handlers GET et POST dans l'objet `handlers`
 export const GET = handlers.GET;
-export const POST = handlers.POST; 
+export const POST = handlers.POST;
