@@ -20,11 +20,12 @@ export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast();
   const [formSubmitLoading, setFormSubmitLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   })
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({})
   const [activeTab, setActiveTab] = useState<string>("patient")
   const [showPassword, setShowPassword] = useState(false)
 
@@ -45,7 +46,7 @@ export default function LoginPage() {
     if (!formData.email) {
       newErrors.email = "L'email est requis"
       isValid = false
-    } else if (!/\S+@\S+\.\S+/.test(formData.email) && formData.email !== "demo") {
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "L'email n'est pas valide"
       isValid = false
     }
@@ -67,46 +68,32 @@ export default function LoginPage() {
     }
     setFormSubmitLoading(true);
 
-    // Préremplir l'email en fonction de l'onglet actif
-    let email = formData.email
-    if (email === "demo") {
-      if (activeTab === "patient") {
-        email = "patient@example.com"
-      } else if (activeTab === "healthcare") {
-        setFormSubmitLoading(false);
-        toast({
-          title: "Démo Docteur non disponible",
-          description: "La démo pour les professionnels de santé n'est pas encore implémentée.",
-          variant: "default",
-        });
-        return;
-      } else if (activeTab === "pharmacy") {
-        email = "pharmacy@example.com"
-      }
-    }
-
     // Utiliser signIn de NextAuth.js
     const result = await signIn("credentials", {
       redirect: false,
-      email: email,
+      email: formData.email,
       password: formData.password,
     });
 
     if (result?.error) {
       // Gérer les erreurs de connexion de NextAuth
       console.error("NextAuth signIn error:", result.error);
-      toast({
-        title: "Échec de la connexion",
-        description: "L'email ou le mot de passe est incorrect.",
-        variant: "destructive",
-      });
+      
+      // Analyser le type d'erreur
+      let errorMessage = "Une erreur est survenue lors de la connexion.";
+      
+      if (result.error.includes("Missing credentials")) {
+        errorMessage = "Veuillez remplir tous les champs.";
+      } else if (result.error.includes("Réponse du serveur invalide")) {
+        errorMessage = "Erreur de réponse du serveur. Veuillez réessayer.";
+      } else if (result.error.includes("Identifiants invalides")) {
+        errorMessage = "Email ou mot de passe incorrect.";
+      } else if (result.error.includes("Erreur lors de la connexion")) {
+        errorMessage = "Impossible de se connecter au serveur. Veuillez réessayer plus tard.";
+      }
+
+      setErrors(prev => ({ ...prev, general: errorMessage }));
     } else if (result?.ok) {
-      // Connexion réussie, rediriger l'utilisateur
-      toast({
-        title: "Connexion réussie",
-        description: "Bienvenue !",
-        variant: "default",
-      });
       router.push("/");
     }
 
@@ -124,28 +111,10 @@ export default function LoginPage() {
             formData={formData}
             errors={errors}
             isLoading={formSubmitLoading}
+            googleLoading={googleLoading}
             onChange={handleChange}
             onSubmit={handleSubmit}
           />
-          <div className="mt-4">
-            <GoogleSignInButton text="Se connecter avec Google" />
-          </div>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">Pour la démo, utilisez:</p>
-            <p className="text-sm text-gray-500">
-              Email: <code className="bg-gray-100 px-1 py-0.5 rounded">patient@example.com</code> ou{" "}
-              <code className="bg-gray-100 px-1 py-0.5 rounded">doctor@example.com</code> ou{" "}
-              <code className="bg-gray-100 px-1 py-0.5 rounded">pharmacy@example.com</code>
-            </p>
-            <p className="text-sm text-gray-500">
-              Mot de passe: <code className="bg-gray-100 px-1 py-0.5 rounded">password123</code>
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              Ou simplement utilisez <code className="bg-gray-100 px-1 py-0.5 rounded">demo</code> comme email et mot de
-              passe pour tester rapidement.
-            </p>
-          </div>
         </div>
       </main>
       <Footer />
@@ -163,13 +132,15 @@ interface LoginFormProps {
   errors: {
     email?: string
     password?: string
+    general?: string
   }
   isLoading: boolean
+  googleLoading: boolean
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
 }
 
-function LoginForm({ title, description, formData, errors, isLoading, onChange, onSubmit }: LoginFormProps) {
+function LoginForm({ title, description, formData, errors, isLoading, googleLoading, onChange, onSubmit }: LoginFormProps) {
   const [showPasswordLocal, setShowPasswordLocal] = useState(false)
 
   return (
@@ -178,8 +149,28 @@ function LoginForm({ title, description, formData, errors, isLoading, onChange, 
         <CardTitle className="text-center py-2">{title}</CardTitle>
         <CardDescription className="text-center">{description}</CardDescription>
       </CardHeader>
+      <CardContent className="space-y-4">
+        <GoogleSignInButton 
+          text="Se connecter avec Google" 
+          isLoading={googleLoading}
+          callbackUrl="/"
+        />
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">Ou</span>
+          </div>
+        </div>
+      </CardContent>
       <form onSubmit={onSubmit}>
         <CardContent className="space-y-4">
+          {errors.general && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{errors.general}</p>
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input

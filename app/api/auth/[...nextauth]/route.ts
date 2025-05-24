@@ -34,7 +34,7 @@ const authConfig: NextAuthConfig = { // <--- Changement ici (plus d'export direc
 
             if (!data.user || !data.access_token) {
               console.error("Backend login response missing user or access_token:", data);
-              return null;
+              throw new Error("Réponse du serveur invalide");
             }
             
             const user = {
@@ -48,13 +48,16 @@ const authConfig: NextAuthConfig = { // <--- Changement ici (plus d'export direc
 
             console.log("Backend login successful, user:", user);
             return user as User;
-          } catch (error) {
+          } catch (error: any) {
             console.error("Error calling backend login API:", error);
-            return null;
+            if (error?.response?.status === 401) {
+              throw new Error("Identifiants invalides");
+            }
+            throw new Error("Erreur lors de la connexion");
           }
         } catch (error) {
-          console.error("Error calling backend login API:", error);
-          return null;
+          console.error("Error in authorize:", error);
+          throw error;
         }
       },
     }),
