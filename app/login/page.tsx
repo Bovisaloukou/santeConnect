@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast";
 import { Eye, EyeOff } from "lucide-react"
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton"
+import { TwoFactorAuthNotification } from "@/components/auth/TwoFactorAuthNotification"
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
@@ -21,6 +22,7 @@ export default function LoginPage() {
   const { toast } = useToast();
   const [formSubmitLoading, setFormSubmitLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [show2FANotification, setShow2FANotification] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -94,7 +96,8 @@ export default function LoginPage() {
 
       setErrors(prev => ({ ...prev, general: errorMessage }));
     } else if (result?.ok) {
-      router.push("/");
+      // Pour le MVP, on simule que la 2FA n'est pas activée
+      setShow2FANotification(true)
     }
 
     setFormSubmitLoading(false);
@@ -118,6 +121,10 @@ export default function LoginPage() {
         </div>
       </main>
       <Footer />
+      <TwoFactorAuthNotification 
+        isOpen={show2FANotification}
+        onOpenChange={setShow2FANotification}
+      />
     </div>
   )
 }
