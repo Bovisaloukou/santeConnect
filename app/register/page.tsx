@@ -15,12 +15,7 @@ import { useToast } from "@/components/ui/use-toast"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 
-import { CalendarIcon, Eye, EyeOff } from "lucide-react"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
-import { cn } from "@/lib/utils"
+import { Eye, EyeOff } from "lucide-react"
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton"
 import PhoneInput from 'react-phone-input-2'
 import type { CountryData } from 'react-phone-input-2'
