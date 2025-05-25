@@ -26,6 +26,16 @@ import PhoneInput from 'react-phone-input-2'
 import type { CountryData } from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import axios from "axios"
+import {
+  validateFirstName,
+  validateLastName,
+  validateEmail,
+  validatePhone,
+  validateBirthdate,
+  validateGenre,
+  validatePassword,
+  validateConfirmPassword
+} from "../utils/validations/registerValidations"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -38,6 +48,7 @@ export default function RegisterPage() {
   const [selectedDay, setSelectedDay] = useState<string>("")
   const [selectedMonth, setSelectedMonth] = useState<string>("")
   const [selectedYear, setSelectedYear] = useState<string>("")
+  const [isBirthdateTouched, setIsBirthdateTouched] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
   // State variables for errors
@@ -54,145 +65,28 @@ export default function RegisterPage() {
     setSelectedCountryData({ countryCode: 'bj', dialCode: '229' } as CountryData)
   }, [])
 
-  // Validation functions
-  const validateFirstName = (value: string): string => {
-    if (!value) {
-      return "Le prénom est requis."
-    }
-    setFirstNameError("")
-    return ""
-  }
-
-  const validateLastName = (value: string): string => {
-    if (!value) {
-      return "Le nom est requis."
-    }
-    setLastNameError("")
-    return ""
-  }
-
-  const validateEmail = (value: string): string => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!value) {
-      return "L'email est requis."
-    }
-    if (!emailRegex.test(value)) {
-      return "Veuillez entrer une adresse email valide."
-    }
-    setEmailError("")
-    return ""
-  }
-
-  const validatePhone = (value: string, countryData: CountryData | null): string => {
-    const digitsOnlyPhone = value.replace(/\D/g, '')
-
-    if (!value) {
-      return "Le numéro de téléphone est requis."
-    }
-
-    // Validation spécifique pour le Bénin (+229)
+  // Fonction de formatage personnalisée pour le numéro de téléphone
+  const formatPhoneNumber = (value: string, countryData: CountryData | null) => {
+    if (!value) return value;
+    
     if (countryData && countryData.countryCode === 'bj') {
-      const dialCode = countryData.dialCode.replace(/\D/g, '') // Assurez-vous que l'indicatif est en chiffres
-      const expectedTotalLength = dialCode.length + 10 // 3 chiffres pour +229 + 10 chiffres locaux
-
-      if (digitsOnlyPhone.length !== expectedTotalLength) {
-          return `Le numéro de téléphone doit comporter exactement ${expectedTotalLength} chiffres pour le Bénin (incluant l'indicatif).`
+      const digitsOnly = value.replace(/\D/g, '');
+      const dialCode = countryData.dialCode;
+      const nationalNumber = digitsOnly.substring(dialCode.length);
+      
+      if (nationalNumber.length >= 2) {
+        const firstPart = nationalNumber.substring(0, 2);
+        const secondPart = nationalNumber.substring(2, 4);
+        const thirdPart = nationalNumber.substring(4, 6);
+        const fourthPart = nationalNumber.substring(6, 8);
+        const fifthPart = nationalNumber.substring(8, 10);
+        
+        return `${dialCode} ${firstPart} ${secondPart} ${thirdPart} ${fourthPart} ${fifthPart}`.trim();
       }
-
-      const nationalNumber = digitsOnlyPhone.substring(dialCode.length); // Partie locale après l'indicatif
-
-      if (!nationalNumber.startsWith("01")) {
-        return "Pour le Bénin, le numéro de téléphone doit commencer par '01' après l'indicatif (+229)."
-      }
-    } else {
-        // Vous pourriez ajouter une validation générique pour d'autres pays ici si nécessaire
-        // Pour l'instant, nous nous concentrons sur le Bénin
-         if (digitsOnlyPhone.length < 10) { // Exemple de validation minimale pour d'autres pays
-             return "Veuillez entrer un numéro de téléphone valide."
-         }
     }
-
-    setPhoneError("")
-    return ""
-  }
-
-  const validateBirthdate = (day: string, month: string, year: string): string => {
-    if (!day || !month || !year) {
-      return "Veuillez sélectionner votre date de naissance complète."
-    }
-
-    const dayInt = parseInt(day, 10)
-    const monthInt = parseInt(month, 10)
-    const yearInt = parseInt(year, 10)
-
-    if (isNaN(dayInt) || isNaN(monthInt) || isNaN(yearInt) || dayInt < 1 || dayInt > 31 || monthInt < 1 || monthInt > 12 || yearInt < 1900 || yearInt > new Date().getFullYear()) {
-      return "Veuillez sélectionner une date de naissance valide (jour, mois, année)."
-    }
-
-    const birthDate = new Date(Date.UTC(yearInt, monthInt - 1, dayInt))
-    if (birthDate.getUTCFullYear() !== yearInt || birthDate.getUTCMonth() !== monthInt - 1 || birthDate.getUTCDate() !== dayInt) {
-      return "La date que vous avez sélectionnée n'est pas valide."
-    }
-
-    const today = new Date()
-    const birthDateComparison = new Date(yearInt, monthInt - 1, dayInt)
-
-    if (birthDateComparison > today) {
-      return "La date de naissance ne peut pas être dans le futur."
-    }
-    setBirthdateError("")
-    return ""
-  }
-
-  const validateGenre = (value: string | undefined): string => {
-    if (!value) {
-      return "Veuillez sélectionner votre genre."
-    }
-    setGenreError("")
-    return ""
-  }
-
-  const validatePassword = (value: string): string => {
-    if (!value) {
-      return "Le mot de passe est requis."
-    }
-
-    const minLength = 8;
-    const hasUpperCase = /[A-Z]/.test(value);
-    const hasLowerCase = /[a-z]/.test(value);
-    const hasNumbers = /\d/.test(value);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value);
-
-    if (value.length < minLength) {
-      return "Le mot de passe doit contenir au moins 8 caractères.";
-    }
-    if (!hasUpperCase) {
-      return "Le mot de passe doit contenir au moins une lettre majuscule.";
-    }
-    if (!hasLowerCase) {
-      return "Le mot de passe doit contenir au moins une lettre minuscule.";
-    }
-    if (!hasNumbers) {
-      return "Le mot de passe doit contenir au moins un chiffre.";
-    }
-    if (!hasSpecialChar) {
-      return "Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*(),.?\":{}|<>).";
-    }
-
-    setPasswordError("");
-    return "";
-  }
-
-  const validateConfirmPassword = (password: string, confirmPassword: string): string => {
-    if (!confirmPassword) {
-      return "La confirmation du mot de passe est requise."
-    }
-    if (password !== confirmPassword) {
-      return "Les mots de passe ne correspondent pas."
-    }
-    setConfirmPasswordError("")
-    return ""
-  }
+    
+    return value;
+  };
 
   const handlePhoneChange = (
     value: string,
@@ -202,37 +96,53 @@ export default function RegisterPage() {
   ) => {
     setPhone(value);
     setSelectedCountryData(data);
-    setPhoneError("");
+    const result = validatePhone({ value, countryData: data });
+    setPhoneError(result.errorMessage);
   };
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    // Validate all fields before submitting
     const formData = new FormData(e.currentTarget)
     const formValues = Object.fromEntries(formData.entries())
 
-    const isFirstNameValid = !validateFirstName(formValues.firstName as string)
-    const isLastNameValid = !validateLastName(formValues.lastName as string)
-    const isEmailValid = !validateEmail(formValues.email as string)
-    const isPhoneValid = !validatePhone(phone, selectedCountryData)
-    const isBirthdateValid = !validateBirthdate(selectedDay, selectedMonth, selectedYear)
-    const isGenreValid = !validateGenre(formValues.genre as string | undefined)
-    const isPasswordValid = !validatePassword(formValues.password as string)
-    const isConfirmPasswordValid = !validateConfirmPassword(formValues.password as string, formValues.confirmPassword as string)
+    // Validation de tous les champs
+    const firstNameResult = validateFirstName(formValues.firstName as string)
+    const lastNameResult = validateLastName(formValues.lastName as string)
+    const emailResult = validateEmail(formValues.email as string)
+    const phoneResult = validatePhone({ value: phone, countryData: selectedCountryData })
+    const birthdateResult = validateBirthdate({ 
+      day: selectedDay, 
+      month: selectedMonth, 
+      year: selectedYear, 
+      isTouched: isBirthdateTouched 
+    })
+    const genreResult = validateGenre(formValues.genre as string | undefined)
+    const passwordResult = validatePassword(formValues.password as string)
+    const confirmPasswordResult = validateConfirmPassword({ 
+      password: formValues.password as string, 
+      confirmPassword: formValues.confirmPassword as string 
+    })
 
-    if (!isFirstNameValid || !isLastNameValid || !isEmailValid || !isPhoneValid || !isBirthdateValid || !isGenreValid || !isPasswordValid || !isConfirmPasswordValid) {
-      // If any field is invalid, update the error states to display messages
-      setFirstNameError(validateFirstName(formValues.firstName as string))
-      setLastNameError(validateLastName(formValues.lastName as string))
-      setEmailError(validateEmail(formValues.email as string))
-      setPhoneError(validatePhone(phone, selectedCountryData))
-      setBirthdateError(validateBirthdate(selectedDay, selectedMonth, selectedYear))
-      setGenreError(validateGenre(formValues.genre as string | undefined))
-      setPasswordError(validatePassword(formValues.password as string))
-      setConfirmPasswordError(validateConfirmPassword(formValues.password as string, formValues.confirmPassword as string))
+    // Mise à jour des messages d'erreur
+    setFirstNameError(firstNameResult.errorMessage)
+    setLastNameError(lastNameResult.errorMessage)
+    setEmailError(emailResult.errorMessage)
+    setPhoneError(phoneResult.errorMessage)
+    setBirthdateError(birthdateResult.errorMessage)
+    setGenreError(genreResult.errorMessage)
+    setPasswordError(passwordResult.errorMessage)
+    setConfirmPasswordError(confirmPasswordResult.errorMessage)
 
-      // Stop the submission if there are errors
+    // Vérification si tous les champs sont valides
+    if (!firstNameResult.isValid || 
+        !lastNameResult.isValid || 
+        !emailResult.isValid || 
+        !phoneResult.isValid || 
+        !birthdateResult.isValid || 
+        !genreResult.isValid || 
+        !passwordResult.isValid || 
+        !confirmPasswordResult.isValid) {
       return
     }
 
@@ -244,7 +154,6 @@ export default function RegisterPage() {
       gender: formValues.genre as string,
       email: formValues.email as string,
       password: formValues.password as string,
-      // Format the birthDate to ISO 8601 string
       birthDate: new Date(Date.UTC(parseInt(selectedYear, 10), parseInt(selectedMonth, 10) - 1, parseInt(selectedDay, 10))).toISOString(),
       contact: phone,
     }
@@ -309,7 +218,10 @@ export default function RegisterPage() {
                           id="first-name"
                           name="firstName"
                           required
-                          onBlur={(e) => setFirstNameError(validateFirstName(e.target.value))}
+                          onBlur={(e) => {
+                            const result = validateFirstName(e.target.value);
+                            setFirstNameError(result.errorMessage);
+                          }}
                           onChange={() => setFirstNameError("")}
                           className={firstNameError ? 'border-red-500' : ''}
                         />
@@ -321,7 +233,10 @@ export default function RegisterPage() {
                           id="last-name"
                           name="lastName"
                           required
-                          onBlur={(e) => setLastNameError(validateLastName(e.target.value))}
+                          onBlur={(e) => {
+                            const result = validateLastName(e.target.value);
+                            setLastNameError(result.errorMessage);
+                          }}
                           onChange={() => setLastNameError("")}
                           className={lastNameError ? 'border-red-500' : ''}
                         />
@@ -335,7 +250,10 @@ export default function RegisterPage() {
                         name="email"
                         type="email"
                         required
-                        onBlur={(e) => setEmailError(validateEmail(e.target.value))}
+                        onBlur={(e) => {
+                          const result = validateEmail(e.target.value);
+                          setEmailError(result.errorMessage);
+                        }}
                         onChange={() => setEmailError("")}
                         className={emailError ? 'border-red-500' : ''}
                       />
@@ -350,7 +268,11 @@ export default function RegisterPage() {
                         inputProps={{
                           required: true,
                           id: 'phone',
-                          onBlur: (e: React.FocusEvent<HTMLInputElement>) => setPhoneError(validatePhone(e.target.value, selectedCountryData)),
+                          onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
+                            const result = validatePhone({ value: e.target.value, countryData: selectedCountryData });
+                            setPhoneError(result.errorMessage);
+                          },
+                          value: formatPhoneNumber(phone, selectedCountryData)
                         }}
                         containerClass={`w-full ${phoneError ? 'border-red-500 rounded-md' : ''}`}
                         inputClass="flex !h-10 !w-full rounded-md border !border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 !rounded-r-md"
@@ -364,11 +286,17 @@ export default function RegisterPage() {
                       <Label htmlFor="birthdate">Date de naissance</Label>
                       <div className={`flex space-x-4 ${birthdateError ? 'border border-red-500 rounded-md p-2' : ''}`}>
                         <Select onValueChange={(value) => {
-                          setBirthdateError("");
+                          setIsBirthdateTouched(true);
                           setSelectedDay(value);
-                          setBirthdateError(validateBirthdate(value, selectedMonth, selectedYear));
+                          const result = validateBirthdate({ 
+                            day: value, 
+                            month: selectedMonth, 
+                            year: selectedYear, 
+                            isTouched: true 
+                          });
+                          setBirthdateError(result.errorMessage);
                         }} value={selectedDay} disabled={isLoading}>
-                          <SelectTrigger id="day" className={birthdateError ? 'border-red-500' : ''}>
+                          <SelectTrigger id="day" className={birthdateError && isBirthdateTouched ? 'border-red-500' : ''}>
                             <SelectValue placeholder="Jour" />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px] overflow-y-auto">
@@ -381,11 +309,17 @@ export default function RegisterPage() {
                         </Select>
 
                         <Select onValueChange={(value) => {
-                          setBirthdateError("");
+                          setIsBirthdateTouched(true);
                           setSelectedMonth(value);
-                          setBirthdateError(validateBirthdate(selectedDay, value, selectedYear));
+                          const result = validateBirthdate({ 
+                            day: selectedDay, 
+                            month: value, 
+                            year: selectedYear, 
+                            isTouched: true 
+                          });
+                          setBirthdateError(result.errorMessage);
                         }} value={selectedMonth} disabled={isLoading}>
-                          <SelectTrigger id="month" className={birthdateError ? 'border-red-500' : ''}>
+                          <SelectTrigger id="month" className={birthdateError && isBirthdateTouched ? 'border-red-500' : ''}>
                             <SelectValue placeholder="Mois" />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px] overflow-y-auto">
@@ -403,11 +337,17 @@ export default function RegisterPage() {
                         </Select>
 
                         <Select onValueChange={(value) => {
-                          setBirthdateError("");
+                          setIsBirthdateTouched(true);
                           setSelectedYear(value);
-                          setBirthdateError(validateBirthdate(selectedDay, selectedMonth, value));
+                          const result = validateBirthdate({ 
+                            day: selectedDay, 
+                            month: selectedMonth, 
+                            year: value, 
+                            isTouched: true 
+                          });
+                          setBirthdateError(result.errorMessage);
                         }} value={selectedYear} disabled={isLoading}>
-                          <SelectTrigger id="year" className={birthdateError ? 'border-red-500' : ''}>
+                          <SelectTrigger id="year" className={birthdateError && isBirthdateTouched ? 'border-red-500' : ''}>
                             <SelectValue placeholder="Année" />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px] overflow-y-auto">
@@ -425,15 +365,24 @@ export default function RegisterPage() {
                       <Label>Genre</Label>
                       <div className={`flex space-x-4 ${genreError ? 'border border-red-500 rounded-md p-2' : ''}`}>
                         <div className="flex items-center space-x-2">
-                          <input type="radio" id="male" name="genre" value="male" onChange={(e) => setGenreError(validateGenre(e.target.value))} />
+                          <input type="radio" id="male" name="genre" value="male" onChange={(e) => {
+                            const result = validateGenre(e.target.value);
+                            setGenreError(result.errorMessage);
+                          }} />
                           <Label htmlFor="male">Homme</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <input type="radio" id="female" name="genre" value="female" onChange={(e) => setGenreError(validateGenre(e.target.value))} />
+                          <input type="radio" id="female" name="genre" value="female" onChange={(e) => {
+                            const result = validateGenre(e.target.value);
+                            setGenreError(result.errorMessage);
+                          }} />
                           <Label htmlFor="female">Femme</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <input type="radio" id="other" name="genre" value="other" onChange={(e) => setGenreError(validateGenre(e.target.value))} />
+                          <input type="radio" id="other" name="genre" value="other" onChange={(e) => {
+                            const result = validateGenre(e.target.value);
+                            setGenreError(result.errorMessage);
+                          }} />
                           <Label htmlFor="other">Autre</Label>
                         </div>
                       </div>
@@ -448,7 +397,10 @@ export default function RegisterPage() {
                           type={showPassword ? "text" : "password"}
                           required
                           disabled={isLoading}
-                          onBlur={(e) => setPasswordError(validatePassword(e.target.value))}
+                          onBlur={(e) => {
+                            const result = validatePassword(e.target.value);
+                            setPasswordError(result.errorMessage);
+                          }}
                           onChange={() => setPasswordError("")}
                           className={passwordError ? 'border-red-500' : ''}
                         />
@@ -475,7 +427,13 @@ export default function RegisterPage() {
                           type={showConfirmPassword ? "text" : "password"}
                           required
                           disabled={isLoading}
-                          onBlur={(e) => setConfirmPasswordError(validateConfirmPassword((document.getElementById('password') as HTMLInputElement).value, e.target.value))}
+                          onBlur={(e) => {
+                            const result = validateConfirmPassword({
+                              password: (document.getElementById('password') as HTMLInputElement).value,
+                              confirmPassword: e.target.value
+                            });
+                            setConfirmPasswordError(result.errorMessage);
+                          }}
                           onChange={() => setConfirmPasswordError("")}
                           className={confirmPasswordError ? 'border-red-500' : ''}
                         />
