@@ -172,7 +172,7 @@ export default function MedicalCenterDetailPage({ params }: Props) {
                       size="sm"
                       onClick={() => {
                         if (user) {
-                          alert("Prendre rendez-vous cliqué!");
+                          router.push("/chatbot");
                         } else {
                           router.push("/login");
                         }
@@ -196,7 +196,7 @@ export default function MedicalCenterDetailPage({ params }: Props) {
               className="bg-accent-turquoise hover:bg-accent-turquoise/90 text-neutral-white"
               onClick={() => {
                 if (user) {
-                  alert("Discuter avec un médecin généraliste cliqué!");
+                  router.push("/chat");
                 } else {
                   router.push("/login");
                 }
