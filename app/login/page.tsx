@@ -16,10 +16,12 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import { signIn } from "next-auth/react"
+import { useSession } from "next-auth/react"
 
 export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast();
+  const { data: session } = useSession();
   const [formSubmitLoading, setFormSubmitLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [show2FANotification, setShow2FANotification] = useState(false);
@@ -96,8 +98,16 @@ export default function LoginPage() {
 
       setErrors(prev => ({ ...prev, general: errorMessage }));
     } else if (result?.ok) {
-      // Pour le MVP, on simule que la 2FA n'est pas activée
-      setShow2FANotification(true)
+      // Attendre que la session soit mise à jour
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const updatedSession = await fetch('/api/auth/session').then(res => res.json());
+      
+      if (!updatedSession?.user?.is2FAEnabled) {
+        setShow2FANotification(true);
+      } else {
+        router.push('/verify-2fa');
+      }
     }
 
     setFormSubmitLoading(false);
