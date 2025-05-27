@@ -7,7 +7,7 @@ import { authApi } from "@/lib/apiClient";
 
 // RENOMMEZ CECI et ne l'exportez pas directement si ce n'est pas nécessaire ailleurs.
 // Si vous devez l'exporter, utilisez un autre nom comme `authOptions`.
-const authConfig: NextAuthConfig = {
+export const authConfig: NextAuthConfig = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -49,6 +49,7 @@ const authConfig: NextAuthConfig = {
               contact: data.user.contact || "",
               isEnabled: data.user.isEnabled || false,
               is2FAEnabled: data.user.is2FAEnabled || false,
+              is2FAVerified: data.user.is2FAVerified || false,
               accessToken: data.accessToken,
             };
 
@@ -73,19 +74,32 @@ const authConfig: NextAuthConfig = {
   },
   callbacks: {
     async jwt({ token, user, account }) {
+      console.log("Callback JWT - Données reçues:", { token, user, account });
+      
       if (account && user) {
         token.accessToken = (user as any).accessToken;
         token.id = user.id;
         token.is2FAEnabled = (user as any).is2FAEnabled;
+        token.is2FAVerified = (user as any).is2FAVerified;
+        
+        console.log("État 2FA dans JWT:", {
+          is2FAEnabled: (user as any).is2FAEnabled,
+          is2FAVerified: (user as any).is2FAVerified
+        });
       }
+      console.log("Token final:", token);
       return token;
     },
     async session({ session, token }) {
+      console.log("Callback Session - Données reçues:", { session, token });
+      
       if (token && session.user) {
         (session.user as any).accessToken = token.accessToken;
         (session.user as any).id = token.id;
         (session.user as any).is2FAEnabled = token.is2FAEnabled;
+        (session.user as any).is2FAVerified = token.is2FAVerified;
       }
+      console.log("Session finale:", session);
       return session;
     },
   },

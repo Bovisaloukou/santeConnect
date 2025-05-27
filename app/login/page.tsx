@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -21,7 +21,7 @@ import { useSession } from "next-auth/react"
 export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [formSubmitLoading, setFormSubmitLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [show2FANotification, setShow2FANotification] = useState(false);
@@ -79,11 +79,11 @@ export default function LoginPage() {
       password: formData.password,
     });
 
+    console.log("Résultat de la connexion:", result);
+
     if (result?.error) {
+      console.error("Erreur de connexion:", result.error);
       // Gérer les erreurs de connexion de NextAuth
-      console.error("NextAuth signIn error:", result.error);
-      
-      // Analyser le type d'erreur
       let errorMessage = "Une erreur est survenue lors de la connexion.";
       
       if (result.error.includes("Missing credentials")) {
@@ -98,15 +98,26 @@ export default function LoginPage() {
 
       setErrors(prev => ({ ...prev, general: errorMessage }));
     } else if (result?.ok) {
+      console.log("Connexion réussie, attente de la mise à jour de la session...");
       // Attendre que la session soit mise à jour
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const updatedSession = await fetch('/api/auth/session').then(res => res.json());
+      console.log("Session mise à jour:", updatedSession);
+      console.log("État 2FA:", {
+        is2FAEnabled: updatedSession?.user?.is2FAEnabled,
+        is2FAVerified: updatedSession?.user?.is2FAVerified
+      });
       
-      if (!updatedSession?.user?.is2FAEnabled) {
+      if (updatedSession?.user?.is2FAEnabled && !updatedSession?.user?.is2FAVerified) {
+        console.log("2FA activé mais non vérifié, redirection vers la page de vérification");
+        router.push('/verify-2fa');
+      } else if (!updatedSession?.user?.is2FAEnabled) {
+        console.log("2FA non activé, affichage de la notification");
         setShow2FANotification(true);
       } else {
-        router.push('/verify-2fa');
+        console.log("2FA déjà vérifié, redirection vers la page d'accueil");
+        router.push('/');
       }
     }
 

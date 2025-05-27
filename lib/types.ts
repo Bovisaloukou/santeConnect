@@ -14,6 +14,7 @@ export interface User {
   contact: string
   isEnabled: boolean
   is2FAEnabled: boolean
+  is2FAVerified: boolean
 }
 
 // Types pour les patients

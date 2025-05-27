@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, KeyboardEvent, ChangeEvent } from "react";
+import { useState, useRef, KeyboardEvent, ChangeEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,11 +12,24 @@ import { useSession } from "next-auth/react";
 
 export default function Verify2FAClient() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, update: updateSession } = useSession();
   const [codes, setCodes] = useState<string[]>(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Vérifier si l'utilisateur a besoin de la 2FA
+  useEffect(() => {
+    if (session?.user) {
+      if (!session.user.is2FAEnabled) {
+        // Si la 2FA n'est pas activée, rediriger vers le dashboard
+        router.push("/dashboard/patient");
+      } else if (session.user.is2FAVerified) {
+        // Si la 2FA est déjà vérifiée, rediriger vers le dashboard
+        router.push("/dashboard/patient");
+      }
+    }
+  }, [session, router]);
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -68,6 +81,14 @@ export default function Verify2FAClient() {
 
     try {
       await authApi.verify2FA(session.user.id, code);
+      // Mettre à jour la session pour indiquer que la 2FA est vérifiée
+      await updateSession({
+        ...session,
+        user: {
+          ...session.user,
+          is2FAVerified: true
+        }
+      });
       router.push("/dashboard/patient");
     } catch (error: any) {
       setError(error.response?.data?.message || "Code invalide. Veuillez réessayer.");

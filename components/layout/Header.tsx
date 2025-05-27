@@ -1,5 +1,6 @@
 'use client'; // Directive pour marquer comme Client Component
 
+import React from 'react';
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
@@ -9,16 +10,18 @@ import Image from 'next/image';
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from 'next/navigation';
 
-export default function Header() {
+export default function Header(): React.ReactElement {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const pathname = usePathname();
+  const isFullyAuthenticated = session?.user && (!session.user.is2FAEnabled || session.user.is2FAVerified);
 
   const navLinks = [
     { href: "/", label: "Accueil" },
     { href: "/centres-medicaux", label: "Centres médicaux" },
     { href: "/pharmacies", label: "Pharmacies" },
     { href: "/about", label: "À propos" },
+    ...(isFullyAuthenticated ? [{ href: "/dashboard/patient", label: "Tableau de bord" }] : []),
   ];
 
   return (
@@ -36,47 +39,42 @@ export default function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex space-x-6 items-center">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.href} 
-              href={link.href} 
-              className={`${
-                pathname === link.href
-                  ? 'text-primary-blue font-semibold'
-                  : 'text-neutral-dark-gray'
-              } hover:text-primary-blue transition-colors`}
-            >
-              {link.label}
-            </Link>
-          ))}
-          {status === 'authenticated' && (
-            <Link href="/dashboard/patient" className="text-neutral-dark-gray hover:text-primary-blue transition-colors">
-              Tableau de bord
-            </Link>
-          )}
-        </nav>
-
-        {/* Desktop Auth Buttons / User Info */}
-        <div className="hidden md:flex space-x-2">
-          {status === 'authenticated' ? (
-            <Button variant="outline" onClick={() => signOut()} className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white">
-              Déconnexion
-            </Button>
-          ) : (
-            <>
-              <Link href="/login" passHref>
-                <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white mr-2">
-                  Connexion
-                </Button>
+        <div className="hidden md:flex flex-1 items-center">
+          <nav className="flex-1 flex justify-center space-x-6">
+            {navLinks.map((link) => (
+              <Link 
+                key={link.href} 
+                href={link.href} 
+                className={`${
+                  pathname === link.href
+                    ? 'text-primary-blue font-semibold'
+                    : 'text-neutral-dark-gray'
+                } hover:text-primary-blue transition-colors`}
+              >
+                {link.label}
               </Link>
-              <Link href="/register" passHref>
-                <Button className="bg-primary-blue text-neutral-white hover:bg-opacity-90">
-                  Inscription
-                </Button>
-              </Link>
-            </>
-          )}
+            ))}
+          </nav>
+          <div className="flex items-center space-x-2">
+            {isFullyAuthenticated ? (
+              <Button variant="outline" onClick={() => signOut()} className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white">
+                Déconnexion
+              </Button>
+            ) : (
+              <>
+                <Link href="/login" passHref>
+                  <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white mr-2">
+                    Connexion
+                  </Button>
+                </Link>
+                <Link href="/register" passHref>
+                  <Button className="bg-primary-blue text-neutral-white hover:bg-opacity-90">
+                    Inscription
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Mobile Menu Button */}
@@ -122,24 +120,7 @@ export default function Header() {
                       </Link>
                     </SheetClose>
                   ))}
-                  {status === 'authenticated' && (
-                    <SheetClose asChild>
-                      <Link
-                        href="/dashboard/patient"
-                        className={`flex items-center py-2 text-lg ${
-                          pathname === '/dashboard/patient'
-                            ? 'text-primary-blue font-semibold'
-                            : 'text-neutral-dark-gray'
-                        } hover:text-primary-blue transition-colors`}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        Tableau de bord
-                      </Link>
-                    </SheetClose>
-                  )}
-                </nav>
-                <div className="p-6 border-t border-neutral-medium-gray/20">
-                  {status === 'authenticated' ? (
+                  {isFullyAuthenticated ? (
                     <SheetClose asChild>
                       <Button variant="outline" onClick={() => signOut()} className="w-full border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-neutral-white">
                         Déconnexion
@@ -163,7 +144,7 @@ export default function Header() {
                       </SheetClose>
                     </>
                   )}
-                </div>
+                </nav>
               </div>
             </SheetContent>
           </Sheet>
