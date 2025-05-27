@@ -5,11 +5,15 @@ export type UserRole = "patient" | "healthcare" | "pharmacy" | "admin"
 
 export interface User {
   id: string
+  createdAt: string
   firstName: string
   lastName: string
+  gender: string
   email: string
-  name: string
-  avatar?: string
+  birthDate: string
+  contact: string
+  isEnabled: boolean
+  is2FAEnabled: boolean
 }
 
 // Types pour les patients
