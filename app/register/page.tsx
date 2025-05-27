@@ -20,7 +20,7 @@ import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton"
 import PhoneInput from 'react-phone-input-2'
 import type { CountryData } from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
-import axios from "axios"
+import { authApi } from "@/lib/apiClient"
 import {
   validateFirstName,
   validateLastName,
@@ -154,16 +154,16 @@ export default function RegisterPage() {
     }
 
     try {
-      const response = await axios.post("https://med-api-exy6.onrender.com/api/auth/signup", userData)
+      const response = await authApi.signup(userData)
       
-      if (response.status === 201) {
+      if (response) {
         setMessage({
           type: 'success',
-          text: response.data.message || "Inscription réussie ! Vous allez être redirigé vers la page de connexion."
+          text: "Votre inscription a été effectuée avec succès ! Un email de confirmation a été envoyé à votre adresse email. Veuillez cliquer sur le lien dans cet email pour activer votre compte. Vous serez redirigé vers la page de connexion dans quelques instants."
         })
         setTimeout(() => {
           router.push("/login")
-        }, 2000)
+        }, 20000)
       }
     } catch (error: any) {
       console.error("Erreur lors de l'inscription:", error)

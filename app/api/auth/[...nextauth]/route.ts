@@ -34,7 +34,7 @@ export const authConfig: NextAuthConfig = {
 
             if (!data.user || !data.accessToken) {
               console.error("Backend login response missing user or access_token:", data);
-              throw new Error("Réponse du serveur invalide");
+              return null;
             }
             
             const user = {
@@ -53,18 +53,19 @@ export const authConfig: NextAuthConfig = {
               accessToken: data.accessToken,
             };
 
+            if (!user.isEnabled) {
+              return null;
+            }
+
             console.log("Backend login successful, user:", user);
             return user as User;
           } catch (error: any) {
             console.error("Error calling backend login API:", error);
-            if (error?.response?.status === 401) {
-              throw new Error("Identifiants invalides");
-            }
-            throw new Error("Erreur lors de la connexion");
+            return null;
           }
         } catch (error) {
           console.error("Error in authorize:", error);
-          throw error;
+          return null;
         }
       },
     }),
@@ -73,33 +74,36 @@ export const authConfig: NextAuthConfig = {
     signIn: "/login",
   },
   callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      if (!user) {
+        // Récupérer les informations d'erreur depuis la requête
+        const error = (credentials as any)?.error;
+        if (error) {
+          // Stocker l'erreur dans la session
+          (user as any).error = error;
+        }
+        return false;
+      }
+      return true;
+    },
     async jwt({ token, user, account }) {
-      console.log("Callback JWT - Données reçues:", { token, user, account });
-      
       if (account && user) {
         token.accessToken = (user as any).accessToken;
         token.id = user.id;
         token.is2FAEnabled = (user as any).is2FAEnabled;
         token.is2FAVerified = (user as any).is2FAVerified;
-        
-        console.log("État 2FA dans JWT:", {
-          is2FAEnabled: (user as any).is2FAEnabled,
-          is2FAVerified: (user as any).is2FAVerified
-        });
+        token.error = (user as any).error;
       }
-      console.log("Token final:", token);
       return token;
     },
     async session({ session, token }) {
-      console.log("Callback Session - Données reçues:", { session, token });
-      
       if (token && session.user) {
         (session.user as any).accessToken = token.accessToken;
         (session.user as any).id = token.id;
         (session.user as any).is2FAEnabled = token.is2FAEnabled;
         (session.user as any).is2FAVerified = token.is2FAVerified;
+        (session.user as any).error = token.error;
       }
-      console.log("Session finale:", session);
       return session;
     },
   },
