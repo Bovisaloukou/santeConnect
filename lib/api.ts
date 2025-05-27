@@ -124,9 +124,6 @@ const api = {
   },
 
   // Méthodes spécifiques pour l'authentification
-  login: (email: string, password: string) =>
-    api.post<{ user: any; token: string }>("/auth/login", { email, password }),
-
   register: (userData: any) => api.post<{ user: any; token: string }>("/auth/register", userData),
 
   logout: async () => {

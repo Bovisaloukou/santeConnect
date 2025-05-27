@@ -1,3 +1,4 @@
+/** @jsxImportSource react */
 'use client';
 import type { Metadata } from "next"
 import Image from "next/image"
@@ -7,19 +8,16 @@ import Footer from "@/components/layout/Footer"
 import { Button } from "@/components/ui/button"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel"
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
 
 // Importation temporaire des données fictives
 // Idéalement, ces données viendraient d'une API ou d'une source centrale
 import { mockMedicalCenters, MedicalCenter } from "../page"
 
-interface Props {
-  params: { id: string }
-}
-
-export default function MedicalCenterDetailPage({ params }: Props) {
-  const { id } = params;
+export default function MedicalCenterDetailPage() {
+  const params = useParams<{ id: string }>();
+  const id = params.id;
   const center = mockMedicalCenters.find((c: MedicalCenter) => c.id === id);
   const router = useRouter();
   const { user, isLoading } = useAuth();
@@ -93,8 +91,6 @@ export default function MedicalCenterDetailPage({ params }: Props) {
     );
   }
 
-  const Icon = center.icon; // Assign the icon component
-
   return (
     <div className="flex flex-col min-h-screen bg-neutral-light-gray">
       <Header />
@@ -136,7 +132,7 @@ export default function MedicalCenterDetailPage({ params }: Props) {
             <h2 className="text-2xl font-semibold text-neutral-dark-gray mb-4">Détails du Centre</h2>
             <div className="space-y-3 text-neutral-dark-gray/90">
               <div className="flex items-center space-x-2">
-                <Icon className="w-5 h-5 text-primary-blue flex-shrink-0" />
+                {React.createElement(center.icon, { className: "w-5 h-5 text-primary-blue flex-shrink-0" })}
                 <span>Type : {center.type}</span>
               </div>
               <div className="flex items-center space-x-2">
@@ -202,7 +198,7 @@ export default function MedicalCenterDetailPage({ params }: Props) {
                 }
               }}
             >
-              Discuter avec un médecin généraliste
+              Consultation
             </Button>
           </div>
 
