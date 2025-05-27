@@ -1,5 +1,16 @@
 import axios from 'axios';
 import { API_CONFIG } from './config';
+import { getSession } from 'next-auth/react';
+import { Session } from 'next-auth';
+
+interface ExtendedSession extends Omit<Session, 'user'> {
+  user: Session['user'] & {
+    accessToken?: string;
+    id?: string;
+    is2FAEnabled?: boolean;
+    is2FAVerified?: boolean;
+  };
+}
 
 const apiClient = axios.create({
   baseURL: API_CONFIG.BASE_URL,
@@ -7,6 +18,15 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
+});
+
+// Intercepteur pour ajouter le token d'autorisation
+apiClient.interceptors.request.use(async (config) => {
+  const session = await getSession() as ExtendedSession;
+  if (session?.user?.accessToken) {
+    config.headers.Authorization = `Bearer ${session.user.accessToken}`;
+  }
+  return config;
 });
 
 // Intercepteur pour gérer les erreurs
