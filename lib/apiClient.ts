@@ -6,6 +6,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 // Intercepteur pour gérer les erreurs
@@ -45,6 +46,12 @@ export const authApi = {
   },
   disable2FA: async (userId: string) => {
     const response = await apiClient.post(`/api/auth/2fa/disable/${userId}`);
+    return response.data;
+  },
+  verify2FA: async (userId: string, otp: string) => {
+    const response = await apiClient.post(`/api/auth/2fa/verify/${userId}`, {
+      otp
+    });
     return response.data;
   }
 };

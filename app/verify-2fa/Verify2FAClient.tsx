@@ -1,82 +1,80 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useRef, KeyboardEvent, ChangeEvent } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import { authApi } from "@/lib/apiClient";
+import { useSession } from "next-auth/react";
 
 export default function Verify2FAClient() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [code, setCode] = useState("");
+  const { data: session } = useSession();
+  const [codes, setCodes] = useState<string[]>(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  useEffect(() => {
-    const emailFromParams = searchParams.get('email');
-    if (emailFromParams) {
-      setUserEmail(emailFromParams);
-    } else {
-      // Si l'email n'est pas présent, rediriger vers la page de login
-      router.push("/login");
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').slice(0, 6);
+    const newCodes = [...codes];
+    for (let i = 0; i < pastedData.length; i++) {
+      if (i < 6) {
+        newCodes[i] = pastedData[i];
+      }
     }
-  }, [searchParams, router]);
+    setCodes(newCodes);
+  };
+
+  const handleInputChange = (index: number, value: string) => {
+    // Mise à jour normale
+    const newCodes = [...codes];
+    newCodes[index] = value;
+    setCodes(newCodes);
+
+    // Passer à l'input suivant si un chiffre est entré
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !codes[index] && index > 0) {
+      // Revenir à l'input précédent si on appuie sur backspace sur un input vide
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
-    if (!code) {
-      setError("Veuillez entrer le code de vérification.");
+    const code = codes.join("");
+    if (code.length !== 6) {
+      setError("Veuillez entrer le code complet de 6 chiffres.");
+      return;
+    }
+
+    if (!session?.user?.id) {
+      setError("Session utilisateur invalide.");
       return;
     }
 
     setIsLoading(true);
 
-    // TODO: Replace with actual 2FA verification logic calling your backend/API
-    // For now, simulate success for any code
-    const verificationSuccessful = true; // Simulation
-
-    if (verificationSuccessful) {
-      // Déterminer la redirection basée sur l'email de l'utilisateur (simulé)
-      let redirectPath = "/dashboard/patient"; // Rôle par défaut
-      if (userEmail) {
-        if (userEmail === "doctor@example.com") {
-          redirectPath = "/dashboard/healthcare";
-        } else if (userEmail === "pharmacy@example.com") {
-          redirectPath = "/dashboard/pharmacy";
-        } else if (userEmail === "patient@example.com") {
-          redirectPath = "/dashboard/patient";
-        } else {
-            // Gérer d'autres emails si nécessaire, redirection par défaut si non reconnu
-             redirectPath = "/dashboard";
-        }
-      }
-
-      router.push(redirectPath);
-
-    } else {
-      setError("Code invalide. Veuillez réessayer.");
+    try {
+      await authApi.verify2FA(session.user.id, code);
+      router.push("/dashboard/patient");
+    } catch (error: any) {
+      setError(error.response?.data?.message || "Code invalide. Veuillez réessayer.");
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
-
-  // Afficher un indicateur de chargement ou un message si l'email n'est pas encore chargé
-  if (!userEmail) {
-      return (
-        <div className="min-h-screen flex flex-col">
-          <main className="flex-1 flex items-center justify-center">
-              <LoadingSpinner />
-              <p className="ml-2">Chargement des informations de vérification...</p>
-          </main>
-        </div>
-      );
-  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -84,22 +82,34 @@ export default function Verify2FAClient() {
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center py-2">Vérification requise</CardTitle>
-            <CardDescription className="text-center">Un code de vérification a été envoyé à votre numéro de téléphone associé à {userEmail}. Veuillez le saisir ci-dessous.</CardDescription>
+            <CardDescription className="text-center">Un code de vérification a été envoyé à votre adresse email. Veuillez le saisir ci-dessous.</CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="2fa-code">Code de vérification</Label>
-                <Input
-                  id="2fa-code"
-                  name="2fa-code"
-                  type="text"
-                  placeholder="Entrez votre code"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  disabled={isLoading}
-                  className={error ? "border-red-500" : ""}
-                />
+                <div className="flex gap-2 justify-center">
+                  {codes.map((code, index) => (
+                    <Input
+                      key={index}
+                      ref={(el) => {
+                        inputRefs.current[index] = el;
+                      }}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={1}
+                      value={code}
+                      onChange={(e) => handleInputChange(index, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(index, e)}
+                      onPaste={handlePaste}
+                      disabled={isLoading}
+                      className={`w-12 h-12 text-center text-xl ${
+                        error ? "border-red-500" : ""
+                      }`}
+                    />
+                  ))}
+                </div>
                 {error && <p className="text-sm text-red-500">{error}</p>}
               </div>
             </CardContent>
