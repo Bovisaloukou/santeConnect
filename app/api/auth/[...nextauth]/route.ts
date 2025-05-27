@@ -7,7 +7,7 @@ import { authApi } from "@/lib/apiClient";
 
 // RENOMMEZ CECI et ne l'exportez pas directement si ce n'est pas nécessaire ailleurs.
 // Si vous devez l'exporter, utilisez un autre nom comme `authOptions`.
-const authConfig: NextAuthConfig = { // <--- Changement ici (plus d'export direct en tant que 'config')
+const authConfig: NextAuthConfig = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -39,10 +39,16 @@ const authConfig: NextAuthConfig = { // <--- Changement ici (plus d'export direc
             
             const user = {
               id: data.user.id.toString(),
+              createdAt: data.user.createdAt,
               email: data.user.email,
               firstName: data.user.firstName,
               lastName: data.user.lastName,
               name: `${data.user.firstName} ${data.user.lastName}`.trim() || data.user.email,
+              gender: data.user.gender || "Non spécifié",
+              birthDate: data.user.birthDate || new Date().toISOString(),
+              contact: data.user.contact || "",
+              isEnabled: data.user.isEnabled || false,
+              is2FAEnabled: data.user.is2FAEnabled || false,
               accessToken: data.accessToken,
             };
 
@@ -66,29 +72,26 @@ const authConfig: NextAuthConfig = { // <--- Changement ici (plus d'export direc
     signIn: "/login",
   },
   callbacks: {
-    async jwt({ token, user, account }) { // account peut être utile ici
-      if (account && user) { // Souvent, le accessToken vient avec `account` lors de la connexion OAuth ou d'un retour `authorize`
-        // Pour le provider Credentials, l'accessToken est ajouté à l'objet `user` dans `authorize`
+    async jwt({ token, user, account }) {
+      if (account && user) {
         token.accessToken = (user as any).accessToken;
-        token.id = user.id; // Stockez l'ID utilisateur dans le token si besoin
-        // Ajoutez d'autres propriétés de l'utilisateur au token si nécessaire
-        // token.firstName = (user as any).firstName;
-        // token.lastName = (user as any).lastName;
+        token.id = user.id;
+        token.is2FAEnabled = (user as any).is2FAEnabled;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
         (session.user as any).accessToken = token.accessToken;
-        (session.user as any).id = token.id; // Exposez l'ID à la session
-        // (session.user as any).firstName = token.firstName;
-        // (session.user as any).lastName = token.lastName;
+        (session.user as any).id = token.id;
+        (session.user as any).is2FAEnabled = token.is2FAEnabled;
       }
       return session;
     },
   },
   secret: process.env.AUTH_SECRET,
-  session: { strategy: "jwt" }, // C'est une bonne pratique de le spécifier
+  session: { strategy: "jwt" },
+  useSecureCookies: process.env.NODE_ENV === "production",
 };
 
 // Initialisez NextAuth avec la configuration renommée

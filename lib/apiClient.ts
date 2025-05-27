@@ -39,6 +39,14 @@ export const authApi = {
     });
     return response.data;
   },
+  enable2FA: async (userId: string) => {
+    const response = await apiClient.post(`/api/auth/2fa/enable/${userId}`);
+    return response.data;
+  },
+  disable2FA: async (userId: string) => {
+    const response = await apiClient.post(`/api/auth/2fa/disable/${userId}`);
+    return response.data;
+  }
 };
 
 export default apiClient; 
