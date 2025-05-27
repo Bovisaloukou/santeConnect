@@ -82,14 +82,19 @@ export default function LoginPage() {
     if (result?.error) {
       let errorMessage = "Une erreur est survenue lors de la connexion.";
       
-      if (result.error.includes("Missing credentials")) {
+      // Vérifier le type d'erreur
+      if (!formData.email || !formData.password) {
         errorMessage = "Veuillez remplir tous les champs.";
-      } else if (result.error.includes("Réponse du serveur invalide")) {
-        errorMessage = "Erreur de réponse du serveur. Veuillez réessayer.";
-      } else if (result.error.includes("Identifiants invalides")) {
-        errorMessage = "Email ou mot de passe incorrect.";
-      } else if (result.error.includes("Erreur lors de la connexion")) {
-        errorMessage = "Impossible de se connecter au serveur. Veuillez réessayer plus tard.";
+      } else if (result.error === "CredentialsSignin") {
+        // Vérifier si c'est un compte non activé
+        const response = await fetch('/api/auth/session');
+        const session = await response.json();
+        
+        if (session?.user?.error === "ACCOUNT_NOT_ACTIVATED") {
+          errorMessage = "Votre compte n'est pas encore activé. Veuillez vérifier votre boîte mail pour activer votre compte.";
+        } else {
+          errorMessage = "Email ou mot de passe incorrect.";
+        }
       }
 
       setErrors(prev => ({ ...prev, general: errorMessage }));

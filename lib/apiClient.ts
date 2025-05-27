@@ -57,6 +57,22 @@ export const authApi = {
       throw error;
     }
   },
+  signup: async (userData: {
+    firstName: string;
+    lastName: string;
+    gender: string;
+    email: string;
+    password: string;
+    birthDate: string;
+    contact: string;
+  }) => {
+    try {
+      const response = await authAxios.post(API_CONFIG.ENDPOINTS.AUTH.SIGNUP, userData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
   forgotPassword: async (email: string) => {
     const response = await authAxios.post(API_CONFIG.ENDPOINTS.AUTH.FORGOT_PASSWORD, {
       email,
