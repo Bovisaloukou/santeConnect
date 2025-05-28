@@ -86,20 +86,30 @@ export const authConfig: NextAuthConfig = {
       }
       return true;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
       if (account && user) {
         token.accessToken = (user as any).accessToken;
         token.id = user.id;
+        token.name = (user as any).name;
+        token.isEnabled = (user as any).isEnabled;
         token.is2FAEnabled = (user as any).is2FAEnabled;
         token.is2FAVerified = (user as any).is2FAVerified;
         token.error = (user as any).error;
       }
+      
+      // Mise à jour du token si la session a été mise à jour
+      if (trigger === "update" && session) {
+        token.is2FAVerified = session.user.is2FAVerified;
+      }
+      
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
         (session.user as any).accessToken = token.accessToken;
         (session.user as any).id = token.id;
+        (session.user as any).name = token.name;
+        (session.user as any).isEnabled = token.isEnabled;
         (session.user as any).is2FAEnabled = token.is2FAEnabled;
         (session.user as any).is2FAVerified = token.is2FAVerified;
         (session.user as any).error = token.error;
