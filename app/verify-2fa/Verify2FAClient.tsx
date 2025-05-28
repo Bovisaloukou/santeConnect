@@ -80,18 +80,26 @@ export default function Verify2FAClient() {
     setIsLoading(true);
 
     try {
-      await authApi.verify2FA(session.user.id, code);
-      // Mettre à jour la session pour indiquer que la 2FA est vérifiée
-      await updateSession({
-        ...session,
-        user: {
-          ...session.user,
-          is2FAVerified: true
-        }
+      // Appeler le nouvel endpoint API
+      const response = await fetch("/api/auth/verify-2fa", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code }),
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Erreur lors de la vérification du code");
+      }
+
+      // Mettre à jour la session avec les données renvoyées par l'API
+      await updateSession(data.session);
       router.push("/dashboard/patient");
     } catch (error: any) {
-      setError(error.response?.data?.message || "Code invalide. Veuillez réessayer.");
+      setError(error.message || "Code invalide. Veuillez réessayer.");
     } finally {
       setIsLoading(false);
     }

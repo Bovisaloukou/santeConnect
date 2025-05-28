@@ -25,7 +25,18 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { data: session, status } = useSession()
   const user = session?.user ? {
-    ...session.user,
+    id: session.user.id || '',
+    createdAt: '',
+    name: session.user.name,
+    firstName: session.user.name?.split(' ')[0] || '',
+    lastName: session.user.name?.split(' ')[1] || '',
+    gender: 'Non spécifié',
+    email: session.user.email || '',
+    birthDate: '',
+    contact: '',
+    isEnabled: session.user.isEnabled,
+    is2FAEnabled: session.user.is2FAEnabled || false,
+    is2FAVerified: session.user.is2FAVerified || false,
     role: (session.user as any).role as UserRole
   } as User : null;
   const isLoading = status === "loading"

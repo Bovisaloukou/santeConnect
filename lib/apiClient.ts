@@ -2,6 +2,7 @@ import axios from 'axios';
 import { API_CONFIG } from './config';
 import { getSession } from 'next-auth/react';
 import { Session } from 'next-auth';
+import { auth } from '@/app/api/auth/[...nextauth]/route';
 
 interface ExtendedSession extends Omit<Session, 'user'> {
   user: Session['user'] & {
@@ -12,26 +13,26 @@ interface ExtendedSession extends Omit<Session, 'user'> {
   };
 }
 
+// Configuration de base pour les clients Axios
+const baseConfig = {
+  baseURL: API_CONFIG.BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
+};
+
 // Instance Axios pour l'authentification (sans intercepteur)
-const authAxios = axios.create({
-  baseURL: API_CONFIG.BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
-});
+const authAxios = axios.create(baseConfig);
 
-// Instance Axios pour les requêtes authentifiées
-const apiClient = axios.create({
-  baseURL: API_CONFIG.BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true,
-});
+// Instance Axios pour le navigateur
+const browserApiClient = axios.create(baseConfig);
 
-// Intercepteur pour ajouter le token d'autorisation
-apiClient.interceptors.request.use(async (config) => {
+// Instance Axios pour le serveur
+const serverApiClient = axios.create(baseConfig);
+
+// Intercepteur pour le client navigateur
+browserApiClient.interceptors.request.use(async (config) => {
   const session = await getSession() as ExtendedSession;
   if (session?.user?.accessToken) {
     config.headers.Authorization = `Bearer ${session.user.accessToken}`;
@@ -39,11 +40,27 @@ apiClient.interceptors.request.use(async (config) => {
   return config;
 });
 
-// Intercepteur pour gérer les erreurs
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => Promise.reject(error)
-);
+// Intercepteur pour le client serveur
+serverApiClient.interceptors.request.use(async (config) => {
+  const session = await auth() as ExtendedSession;
+  if (session?.user?.accessToken) {
+    config.headers.Authorization = `Bearer ${session.user.accessToken}`;
+  }
+  return config;
+});
+
+// Factory function pour obtenir le bon client selon le contexte
+export const getApiClient = () => {
+  if (typeof window === 'undefined') {
+    return serverApiClient;
+  }
+  return browserApiClient;
+};
+
+// Intercepteur pour gérer les erreurs (commun aux deux clients)
+const errorInterceptor = (error: any) => Promise.reject(error);
+browserApiClient.interceptors.response.use((response) => response, errorInterceptor);
+serverApiClient.interceptors.response.use((response) => response, errorInterceptor);
 
 export const authApi = {
   login: async (email: string, password: string) => {
@@ -88,19 +105,23 @@ export const authApi = {
     return response.data;
   },
   enable2FA: async (userId: string) => {
-    const response = await apiClient.post(`/api/auth/2fa/enable/${userId}`);
+    const client = getApiClient();
+    const response = await client.post(`/api/auth/2fa/enable/${userId}`);
     return response.data;
   },
   disable2FA: async (userId: string) => {
-    const response = await apiClient.post(`/api/auth/2fa/disable/${userId}`);
+    const client = getApiClient();
+    const response = await client.post(`/api/auth/2fa/disable/${userId}`);
     return response.data;
   },
   verify2FA: async (userId: string, otp: string) => {
-    const response = await apiClient.post(`/api/auth/2fa/verify/${userId}`, {
+    const client = getApiClient();
+    const response = await client.post(`/api/auth/2fa/verify/${userId}`, {
       otp
     });
     return response.data;
   }
 };
 
-export default apiClient; 
+// Exporter le client par défaut pour la compatibilité
+export default getApiClient(); 
