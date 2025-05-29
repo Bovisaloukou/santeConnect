@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,11 +13,31 @@ interface Message {
   role: "user" | "assistant";
 }
 
+// Hook personnalisé pour le défilement automatique
+function useChatScroll<T>(dep: T) {
+  const ref = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (ref.current) {
+      const viewport = ref.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (viewport) {
+        viewport.scrollTo({
+          top: viewport.scrollHeight,
+          behavior: "smooth"
+        });
+      }
+    }
+  }, [dep]);
+
+  return ref;
+}
+
 export function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [userId] = useState(() => uuidv4());
+  const scrollRef = useChatScroll(messages);
 
   useEffect(() => {
     const sendInitialMessage = async () => {
@@ -50,7 +70,7 @@ export function Chat() {
         
         const assistantMessage: Message = {
           id: uuidv4(),
-          content: data.output,
+          content: data.message,
           role: "assistant",
         };
 
@@ -105,10 +125,9 @@ export function Chat() {
       
       const assistantMessage: Message = {
         id: uuidv4(),
-        content: data.output,
+        content: data.message,
         role: "assistant",
       };
-
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("Erreur:", error);
@@ -125,7 +144,7 @@ export function Chat() {
 
   return (
     <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
         <div className="space-y-4">
           {messages.map((message) => (
             <div
