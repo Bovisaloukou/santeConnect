@@ -24,113 +24,91 @@ export function getNavigationItems(role: UserRole): NavigationItem[] {
   
   const topLinks = [
     {
-      href: `/dashboard/${defaultRole}`,
+      href: `/dashboard/${defaultRole}?role=${defaultRole}`,
       icon: <Home className="h-5 w-5" />,
       label: "Tableau de bord",
     },
     {
-      href: `/dashboard/${defaultRole}/profile`,
+      href: `/dashboard/${defaultRole}/profile?role=${defaultRole}`,
       icon: <User className="h-5 w-5" />,
       label: "Profil",
     },
   ]
 
   const settingsLink = {
-    href: `/dashboard/${defaultRole}/settings`,
+    href: `/dashboard/${defaultRole}/settings?role=${defaultRole}`,
     icon: <Settings className="h-5 w-5" />,
     label: "Paramètres",
   }
 
-  const roleSpecificLinks: Record<UserRole, NavigationItem[]> = {
+  const roleSpecificLinks: Partial<Record<UserRole, NavigationItem[]>> = {
     patient: [
       {
-        href: "/dashboard/patient/appointments",
+        href: `/dashboard/patient/appointments?role=${defaultRole}`,
         icon: <Calendar className="h-5 w-5" />,
         label: "Rendez-vous",
       },
       {
-        href: "/dashboard/patient/documents",
+        href: `/dashboard/patient/documents?role=${defaultRole}`,
         icon: <FileText className="h-5 w-5" />,
         label: "Documents",
       },
       {
-        href: "/dashboard/patient/messages",
+        href: `/dashboard/patient/messages?role=${defaultRole}`,
         icon: <MessageSquare className="h-5 w-5" />,
         label: "Messages",
       },
       {
-        href: "/dashboard/patient/pharmacies",
+        href: `/dashboard/patient/pharmacies?role=${defaultRole}`,
         icon: <ShoppingBag className="h-5 w-5" />,
         label: "Pharmacies",
       },
       {
-        href: "/dashboard/patient/complaints",
+        href: `/dashboard/patient/complaints?role=${defaultRole}`,
         icon: <FileQuestion className="h-5 w-5" />,
         label: "Réclamations",
       },
     ],
     healthcare: [
       {
-        href: "/dashboard/healthcare/patients",
+        href: `/dashboard/healthcare/patients?role=${defaultRole}`,
         icon: <Users className="h-5 w-5" />,
         label: "Patients",
       },
       {
-        href: "/dashboard/healthcare/appointments",
+        href: `/dashboard/healthcare/appointments?role=${defaultRole}`,
         icon: <Calendar className="h-5 w-5" />,
         label: "Rendez-vous",
       },
       {
-        href: "/dashboard/healthcare/prescriptions",
+        href: `/dashboard/healthcare/prescriptions?role=${defaultRole}`,
         icon: <FileText className="h-5 w-5" />,
         label: "Ordonnances",
       },
       {
-        href: "/dashboard/healthcare/messages",
+        href: `/dashboard/healthcare/messages?role=${defaultRole}`,
         icon: <MessageSquare className="h-5 w-5" />,
         label: "Messages",
       },
     ],
     pharmacy: [
       {
-        href: "/dashboard/pharmacy/products",
+        href: `/dashboard/pharmacy/products?role=${defaultRole}`,
         icon: <ShoppingBag className="h-5 w-5" />,
         label: "Produits",
       },
       {
-        href: "/dashboard/pharmacy/orders",
+        href: `/dashboard/pharmacy/orders?role=${defaultRole}`,
         icon: <FileText className="h-5 w-5" />,
         label: "Commandes",
       },
       {
-        href: "/dashboard/pharmacy/messages",
+        href: `/dashboard/pharmacy/messages?role=${defaultRole}`,
         icon: <MessageSquare className="h-5 w-5" />,
         label: "Messages",
       },
     ],
-    admin: [
-      {
-        href: "/dashboard/admin/users",
-        icon: <Users className="h-5 w-5" />,
-        label: "Utilisateurs",
-      },
-      {
-        href: "/dashboard/admin/healthcare",
-        icon: <Pill className="h-5 w-5" />,
-        label: "Professionnels",
-      },
-      {
-        href: "/dashboard/admin/pharmacies",
-        icon: <ShoppingBag className="h-5 w-5" />,
-        label: "Pharmacies",
-      },
-      {
-        href: "/dashboard/admin/reports",
-        icon: <FileText className="h-5 w-5" />,
-        label: "Rapports",
-      },
-    ],
   }
 
-  return [...topLinks, ...(roleSpecificLinks[defaultRole] || roleSpecificLinks.patient), settingsLink]
+  return [...topLinks, ...(roleSpecificLinks[defaultRole] ?? roleSpecificLinks.patient ?? []), settingsLink]
 }

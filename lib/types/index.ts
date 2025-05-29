@@ -1,7 +1,7 @@
 // Types centralisés pour l'application
 
 // Types d'utilisateurs
-export type UserRole = "patient" | "healthcare" | "pharmacy" | "admin"
+export type UserRole = "patient" | "healthcare" | "pharmacy"
 
 export interface User {
   id: string
