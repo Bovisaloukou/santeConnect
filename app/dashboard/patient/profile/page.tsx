@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,8 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CalendarIcon, Eye, EyeOff, Camera, UserCircle2 } from "lucide-react"; // Ajout d'icônes utiles
+import { CalendarIcon, Eye, EyeOff, Camera, UserCircle2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -29,15 +28,19 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Import des composants Avatar
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSession } from "next-auth/react";
+import { userApi, UserProfile } from "@/lib/apiClient";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Interface (potentielle) pour les données du profil patient
+// Interface pour les données du profil patient
 interface PatientProfileData {
-  fullName: string;
+  firstName: string;
+  lastName: string;
   dateOfBirth: Date | undefined;
   gender: string;
   placeOfBirth?: string;
-  currentAddress: string;
+  currentAddress?: string;
   phone: string;
   email: string;
   profession?: string;
@@ -60,79 +63,143 @@ interface PatientProfileData {
   profileImageUrl?: string;
 }
 
-// Données fictives pour le profil
-const mockProfileData: PatientProfileData = {
-  fullName: "Alice Dubois",
-  dateOfBirth: new Date(1990, 5, 15), // Année, Mois (0-11), Jour
-  gender: "female",
-  placeOfBirth: "Lyon",
-  currentAddress: "45 Rue de la République, 69002 Lyon",
-  phone: "0611223344",
-  email: "alice.dubois@example.com",
-  profession: "Développeuse",
-  uniqueId: "123456789012345",
-  emergencyContactName: "Bob Dubois",
-  emergencyContactRelation: "Mari",
-  emergencyContactPhone: "0699887766",
-  treatingPhysician: "Dr. Sophie Martin",
-  insuranceInfo: "Assurance Maladie - N° XXXXXX",
-  chronicDiseases: "Aucune",
-  majorSurgeries: "Appendicectomie (2010)",
-  hospitalizations: "Aucune",
-  allergies: "Pénicilline",
-  bloodType: "A+",
-  familyMedicalHistory: "Antécédents de diabète type 2 côté maternel.",
-  profileImageUrl: "/placeholder-avatar.png", // Utilisez une image placeholder si vous en avez une
-};
-
 export default function PatientProfilePage() {
-  const [profileData, setProfileData] =
-    useState<PatientProfileData>(mockProfileData);
+  const { data: session } = useSession();
+  const [profileData, setProfileData] = useState<PatientProfileData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
-  const [showPassword, setShowPassword] = useState(false); // Pour un potentiel champ de mot de passe (non requis par le prompt, mais utile si on l'ajoute)
-  const fileInputRef = useRef<HTMLInputElement>(null); // Créer une référence pour l'input de fichier caché
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (!session?.user?.id) return;
+      
+      try {
+        setIsLoading(true);
+        const userData = await userApi.getProfile(session.user.id);
+        
+        // Transformer les données de l'API en format PatientProfileData
+        const transformedData: PatientProfileData = {
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          dateOfBirth: new Date(userData.birthDate),
+          gender: userData.gender,
+          phone: userData.contact,
+          email: userData.email,
+          // Les autres champs restent vides car non fournis par l'API
+          placeOfBirth: "",
+          currentAddress: "",
+          profession: "",
+          uniqueId: "",
+          emergencyContactName: "",
+          emergencyContactRelation: "",
+          emergencyContactPhone: "",
+          treatingPhysician: "",
+          insuranceInfo: "",
+          chronicDiseases: "",
+          majorSurgeries: "",
+          hospitalizations: "",
+          allergies: "",
+          bloodType: "",
+          familyMedicalHistory: "",
+          profileImageUrl: "",
+        };
+        
+        setProfileData(transformedData);
+      } catch (error) {
+        console.error("Erreur lors du chargement du profil:", error);
+        // TODO: Ajouter une notification d'erreur
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, [session?.user?.id]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
+    if (!profileData) return;
     const { name, value } = e.target;
-    setProfileData((prev) => ({ ...prev, [name]: value }));
+    setProfileData((prev) => prev ? ({ ...prev, [name]: value }) : null);
   };
 
   const handleSelectChange = (
     name: keyof PatientProfileData,
     value: string
   ) => {
-    setProfileData((prev) => ({ ...prev, [name]: value }));
+    if (!profileData) return;
+    setProfileData((prev) => prev ? ({ ...prev, [name]: value }) : null);
   };
 
   const handleDateChange = (date: Date | undefined) => {
-    setProfileData((prev) => ({ ...prev, dateOfBirth: date }));
+    if (!profileData) return;
+    setProfileData((prev) => prev ? ({ ...prev, dateOfBirth: date }) : null);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setProfileImageFile(e.target.files[0]);
-      // Optionnel: Afficher un aperçu de l'image si nécessaire
-      // const reader = new FileReader();
-      // reader.onload = (event) => { setProfileData(prev => ({...prev, profileImageUrl: event.target?.result as string})) };
-      // reader.readAsDataURL(e.target.files[0]);
     }
   };
 
   const handleSave = async () => {
+    if (!profileData || !session?.user?.id) return;
+    
     setIsSaving(true);
-    // TODO: Implémenter la logique de sauvegarde (appel API, etc.)
-    console.log("Sauvegarde des données du profil :", profileData);
-    if (profileImageFile) {
-      console.log("Fichier image de profil à uploader :", profileImageFile);
-      // TODO: Logique d'upload de l'image
+    try {
+      // Préparer les données pour l'API
+      const userData = {
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
+        gender: profileData.gender,
+        birthDate: profileData.dateOfBirth?.toISOString(),
+        contact: profileData.phone,
+        email: profileData.email,
+      };
+
+      // Appeler l'API pour mettre à jour le profil
+      await userApi.updateProfile(session.user.id, userData);
+
+      if (profileImageFile) {
+        console.log("Fichier image de profil à uploader :", profileImageFile);
+        // TODO: Implémenter l'upload de l'image
+      }
+      
+      // TODO: Ajouter une notification de succès
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde:", error);
+      // TODO: Ajouter une notification d'erreur
+    } finally {
+      setIsSaving(false);
     }
-    await new Promise((resolve) => setTimeout(resolve, 1500)); // Simuler une attente
-    setIsSaving(false);
-    alert("Profil sauvegardé (simulation)!"); // Remplacer par un Toast
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4">
+        <h1 className="text-2xl font-bold mb-6">Mon Profil</h1>
+        <div className="space-y-6">
+          <Skeleton className="h-[200px] w-full" />
+          <Skeleton className="h-[300px] w-full" />
+          <Skeleton className="h-[200px] w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!profileData) {
+    return (
+      <div className="container mx-auto px-4">
+        <h1 className="text-2xl font-bold mb-6">Mon Profil</h1>
+        <div className="text-center">
+          <p>Impossible de charger les données du profil.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4">
@@ -151,10 +218,8 @@ export default function PatientProfilePage() {
           <div className="flex items-center space-x-4">
             <Popover>
               <PopoverTrigger asChild>
-                {/* Rendre l'avatar cliquable */}
                 <div className="cursor-pointer">
                   <Avatar className="w-20 h-20">
-                    {/* Utilise l'image uploadée en priorité, sinon l'URL existante, sinon un fallback */}
                     <AvatarImage
                       src={
                         profileImageFile
@@ -164,12 +229,8 @@ export default function PatientProfilePage() {
                       alt="Avatar"
                     />
                     <AvatarFallback>
-                      {profileData.fullName ? (
-                        profileData.fullName
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .substring(0, 2)
+                      {profileData.firstName && profileData.lastName ? (
+                        profileData.firstName[0] + profileData.lastName[0]
                       ) : (
                         <UserCircle2 className="w-full h-full text-neutral-medium-gray" />
                       )}
@@ -179,7 +240,6 @@ export default function PatientProfilePage() {
               </PopoverTrigger>
               <PopoverContent className="w-auto p-4" side="right">
                 <div className="flex flex-col items-center space-y-4">
-                  {/* Afficher l'image actuelle dans la popover */}
                   <Avatar className="w-32 h-32">
                     <AvatarImage
                       src={
@@ -190,29 +250,23 @@ export default function PatientProfilePage() {
                       alt="Avatar preview"
                     />
                     <AvatarFallback>
-                      {profileData.fullName ? (
-                        profileData.fullName
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .substring(0, 2)
+                      {profileData.firstName && profileData.lastName ? (
+                        profileData.firstName[0] + profileData.lastName[0]
                       ) : (
                         <UserCircle2 className="w-full h-full text-neutral-medium-gray" />
                       )}
                     </AvatarFallback>
                   </Avatar>
-                  {/* Bouton pour déclencher l'input de fichier caché */}
                   <Button onClick={() => fileInputRef.current?.click()}>
                     Modifier l'image
                   </Button>
-                  {/* Input de fichier caché */}
                   <Input
                     id="profile-image"
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
-                    ref={fileInputRef} // Associer la référence
-                    className="hidden" // Cacher l'input
+                    ref={fileInputRef}
+                    className="hidden"
                   />
                 </div>
               </PopoverContent>
@@ -221,11 +275,20 @@ export default function PatientProfilePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName">Nom complet</Label>
+              <Label htmlFor="firstName">Prénom</Label>
               <Input
-                id="fullName"
-                name="fullName"
-                value={profileData.fullName}
+                id="firstName"
+                name="firstName"
+                value={profileData.firstName}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Nom</Label>
+              <Input
+                id="lastName"
+                name="lastName"
+                value={profileData.lastName}
                 onChange={handleInputChange}
               />
             </div>
@@ -276,24 +339,6 @@ export default function PatientProfilePage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="placeOfBirth">Lieu de naissance</Label>
-              <Input
-                id="placeOfBirth"
-                name="placeOfBirth"
-                value={profileData.placeOfBirth}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="currentAddress">Adresse actuelle</Label>
-              <Input
-                id="currentAddress"
-                name="currentAddress"
-                value={profileData.currentAddress}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="phone">Numéro de téléphone</Label>
               <Input
                 id="phone"
@@ -312,16 +357,6 @@ export default function PatientProfilePage() {
                 value={profileData.email}
                 onChange={handleInputChange}
                 disabled
-              />{" "}
-              {/* Email souvent non modifiable */}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="profession">Profession</Label>
-              <Input
-                id="profession"
-                name="profession"
-                value={profileData.profession}
-                onChange={handleInputChange}
               />
             </div>
           </div>
@@ -499,8 +534,7 @@ export default function PatientProfilePage() {
               name="familyMedicalHistory"
               value={profileData.familyMedicalHistory}
               onChange={handleInputChange}
-            />{" "}
-            {/* Peut-être un textarea pour plus d'espace */}
+            />
           </div>
         </CardContent>
       </Card>

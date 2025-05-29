@@ -123,5 +123,32 @@ export const authApi = {
   }
 };
 
+// Interface pour les données du profil utilisateur
+export interface UserProfile {
+  uuid: string;
+  createdAt: string;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  email: string;
+  birthDate: string;
+  contact: string;
+  isEnabled: boolean;
+  is2FAEnabled: boolean;
+}
+
+export const userApi = {
+  getProfile: async (userId: string) => {
+    const client = getApiClient();
+    const response = await client.get(`/api/users/${userId}`);
+    return response.data as UserProfile;
+  },
+  updateProfile: async (userId: string, profileData: Partial<UserProfile>) => {
+    const client = getApiClient();
+    const response = await client.patch(`/api/users/${userId}`, profileData);
+    return response.data;
+  }
+};
+
 // Exporter le client par défaut pour la compatibilité
 export default getApiClient(); 
