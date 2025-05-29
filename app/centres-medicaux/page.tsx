@@ -2,6 +2,7 @@ import { Hospital, Stethoscope, HomeIcon, Phone, MapPin, Clock } from "lucide-re
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import Link from "next/link"
+import React from "react"
 
 export interface MedicalCenter {
   id: string
@@ -126,7 +127,7 @@ export default function CentresMedicauxPage() {
 
                 <div className="space-y-2.5 text-sm text-neutral-dark-gray/90 flex-grow">
                   <div className="flex items-center space-x-2">
-                    <center.icon className="w-4 h-4 text-primary-blue flex-shrink-0" />
+                    {React.createElement(center.icon, { className: "w-4 h-4 text-primary-blue flex-shrink-0" })}
                     <span>{center.type}</span>
                   </div>
                   <div className="flex items-center space-x-2">
