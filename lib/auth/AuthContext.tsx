@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     email: session.user.email || '',
     birthDate: '',
     contact: '',
-    isEnabled: session.user.isEnabled,
+    isEnabled: (session.user as any).isEnabled || false,
     is2FAEnabled: session.user.is2FAEnabled || false,
     is2FAVerified: session.user.is2FAVerified || false,
     role: (session.user as any).role as UserRole

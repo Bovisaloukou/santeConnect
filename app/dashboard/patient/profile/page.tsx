@@ -32,6 +32,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
 import { userApi, UserProfile } from "@/lib/apiClient";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast"
 
 // Interface pour les données du profil patient
 interface PatientProfileData {
@@ -70,6 +71,7 @@ export default function PatientProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast()
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -109,14 +111,18 @@ export default function PatientProfilePage() {
         setProfileData(transformedData);
       } catch (error) {
         console.error("Erreur lors du chargement du profil:", error);
-        // TODO: Ajouter une notification d'erreur
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de charger les données du profil. Veuillez réessayer.",
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchProfileData();
-  }, [session?.user?.id]);
+  }, [session?.user?.id, toast]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -168,10 +174,17 @@ export default function PatientProfilePage() {
         // TODO: Implémenter l'upload de l'image
       }
       
-      // TODO: Ajouter une notification de succès
+      toast({
+        title: "Succès",
+        description: "Votre profil a été mis à jour avec succès.",
+      });
     } catch (error) {
       console.error("Erreur lors de la sauvegarde:", error);
-      // TODO: Ajouter une notification d'erreur
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la sauvegarde. Veuillez réessayer.",
+      });
     } finally {
       setIsSaving(false);
     }

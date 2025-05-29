@@ -39,11 +39,7 @@ export default function DashboardNavbar() {
           </SheetContent>
         </Sheet>
         <h1 className="text-xl font-semibold ml-2">
-          {user.role === "patient"
-            ? "Espace Patient"
-            : user.role === "healthcare"
-              ? "Espace Professionnel de Santé"
-              : "Espace Pharmacie"}
+          Espace Patient
         </h1>
       </div>
       <div className="flex items-center space-x-4">
@@ -55,19 +51,19 @@ export default function DashboardNavbar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center space-x-2 p-1">
               <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-semibold">
-                {user.name.charAt(0)}
+                {user.firstName.charAt(0)}
               </div>
-              <span className="text-sm font-medium hidden md:inline-block">{user.name}</span>
+              <span className="text-sm font-medium hidden md:inline-block pr-2">{user.firstName} {user.lastName}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/dashboard/${user.role}/profile`}>Profil</Link>
+              <Link href="/dashboard/patient/profile">Profil</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href={`/dashboard/${user.role}/settings`}>Paramètres</Link>
+              <Link href="/dashboard/patient/settings">Paramètres</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => logout()} className="text-red-500 focus:text-red-500 cursor-pointer">
