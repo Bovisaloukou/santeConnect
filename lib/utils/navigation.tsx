@@ -9,106 +9,100 @@ import {
   Users,
   ShoppingBag,
   FileQuestion,
+  Building2,
+  ChevronDown,
+  List,
+  Plus,
 } from "lucide-react"
 import type { ReactNode } from "react"
-import type { UserRole } from "../types"
 
 interface NavigationItem {
   href: string
   icon: ReactNode
   label: string
+  subItems?: NavigationItem[]
 }
 
-export function getNavigationItems(role: UserRole): NavigationItem[] {
-  const defaultRole = role || 'patient'
-  
-  const topLinks = [
+export function getNavigationItems(): NavigationItem[] {
+  return [
     {
-      href: `/dashboard/${defaultRole}?role=${defaultRole}`,
+      href: "/dashboard/patient",
       icon: <Home className="h-5 w-5" />,
       label: "Tableau de bord",
     },
     {
-      href: `/dashboard/${defaultRole}/profile?role=${defaultRole}`,
+      href: "/dashboard/patient/profile",
       icon: <User className="h-5 w-5" />,
       label: "Profil",
     },
+    {
+      href: "/dashboard/patient/appointments",
+      icon: <Calendar className="h-5 w-5" />,
+      label: "Rendez-vous",
+    },
+    {
+      href: "/dashboard/patient/documents",
+      icon: <FileText className="h-5 w-5" />,
+      label: "Documents",
+    },
+    {
+      href: "/dashboard/patient/messages",
+      icon: <MessageSquare className="h-5 w-5" />,
+      label: "Messages",
+    },
+    {
+      href: "/dashboard/patient/pharmacy/products",
+      icon: <ShoppingBag className="h-5 w-5" />,
+      label: "Pharmacies",
+      subItems: [
+        {
+          href: "/dashboard/patient/pharmacy/products",
+          icon: <List className="h-4 w-4" />,
+          label: "Liste des médicaments"
+        },
+        {
+          href: "/dashboard/patient/pharmacy/products/add",
+          icon: <Plus className="h-4 w-4" />,
+          label: "Ajouter un médicament"
+        }
+      ]
+    },
+    {
+      href: "/dashboard/patient/complaints",
+      icon: <FileQuestion className="h-5 w-5" />,
+      label: "Réclamations",
+    },
+    {
+      href: "/dashboard/patient/health-center",
+      icon: <Building2 className="h-5 w-5" />,
+      label: "Centre de Santé",
+      subItems: [
+        {
+          href: "/dashboard/patient/health-center",
+          icon: <Home className="h-4 w-4" />,
+          label: "Vue d'ensemble",
+        },
+        {
+          href: "/dashboard/patient/health-center/doctors",
+          icon: <User className="h-4 w-4" />,
+          label: "Médecins",
+        },
+        {
+          href: "/dashboard/patient/health-center/services",
+          icon: <FileText className="h-4 w-4" />,
+          label: "Services",
+        },
+        {
+          href: "/dashboard/patient/health-center/patients",
+          icon: <Users className="h-4 w-4" />,
+          label: "Patients",
+        },
+      ],
+    },
+    {
+      href: "/dashboard/patient/settings",
+      icon: <Settings className="h-5 w-5" />,
+      label: "Paramètres",
+    },
   ]
-
-  const settingsLink = {
-    href: `/dashboard/${defaultRole}/settings?role=${defaultRole}`,
-    icon: <Settings className="h-5 w-5" />,
-    label: "Paramètres",
-  }
-
-  const roleSpecificLinks: Partial<Record<UserRole, NavigationItem[]>> = {
-    patient: [
-      {
-        href: `/dashboard/patient/appointments?role=${defaultRole}`,
-        icon: <Calendar className="h-5 w-5" />,
-        label: "Rendez-vous",
-      },
-      {
-        href: `/dashboard/patient/documents?role=${defaultRole}`,
-        icon: <FileText className="h-5 w-5" />,
-        label: "Documents",
-      },
-      {
-        href: `/dashboard/patient/messages?role=${defaultRole}`,
-        icon: <MessageSquare className="h-5 w-5" />,
-        label: "Messages",
-      },
-      {
-        href: `/dashboard/patient/pharmacies?role=${defaultRole}`,
-        icon: <ShoppingBag className="h-5 w-5" />,
-        label: "Pharmacies",
-      },
-      {
-        href: `/dashboard/patient/complaints?role=${defaultRole}`,
-        icon: <FileQuestion className="h-5 w-5" />,
-        label: "Réclamations",
-      },
-    ],
-    healthcare: [
-      {
-        href: `/dashboard/healthcare/patients?role=${defaultRole}`,
-        icon: <Users className="h-5 w-5" />,
-        label: "Patients",
-      },
-      {
-        href: `/dashboard/healthcare/appointments?role=${defaultRole}`,
-        icon: <Calendar className="h-5 w-5" />,
-        label: "Rendez-vous",
-      },
-      {
-        href: `/dashboard/healthcare/prescriptions?role=${defaultRole}`,
-        icon: <FileText className="h-5 w-5" />,
-        label: "Ordonnances",
-      },
-      {
-        href: `/dashboard/healthcare/messages?role=${defaultRole}`,
-        icon: <MessageSquare className="h-5 w-5" />,
-        label: "Messages",
-      },
-    ],
-    pharmacy: [
-      {
-        href: `/dashboard/pharmacy/products?role=${defaultRole}`,
-        icon: <ShoppingBag className="h-5 w-5" />,
-        label: "Produits",
-      },
-      {
-        href: `/dashboard/pharmacy/orders?role=${defaultRole}`,
-        icon: <FileText className="h-5 w-5" />,
-        label: "Commandes",
-      },
-      {
-        href: `/dashboard/pharmacy/messages?role=${defaultRole}`,
-        icon: <MessageSquare className="h-5 w-5" />,
-        label: "Messages",
-      },
-    ],
-  }
-
-  return [...topLinks, ...(roleSpecificLinks[defaultRole] ?? roleSpecificLinks.patient ?? []), settingsLink]
 }

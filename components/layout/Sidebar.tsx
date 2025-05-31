@@ -1,12 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname, useSearchParams } from "next/navigation"
-import { LogOut, Pill } from "lucide-react"
+import { usePathname } from "next/navigation"
+import { LogOut, Pill, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth/AuthContext"
 import { getNavigationItems } from "@/lib/utils/navigation"
-import type { UserRole } from "@/lib/types"
+import { useState } from "react"
+import { cn } from "@/lib/utils"
 
 interface SidebarProps {
   forMobile?: boolean
@@ -15,24 +16,19 @@ interface SidebarProps {
 
 export function Sidebar({ forMobile = false, onClose }: SidebarProps) {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
   const { user, logout } = useAuth()
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({})
 
   if (!user) return null
 
-  if (!('role' in user)) {
-    console.error('User object does not have a role property')
-    return null
+  const toggleSubMenu = (label: string) => {
+    setExpandedMenus(prev => ({
+      ...prev,
+      [label]: !prev[label]
+    }))
   }
 
-  // Récupérer le rôle depuis l'URL ou utiliser patient par défaut
-  const role = searchParams.get('role') || 'patient'
-  
-  // Vérifier que le rôle est valide
-  const validRoles = ['patient', 'healthcare', 'pharmacy']
-  const currentRole = validRoles.includes(role) ? role : 'patient'
-
-  const navLinks = getNavigationItems(currentRole as UserRole)
+  const navLinks = getNavigationItems()
 
   return (
     <aside className="flex flex-col h-full bg-white border-r">
@@ -44,17 +40,52 @@ export function Sidebar({ forMobile = false, onClose }: SidebarProps) {
       </div>
       <nav className="flex-1 p-4 space-y-1 overflow-auto">
         {navLinks.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={`flex items-center space-x-2 px-3 py-2 rounded-md ${
-              pathname === link.href.split('?')[0] ? "bg-primary/10 text-primary" : "text-gray-700 hover:bg-gray-100"
-            }`}
-            onClick={forMobile ? onClose : undefined}
-          >
-            {link.icon}
-            <span>{link.label}</span>
-          </Link>
+          <div key={link.href}>
+            <div
+              className={cn(
+                "flex items-center justify-between px-3 py-2 rounded-md cursor-pointer",
+                pathname === link.href.split('?')[0] ? "bg-primary/10 text-primary" : "text-gray-700 hover:bg-gray-100"
+              )}
+              onClick={() => link.subItems && toggleSubMenu(link.label)}
+            >
+              <Link
+                href={link.href}
+                className="flex items-center space-x-2 flex-1"
+                onClick={forMobile ? onClose : undefined}
+              >
+                {link.icon}
+                <span>{link.label}</span>
+              </Link>
+              {link.subItems && (
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4 transition-transform",
+                    expandedMenus[link.label] ? "transform rotate-180" : ""
+                  )}
+                />
+              )}
+            </div>
+            {link.subItems && expandedMenus[link.label] && (
+              <div className="ml-6 mt-1 space-y-1">
+                {link.subItems.map((subItem) => (
+                  <Link
+                    key={subItem.href}
+                    href={subItem.href}
+                    className={cn(
+                      "flex items-center space-x-2 px-3 py-2 rounded-md text-sm",
+                      pathname === subItem.href.split('?')[0]
+                        ? "bg-primary/10 text-primary"
+                        : "text-gray-600 hover:bg-gray-100"
+                    )}
+                    onClick={forMobile ? onClose : undefined}
+                  >
+                    {subItem.icon}
+                    <span>{subItem.label}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         ))}
       </nav>
       <div className="p-4 border-t">
