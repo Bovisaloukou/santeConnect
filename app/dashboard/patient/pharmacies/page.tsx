@@ -160,7 +160,7 @@ export default function PatientPharmaciesPage() {
   }
 
   const calculateTotal = () => {
-    return cart.reduce((total, item) => total + item.product.price * item.quantity, 0).toFixed(2)
+    return cart.reduce((total, item) => total + item.product.price * item.quantity, 0).toFixed(0)
   }
 
   const filteredPharmacies = pharmacies.filter(
@@ -252,7 +252,7 @@ export default function PatientPharmaciesPage() {
                       <CardContent>
                         {product.description && <p className="mb-2">{product.description}</p>}
                         <div className="flex justify-between items-center">
-                          <span className="font-semibold">{product.price.toFixed(2)} €</span>
+                          <span className="font-semibold">{product.price.toFixed(0)} FCFA</span>
                           <span className={product.inStock ? "text-emerald-600" : "text-red-500"}>
                             {product.inStock ? "En stock" : "Rupture de stock"}
                           </span>
@@ -322,7 +322,7 @@ export default function PatientPharmaciesPage() {
                     <div key={item.product.id} className="flex justify-between items-center border-b pb-2">
                       <div>
                         <p className="font-medium">{item.product.name}</p>
-                        <p className="text-sm text-gray-500">{item.product.price.toFixed(2)} € / unité</p>
+                        <p className="text-sm text-gray-500">{item.product.price.toFixed(0)} FCFA / unité</p>
                       </div>
                       <div className="flex items-center">
                         <Button
@@ -347,7 +347,7 @@ export default function PatientPharmaciesPage() {
                   ))}
                   <div className="flex justify-between items-center font-semibold pt-2">
                     <span>Total</span>
-                    <span>{calculateTotal()} €</span>
+                    <span>{calculateTotal()} FCFA</span>
                   </div>
                 </div>
               )}

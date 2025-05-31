@@ -157,25 +157,50 @@ export default function MedicalCenterDetailPage() {
               <h2 className="text-2xl font-semibold text-neutral-dark-gray mb-4">Services Proposés</h2>
               <div className="grid grid-cols-1 gap-4">
                 {center.services.map((service: { name: string; description?: string }, index: number) => (
-                  <div key={index} className="bg-neutral-light-gray p-4 rounded-md border border-neutral-medium-gray/20 flex justify-between items-center">
-                    <div>
+                  <div key={index} className="bg-neutral-light-gray p-4 rounded-md border border-neutral-medium-gray/20 flex items-center justify-between">
+                    <div className="flex-1">
                       <span className="text-neutral-dark-gray font-medium">{service.name}</span>
                       {service.description && (
                         <p className="text-sm text-neutral-dark-gray/70 mt-1">{service.description}</p>
                       )}
                     </div>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        if (user) {
-                          router.push("/chatbot");
-                        } else {
-                          router.push("/login");
-                        }
-                      }}
-                    >
-                      Prendre rendez-vous
-                    </Button>
+                    <div className="flex gap-2 ml-4">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          if (user) {
+                            router.push("/chatbot");
+                          } else {
+                            router.push("/login");
+                          }
+                        }}
+                      >
+                        Prendre rendez-vous
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          router.push(`/centres-medicaux/${center.id}/services/${index}`);
+                        }}
+                      >
+                        Voir les détails
+                      </Button>
+                      <div className="relative group">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            router.push("/register/professional");
+                          }}
+                        >
+                          S'affilier au centre
+                        </Button>
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-neutral-dark-gray text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-64 text-center">
+                          Pour les médecins qui souhaitent s'affilier à ce service dans ce centre
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -39,7 +39,7 @@ export const medicaments: Medicament[] = [
     id: "1",
     nom: "Paracétamol 500mg",
     description: "Antidouleur et antipyrétique",
-    prix: 2.50,
+    prix: 150,
     image: "/medicaments/paracetamol.jpg",
     necessiteOrdonnance: false,
     stock: 100,
@@ -50,7 +50,7 @@ export const medicaments: Medicament[] = [
     id: "2",
     nom: "Ibuprofène 400mg",
     description: "Anti-inflammatoire non stéroïdien",
-    prix: 3.20,
+    prix: 250,
     image: "/medicaments/ibuprofene.jpg",
     necessiteOrdonnance: false,
     stock: 75,
@@ -61,7 +61,7 @@ export const medicaments: Medicament[] = [
     id: "3",
     nom: "Amoxicilline 500mg",
     description: "Antibiotique à large spectre",
-    prix: 5.80,
+    prix: 3500,
     image: "/medicaments/amoxicilline.jpg",
     necessiteOrdonnance: true,
     stock: 50,
@@ -72,7 +72,7 @@ export const medicaments: Medicament[] = [
     id: "4",
     nom: "Doliprane 1000mg",
     description: "Antidouleur et antipyrétique à forte dose",
-    prix: 3.90,
+    prix: 300,
     image: "/medicaments/doliprane.jpg",
     necessiteOrdonnance: false,
     stock: 120,
@@ -83,7 +83,7 @@ export const medicaments: Medicament[] = [
     id: "5",
     nom: "Spasfon",
     description: "Antispasmodique",
-    prix: 4.20,
+    prix: 450,
     image: "/medicaments/spasfon.jpg",
     necessiteOrdonnance: false,
     stock: 85,
@@ -94,7 +94,7 @@ export const medicaments: Medicament[] = [
     id: "6",
     nom: "Ventoline",
     description: "Bronchodilatateur",
-    prix: 6.50,
+    prix: 8500,
     image: "/medicaments/ventoline.jpg",
     necessiteOrdonnance: true,
     stock: 45,
@@ -106,35 +106,81 @@ export const medicaments: Medicament[] = [
 export const pharmacies: Pharmacie[] = [
   {
     id: "1",
-    nom: "Pharmacie du Centre",
-    adresse: "15 rue de la Paix",
-    ville: "Paris",
-    codePostal: "75001",
-    telephone: "01 23 45 67 89",
-    email: "contact@pharmacieducentre.fr",
+    nom: "Pharmacie Camp Ghézo",
+    adresse: "08 BP 795 Cotonou",
+    ville: "Cotonou",
+    codePostal: "08 BP 795",
+    telephone: "21 31 35 35",
+    email: "contact@pharmaciecampguezo.net",
     horaires: {
-      lundi: "09:00-19:00",
-      mardi: "09:00-19:00",
-      mercredi: "09:00-19:00",
-      jeudi: "09:00-19:00",
-      vendredi: "09:00-19:00",
-      samedi: "09:00-12:00",
-      dimanche: "Fermé"
+      lundi: "24h/24",
+      mardi: "24h/24",
+      mercredi: "24h/24",
+      jeudi: "24h/24",
+      vendredi: "24h/24",
+      samedi: "24h/24",
+      dimanche: "24h/24"
     },
-    services: ["Livraison", "Garde", "Conseil pharmaceutique"],
+    services: ["Allopathie", "Cosmétique", "Génériques", "Homéopathie", "Hygiène", "Produits vétérinaires", "Zone assurance", "Zone bébé", "Zone cosmétique", "Zone orthopédique"],
     position: {
-      lat: 48.8566,
-      lng: 2.3522
+      lat: 6.3667,
+      lng: 2.4333
     }
   },
   {
     id: "2",
-    nom: "Pharmacie de la Gare",
-    adresse: "25 avenue de la République",
-    ville: "Paris",
-    codePostal: "75011",
-    telephone: "01 98 76 54 32",
-    email: "contact@pharmaciedelagare.fr",
+    nom: "Pharmacie La Béninoise",
+    adresse: "Cotonou",
+    ville: "Cotonou",
+    codePostal: "BP 40",
+    telephone: "60 50 29 56",
+    email: "pharmacielabeninoise40@gmail.com",
+    horaires: {
+      lundi: "08:00-20:00",
+      mardi: "08:00-20:00",
+      mercredi: "08:00-20:00",
+      jeudi: "08:00-20:00",
+      vendredi: "08:00-20:00",
+      samedi: "08:00-20:00",
+      dimanche: "09:00-13:00"
+    },
+    services: ["Livraison", "Conseil pharmaceutique", "Vaccination"],
+    position: {
+      lat: 6.3667,
+      lng: 2.4333
+    }
+  },
+  {
+    id: "3",
+    nom: "Pharmacie de la Paix",
+    adresse: "BP 8065 Cotonou",
+    ville: "Cotonou",
+    codePostal: "BP 8065",
+    telephone: "21 33 11 44",
+    email: "contact@pharmaciedelapaix.bj",
+    horaires: {
+      lundi: "08:00-20:00",
+      mardi: "08:00-20:00",
+      mercredi: "08:00-20:00",
+      jeudi: "08:00-20:00",
+      vendredi: "08:00-20:00",
+      samedi: "08:00-20:00",
+      dimanche: "09:00-13:00"
+    },
+    services: ["Livraison", "Garde", "Conseil pharmaceutique"],
+    position: {
+      lat: 6.3667,
+      lng: 2.4333
+    }
+  },
+  {
+    id: "4",
+    nom: "Pharmacie Adéchina",
+    adresse: "BP 2269 Cotonou",
+    ville: "Cotonou",
+    codePostal: "BP 2269",
+    telephone: "21 32 15 65",
+    email: "contact@pharmacieadechina.bj",
     horaires: {
       lundi: "08:00-20:00",
       mardi: "08:00-20:00",
@@ -146,54 +192,31 @@ export const pharmacies: Pharmacie[] = [
     },
     services: ["Livraison", "Garde", "Conseil pharmaceutique", "Vaccination"],
     position: {
-      lat: 48.8566,
-      lng: 2.3522
+      lat: 6.3667,
+      lng: 2.4333
     }
   },
   {
-    id: "3",
-    nom: "Pharmacie Saint-Michel",
-    adresse: "8 boulevard Saint-Michel",
-    ville: "Paris",
-    codePostal: "75005",
-    telephone: "01 43 54 65 76",
-    email: "contact@pharmaciesaintmichel.fr",
+    id: "5",
+    nom: "Pharmacie Agla",
+    adresse: "BP 7012 Cotonou",
+    ville: "Cotonou",
+    codePostal: "BP 7012",
+    telephone: "21 38 07 63",
+    email: "contact@pharmacieagla.bj",
     horaires: {
-      lundi: "08:30-20:00",
-      mardi: "08:30-20:00",
-      mercredi: "08:30-20:00",
-      jeudi: "08:30-20:00",
-      vendredi: "08:30-20:00",
-      samedi: "09:00-19:00",
-      dimanche: "Fermé"
+      lundi: "08:00-20:00",
+      mardi: "08:00-20:00",
+      mercredi: "08:00-20:00",
+      jeudi: "08:00-20:00",
+      vendredi: "08:00-20:00",
+      samedi: "08:00-20:00",
+      dimanche: "09:00-13:00"
     },
-    services: ["Livraison", "Garde", "Conseil pharmaceutique", "Vaccination", "Test COVID"],
+    services: ["Livraison", "Garde", "Conseil pharmaceutique", "Test COVID"],
     position: {
-      lat: 48.8534,
-      lng: 2.3488
-    }
-  },
-  {
-    id: "4",
-    nom: "Pharmacie des Batignolles",
-    adresse: "12 rue des Batignolles",
-    ville: "Paris",
-    codePostal: "75017",
-    telephone: "01 42 63 74 85",
-    email: "contact@pharmaciedesbatignolles.fr",
-    horaires: {
-      lundi: "09:00-19:30",
-      mardi: "09:00-19:30",
-      mercredi: "09:00-19:30",
-      jeudi: "09:00-19:30",
-      vendredi: "09:00-19:30",
-      samedi: "09:00-19:00",
-      dimanche: "Fermé"
-    },
-    services: ["Livraison", "Garde", "Conseil pharmaceutique", "Test COVID", "Médecine naturelle"],
-    position: {
-      lat: 48.8841,
-      lng: 2.3219
+      lat: 6.3667,
+      lng: 2.4333
     }
   }
 ]; 

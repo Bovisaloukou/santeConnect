@@ -4,14 +4,6 @@ import type { Session } from "next-auth";
 
 export default auth((req) => {
   const session = req.auth as Session;
-  console.log("Middleware - Session:", {
-    hasSession: !!session,
-    user: session?.user,
-    path: req.nextUrl.pathname,
-    is2FAEnabled: session?.user?.is2FAEnabled,
-    is2FAVerified: session?.user?.is2FAVerified
-  });
-
   const is2FAEnabled = session?.user?.is2FAEnabled;
   const is2FAVerified = session?.user?.is2FAVerified;
   const isAuthPage = req.nextUrl.pathname.startsWith("/login") || 
@@ -20,17 +12,14 @@ export default auth((req) => {
 
   // Si l'utilisateur n'est pas sur une page d'auth et a la 2FA activée mais non vérifiée
   if (!isAuthPage && is2FAEnabled && !is2FAVerified) {
-    console.log("Middleware - Redirection vers verify-2fa");
     return NextResponse.redirect(new URL("/verify-2fa", req.url));
   }
 
   // Si l'utilisateur est sur la page de vérification 2FA mais n'a pas besoin de 2FA
   if (req.nextUrl.pathname.startsWith("/verify-2fa") && !is2FAEnabled) {
-    console.log("Middleware - Redirection vers dashboard");
     return NextResponse.redirect(new URL("/dashboard/patient", req.url));
   }
 
-  console.log("Middleware - Continuer vers la page demandée");
   return NextResponse.next();
 });
 

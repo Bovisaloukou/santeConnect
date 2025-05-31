@@ -11,7 +11,7 @@ interface MedicamentListProps {
 
 export function MedicamentList({ medicament, pharmacies }: MedicamentListProps) {
   const pharmaciesWithMedicament = pharmacies.filter(pharma => 
-    pharma.medicaments.some(med => med.id === medicament.id)
+    medicament.pharmacies.includes(pharma.id)
   )
 
   return (
@@ -22,7 +22,7 @@ export function MedicamentList({ medicament, pharmacies }: MedicamentListProps) 
             <CardTitle className="text-xl mb-2">{medicament.nom}</CardTitle>
             <p className="text-sm text-muted-foreground mb-2">{medicament.description}</p>
             <div className="flex items-center gap-4">
-              <span className="text-lg font-bold">{medicament.prix.toFixed(2)} €</span>
+              <span className="text-lg font-bold">{medicament.prix.toFixed(0)} FCFA</span>
               <Badge variant={medicament.necessiteOrdonnance ? "destructive" : "default"}>
                 {medicament.necessiteOrdonnance ? "Ordonnance requise" : "Sans ordonnance"}
               </Badge>
