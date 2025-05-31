@@ -28,99 +28,48 @@ export default function MobileNav() {
 
   if (!user) return null
 
-  // Déterminer les liens de navigation en fonction du rôle
-  const getNavLinks = () => {
-    const baseLinks = [
-      {
-        href: `/dashboard/${user.role}`,
-        icon: <Home className="h-5 w-5" />,
-        label: "Tableau de bord",
-      },
-      {
-        href: `/dashboard/${user.role}/profile`,
-        icon: <User className="h-5 w-5" />,
-        label: "Profil",
-      },
-      {
-        href: `/dashboard/${user.role}/settings`,
-        icon: <Settings className="h-5 w-5" />,
-        label: "Paramètres",
-      },
-    ]
-
-    const roleSpecificLinks = {
-      patient: [
-        {
-          href: "/dashboard/patient/appointments",
-          icon: <Calendar className="h-5 w-5" />,
-          label: "Rendez-vous",
-        },
-        {
-          href: "/dashboard/patient/documents",
-          icon: <FileText className="h-5 w-5" />,
-          label: "Documents",
-        },
-        {
-          href: "/dashboard/patient/messages",
-          icon: <MessageSquare className="h-5 w-5" />,
-          label: "Messages",
-        },
-        {
-          href: "/dashboard/patient/pharmacies",
-          icon: <ShoppingBag className="h-5 w-5" />,
-          label: "Pharmacies",
-        },
-        {
-          href: "/dashboard/patient/complaints",
-          icon: <FileQuestion className="h-5 w-5" />,
-          label: "Réclamations",
-        },
-      ],
-      healthcare: [
-        {
-          href: "/dashboard/healthcare/patients",
-          icon: <Users className="h-5 w-5" />,
-          label: "Patients",
-        },
-        {
-          href: "/dashboard/healthcare/appointments",
-          icon: <Calendar className="h-5 w-5" />,
-          label: "Rendez-vous",
-        },
-        {
-          href: "/dashboard/healthcare/prescriptions",
-          icon: <FileText className="h-5 w-5" />,
-          label: "Ordonnances",
-        },
-        {
-          href: "/dashboard/healthcare/messages",
-          icon: <MessageSquare className="h-5 w-5" />,
-          label: "Messages",
-        },
-      ],
-      pharmacy: [
-        {
-          href: "/dashboard/pharmacy/products",
-          icon: <ShoppingBag className="h-5 w-5" />,
-          label: "Produits",
-        },
-        {
-          href: "/dashboard/pharmacy/orders",
-          icon: <FileText className="h-5 w-5" />,
-          label: "Commandes",
-        },
-        {
-          href: "/dashboard/pharmacy/messages",
-          icon: <MessageSquare className="h-5 w-5" />,
-          label: "Messages",
-        },
-      ],
-    }
-
-    return [...baseLinks, ...(roleSpecificLinks[user.role as keyof typeof roleSpecificLinks] || [])]
-  }
-
-  const navLinks = getNavLinks()
+  const navLinks = [
+    {
+      href: "/dashboard/patient",
+      icon: <Home className="h-5 w-5" />,
+      label: "Tableau de bord",
+    },
+    {
+      href: "/dashboard/patient/profile",
+      icon: <User className="h-5 w-5" />,
+      label: "Profil",
+    },
+    {
+      href: "/dashboard/patient/appointments",
+      icon: <Calendar className="h-5 w-5" />,
+      label: "Rendez-vous",
+    },
+    {
+      href: "/dashboard/patient/documents",
+      icon: <FileText className="h-5 w-5" />,
+      label: "Documents",
+    },
+    {
+      href: "/dashboard/patient/messages",
+      icon: <MessageSquare className="h-5 w-5" />,
+      label: "Messages",
+    },
+    {
+      href: "/dashboard/patient/pharmacies",
+      icon: <ShoppingBag className="h-5 w-5" />,
+      label: "Pharmacies",
+    },
+    {
+      href: "/dashboard/patient/complaints",
+      icon: <FileQuestion className="h-5 w-5" />,
+      label: "Réclamations",
+    },
+    {
+      href: "/dashboard/patient/settings",
+      icon: <Settings className="h-5 w-5" />,
+      label: "Paramètres",
+    },
+  ]
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

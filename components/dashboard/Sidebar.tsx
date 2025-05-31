@@ -16,107 +16,28 @@ import {
   Users,
   ShoppingBag,
   FileQuestion,
+  Building2,
+  ChevronDown,
 } from "lucide-react"
+import { useState } from "react"
+import { cn } from "@/lib/utils"
+import { getNavigationItems } from "@/lib/utils/navigation"
 
 export default function Sidebar() {
   const pathname = usePathname()
   const { user, logout } = useAuth()
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({})
 
   if (!user) return null
 
-  // Déterminer les liens de navigation en fonction du rôle
-  const getNavLinks = () => {
-    const baseLinks = [
-      {
-        href: `/dashboard/${user.role}`,
-        icon: <Home className="h-5 w-5" />,
-        label: "Tableau de bord",
-      },
-      {
-        href: `/dashboard/${user.role}/profile`,
-        icon: <User className="h-5 w-5" />,
-        label: "Profil",
-      },
-      {
-        href: `/dashboard/${user.role}/settings`,
-        icon: <Settings className="h-5 w-5" />,
-        label: "Paramètres",
-      },
-    ]
-
-    const roleSpecificLinks = {
-      patient: [
-        {
-          href: "/dashboard/patient/appointments",
-          icon: <Calendar className="h-5 w-5" />,
-          label: "Rendez-vous",
-        },
-        {
-          href: "/dashboard/patient/documents",
-          icon: <FileText className="h-5 w-5" />,
-          label: "Documents",
-        },
-        {
-          href: "/dashboard/patient/messages",
-          icon: <MessageSquare className="h-5 w-5" />,
-          label: "Messages",
-        },
-        {
-          href: "/dashboard/patient/pharmacies",
-          icon: <ShoppingBag className="h-5 w-5" />,
-          label: "Pharmacies",
-        },
-        {
-          href: "/dashboard/patient/complaints",
-          icon: <FileQuestion className="h-5 w-5" />,
-          label: "Réclamations",
-        },
-      ],
-      healthcare: [
-        {
-          href: "/dashboard/healthcare/patients",
-          icon: <Users className="h-5 w-5" />,
-          label: "Patients",
-        },
-        {
-          href: "/dashboard/healthcare/appointments",
-          icon: <Calendar className="h-5 w-5" />,
-          label: "Rendez-vous",
-        },
-        {
-          href: "/dashboard/healthcare/prescriptions",
-          icon: <FileText className="h-5 w-5" />,
-          label: "Ordonnances",
-        },
-        {
-          href: "/dashboard/healthcare/messages",
-          icon: <MessageSquare className="h-5 w-5" />,
-          label: "Messages",
-        },
-      ],
-      pharmacy: [
-        {
-          href: "/dashboard/pharmacy/products",
-          icon: <ShoppingBag className="h-5 w-5" />,
-          label: "Produits",
-        },
-        {
-          href: "/dashboard/pharmacy/orders",
-          icon: <FileText className="h-5 w-5" />,
-          label: "Commandes",
-        },
-        {
-          href: "/dashboard/pharmacy/messages",
-          icon: <MessageSquare className="h-5 w-5" />,
-          label: "Messages",
-        },
-      ],
-    }
-
-    return [...baseLinks, ...(roleSpecificLinks[user.role as keyof typeof roleSpecificLinks] || [])]
+  const toggleSubMenu = (label: string) => {
+    setExpandedMenus(prev => ({
+      ...prev,
+      [label]: !prev[label]
+    }))
   }
 
-  const navLinks = getNavLinks()
+  const navLinks = getNavigationItems()
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-white border-r">
@@ -128,16 +49,50 @@ export default function Sidebar() {
       </div>
       <nav className="flex-1 p-4 space-y-1">
         {navLinks.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={`flex items-center space-x-2 px-3 py-2 rounded-md ${
-              pathname === link.href ? "bg-emerald-50 text-emerald-600" : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            {link.icon}
-            <span>{link.label}</span>
-          </Link>
+          <div key={link.href}>
+            <div
+              className={cn(
+                "flex items-center justify-between px-3 py-2 rounded-md cursor-pointer",
+                pathname === link.href ? "bg-emerald-50 text-emerald-600" : "text-gray-700 hover:bg-gray-100"
+              )}
+              onClick={() => link.subItems && toggleSubMenu(link.label)}
+            >
+              <Link
+                href={link.href}
+                className="flex items-center space-x-2 flex-1"
+              >
+                {link.icon}
+                <span>{link.label}</span>
+              </Link>
+              {link.subItems && (
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4 transition-transform",
+                    expandedMenus[link.label] ? "transform rotate-180" : ""
+                  )}
+                />
+              )}
+            </div>
+            {link.subItems && expandedMenus[link.label] && (
+              <div className="ml-6 mt-1 space-y-1">
+                {link.subItems.map((subItem) => (
+                  <Link
+                    key={subItem.href}
+                    href={subItem.href}
+                    className={cn(
+                      "flex items-center space-x-2 px-3 py-2 rounded-md text-sm",
+                      pathname === subItem.href
+                        ? "bg-emerald-50 text-emerald-600"
+                        : "text-gray-600 hover:bg-gray-100"
+                    )}
+                  >
+                    {subItem.icon}
+                    <span>{subItem.label}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         ))}
       </nav>
       <div className="p-4 border-t">

@@ -7,7 +7,7 @@ import React from "react"
 export interface MedicalCenter {
   id: string
   name: string
-  type: "Hôpital" | "Clinique" | "Centre de santé"
+  type: "HOSPITAL" | "CLINIC" | "HEALTH_CENTER" | "DOCTOR_OFFICE"
   isOpen: boolean
   distance: number // en kilomètres
   address: string
@@ -17,11 +17,22 @@ export interface MedicalCenter {
   services: { name: string; description?: string }[]
 }
 
+// Fonction de mapping pour l'affichage des types en français
+const getTypeLabel = (type: MedicalCenter["type"]): string => {
+  const typeLabels: Record<MedicalCenter["type"], string> = {
+    HOSPITAL: "Hôpital",
+    CLINIC: "Clinique",
+    HEALTH_CENTER: "Centre de santé",
+    DOCTOR_OFFICE: "Cabinet médical"
+  }
+  return typeLabels[type]
+}
+
 export const mockMedicalCenters: MedicalCenter[] = [
   {
     id: "1",
     name: "Hôpital Central de la Ville",
-    type: "Hôpital",
+    type: "HOSPITAL",
     isOpen: true,
     distance: 1.2,
     address: "123 Rue de la Santé, 75001 Paris",
@@ -37,7 +48,7 @@ export const mockMedicalCenters: MedicalCenter[] = [
   {
     id: "2",
     name: "Clinique du Parc",
-    type: "Clinique",
+    type: "CLINIC",
     isOpen: false,
     distance: 2.5,
     address: "45 Avenue des Champs, 75008 Paris",
@@ -52,7 +63,7 @@ export const mockMedicalCenters: MedicalCenter[] = [
   {
     id: "3",
     name: "Centre de Santé Bien-Être",
-    type: "Centre de santé",
+    type: "HEALTH_CENTER",
     isOpen: true,
     distance: 0.8,
     address: "789 Boulevard Voltaire, 75011 Paris",
@@ -67,7 +78,7 @@ export const mockMedicalCenters: MedicalCenter[] = [
   {
     id: "4",
     name: "Hôpital Universitaire Grand Est",
-    type: "Hôpital",
+    type: "HOSPITAL",
     isOpen: true,
     distance: 5.1,
     address: "10 Rue de l'Hôpital, 67000 Strasbourg",
@@ -83,7 +94,7 @@ export const mockMedicalCenters: MedicalCenter[] = [
   {
     id: "5",
     name: "Clinique Sainte-Anne",
-    type: "Clinique",
+    type: "CLINIC",
     isOpen: false,
     distance: 3.0,
     address: "22 Allée de la Robertsau, 67000 Strasbourg",
@@ -128,7 +139,7 @@ export default function CentresMedicauxPage() {
                 <div className="space-y-2.5 text-sm text-neutral-dark-gray/90 flex-grow">
                   <div className="flex items-center space-x-2">
                     {React.createElement(center.icon, { className: "w-4 h-4 text-primary-blue flex-shrink-0" })}
-                    <span>{center.type}</span>
+                    <span>{getTypeLabel(center.type)}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <MapPin className="w-4 h-4 text-primary-blue flex-shrink-0" />

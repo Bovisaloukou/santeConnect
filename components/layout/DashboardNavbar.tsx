@@ -39,7 +39,7 @@ export default function DashboardNavbar() {
           </SheetContent>
         </Sheet>
         <h1 className="text-xl font-semibold ml-2">
-          Espace Patient
+          Espace
         </h1>
       </div>
       <div className="flex items-center space-x-4">
