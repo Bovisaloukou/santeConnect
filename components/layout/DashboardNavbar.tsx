@@ -66,7 +66,7 @@ export default function DashboardNavbar() {
               <Link href="/dashboard/patient/settings">Paramètres</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => logout()} className="text-red-500 focus:text-red-500 cursor-pointer">
+            <DropdownMenuItem onClick={() => logout()} className="text-red-500 hover:text-white focus:text-white cursor-pointer">
               Déconnexion
             </DropdownMenuItem>
           </DropdownMenuContent>

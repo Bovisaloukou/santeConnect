@@ -27,7 +27,7 @@ export const columns: ColumnDef<Medicament>[] = [
     header: "Prix",
     cell: ({ row }) => {
       const prix = row.getValue("prix") as number
-      return `${prix.toFixed(2)} €`
+      return `${prix.toFixed(0)} FCFA`
     },
   },
   {

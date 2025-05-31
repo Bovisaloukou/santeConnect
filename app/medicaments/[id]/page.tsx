@@ -45,7 +45,7 @@ export default function MedicamentPage({ params }: MedicamentPageProps) {
                 </Badge>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold text-primary">{medicament.prix.toFixed(2)} €</p>
+                <p className="text-2xl font-bold text-primary">{medicament.prix.toFixed(0)} FCFA</p>
                 <p className="text-sm text-muted-foreground">Stock disponible : {medicament.stock}</p>
               </div>
             </div>
@@ -53,14 +53,11 @@ export default function MedicamentPage({ params }: MedicamentPageProps) {
             <p className="text-lg mb-6">{medicament.description}</p>
 
             <div className="flex gap-4">
-              {medicament.necessiteOrdonnance ? (
+              <Link href="/pharmacies">
                 <Button variant="outline" size="lg">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Télécharger l'ordonnance
+                  Retour aux pharmacies
                 </Button>
-              ) : (
-                <Button size="lg">Ajouter au panier</Button>
-              )}
+              </Link>
             </div>
           </div>
 

@@ -23,25 +23,17 @@ export function MedicamentCard({ medicament }: MedicamentCardProps) {
       <CardContent>
         <p className="text-sm text-muted-foreground mb-4">{medicament.description}</p>
         <div className="flex justify-between items-center">
-          <span className="text-lg font-bold">{medicament.prix.toFixed(2)} €</span>
+          <span className="text-lg font-bold">{medicament.prix.toFixed(0)} FCFA</span>
           <span className="text-sm text-muted-foreground">Stock: {medicament.stock}</span>
         </div>
       </CardContent>
       <CardFooter className="flex gap-2">
-        <Link href={`/medicaments/${medicament.id}`} className="flex-1">
+        <Link href={`/medicaments/${medicament.id}`} className="w-full">
           <Button variant="outline" className="w-full">
             <Info className="w-4 h-4 mr-2" />
             Voir les détails
           </Button>
         </Link>
-        {medicament.necessiteOrdonnance ? (
-          <Button className="flex-1" variant="outline">
-            <Upload className="w-4 h-4 mr-2" />
-            Ordonnance
-          </Button>
-        ) : (
-          <Button className="flex-1">Ajouter au panier</Button>
-        )}
       </CardFooter>
     </Card>
   )
