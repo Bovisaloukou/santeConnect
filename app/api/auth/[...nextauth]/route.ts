@@ -2,8 +2,8 @@ import NextAuth from "next-auth";
 import type { NextAuthConfig } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import type { User } from "@/lib/types"; // Assurez-vous que ce chemin est correct
-import { authApi } from "@/lib/apiClient";
+import type { User } from "@/lib/types";
+import { authApi } from "@/lib/api/auth";
 
 // RENOMMEZ CECI et ne l'exportez pas directement si ce n'est pas nécessaire ailleurs.
 // Si vous devez l'exporter, utilisez un autre nom comme `authOptions`.

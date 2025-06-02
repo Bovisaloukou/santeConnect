@@ -13,6 +13,7 @@ import {
   ChevronDown,
   List,
   Plus,
+  Briefcase,
 } from "lucide-react"
 import type { ReactNode } from "react"
 
@@ -34,6 +35,11 @@ export function getNavigationItems(): NavigationItem[] {
       href: "/dashboard/patient/profile",
       icon: <User className="h-5 w-5" />,
       label: "Profil",
+    },
+    {
+      href: "/dashboard/patient/professional",
+      icon: <Briefcase className="h-5 w-5" />,
+      label: "Dossier Professionnel",
     },
     {
       href: "/dashboard/patient/appointments",

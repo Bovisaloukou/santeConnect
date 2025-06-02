@@ -3,7 +3,7 @@
 import { Switch } from "@/components/ui/switch"
 import { useSession } from "next-auth/react"
 import { useState } from "react"
-import { authApi } from "@/lib/apiClient"
+import { authApi } from "@/lib/api/auth"
 
 export default function PatientSettingsPage() {
   const { data: session } = useSession()
