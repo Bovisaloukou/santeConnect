@@ -30,7 +30,8 @@ import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
-import { userApi, UserProfile } from "@/lib/apiClient";
+import { userApi } from "@/lib/api/user";
+import { UserProfile } from "@/lib/api/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast"
 

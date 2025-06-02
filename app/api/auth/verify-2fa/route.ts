@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "../[...nextauth]/route";
-import { authApi } from "@/lib/apiClient";
+import { authApi } from "@/lib/api/auth";
 
 export async function POST(request: Request) {
   try {

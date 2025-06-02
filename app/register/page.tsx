@@ -20,7 +20,7 @@ import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton"
 import PhoneInput from 'react-phone-input-2'
 import type { CountryData } from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
-import { authApi } from "@/lib/apiClient"
+import { authApi } from "@/lib/api/auth"
 import {
   validateFirstName,
   validateLastName,

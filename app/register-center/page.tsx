@@ -22,6 +22,10 @@ import { useToast } from "@/components/ui/use-toast";
 
 // Import des données administratives du Bénin
 import { beninAdministrativeData, DepartementData } from '@/data/beninAdministrativeData';
+import { healthCenterApi } from '@/lib/api/healthCenter';
+import { HealthCenter } from '@/lib/api/types';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const medicalSpecialtiesList = [
   { value: "medecine-generale", label: "Médecine générale" },
@@ -50,6 +54,8 @@ const structureTypes = [
 const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 
 const RegisterCenterPage = () => {
+  const { data: session } = useSession();
+  const router = useRouter();
   const [centerPhone, setCenterPhone] = useState('');
   const [centerSelectedCountryData, setCenterSelectedCountryData] = useState<CountryData | null>(null);
   const [selectedSpecialties, setSelectedSpecialties] = useState<{ value: string; label: string }[]>([]);
@@ -70,6 +76,18 @@ const RegisterCenterPage = () => {
   const { toast } = useToast();
 
   const commandRef = useRef<HTMLDivElement>(null);
+
+  const [files, setFiles] = useState<File[]>([]);
+  const [formData, setFormData] = useState({
+    name: '',
+    type: '',
+    fullAddress: '',
+    department: '',
+    municipality: '',
+    email: '',
+    licenseNumber: '',
+    taxIdentificationNumber: '',
+  });
 
   useEffect(() => {
     // Default to Benin if needed
@@ -104,10 +122,13 @@ const RegisterCenterPage = () => {
   // --- Nouvelle logique pour filtrer les communes par département ---
   useEffect(() => {
     if (selectedDepartement) {
-      const departement = communesData.find(dep => dep.departement.toLowerCase().replace(/[^a-z0-9]/g, '') === selectedDepartement);
+      const departement = communesData.find(dep => 
+        dep.departement.toLowerCase().replace(/[^a-z0-9]/g, '') === selectedDepartement
+      );
+      
       if (departement) {
         const formattedCommunes = departement.communes.map(com => ({
-          value: com.toLowerCase().replace(/[^a-z0-9]/g, ''), // Crée une valeur simple
+          value: com.toLowerCase().replace(/[^a-z0-9]/g, ''),
           label: com
         }));
         setFilteredCommunes(formattedCommunes);
@@ -117,7 +138,7 @@ const RegisterCenterPage = () => {
     } else {
       setFilteredCommunes([]);
     }
-  }, [selectedDepartement, communesData]); // Dépend de selectedDepartement et des données brutes
+  }, [selectedDepartement, communesData]);
   // --- Fin de la nouvelle logique ---
 
   const handlePhoneChange = (value: string, data: CountryData) => {
@@ -141,29 +162,51 @@ const RegisterCenterPage = () => {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setFiles(prev => [...prev, file]);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Handle form submission logic here (e.g., send data to an API)
-    console.log('Form submitted', {
-      centerPhone,
-      selectedSpecialties,
-      openDays,
-      openingTime,
-      closingTime
-    });
+    try {
+      const healthCenterData: HealthCenter = {
+        ...formData,
+        type: formData.type,
+        phoneNumber: centerPhone,
+        userUuid: session?.user?.id || '',
+        services: selectedSpecialties.map(s => s.label)
+      };
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+      await healthCenterApi.register(healthCenterData, files);
 
-    setIsLoading(false);
+      toast({
+        title: "Inscription réussie",
+        description: "Votre centre de santé a été enregistré avec succès. Nous allons valider votre compte dans les plus brefs délais.",
+      });
 
-    // Show success message
-    toast({
-      title: "Informations reçues",
-      description: "Vos informations ont été bien reçues. Nous allons valider votre compte au plus tard dans 48h et vous faire un retour par mail.",
-    });
+      router.push('/dashboard');
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -177,13 +220,23 @@ const RegisterCenterPage = () => {
             <h2 className="text-xl font-semibold mb-4">1. Identification du centre</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="centerName">Nom du centre</Label>
-                <Input id="centerName" placeholder="Nom du centre" />
+                <Label htmlFor="name">Nom du centre</Label>
+                <Input 
+                  id="name" 
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Nom du centre" 
+                  required
+                />
               </div>
               <div>
-                <Label htmlFor="structureType">Type de structure</Label>
-                <Select>
-                  <SelectTrigger id="structureType">
+                <Label htmlFor="type">Type de structure</Label>
+                <Select 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
+                  value={formData.type}
+                >
+                  <SelectTrigger id="type">
                     <SelectValue placeholder="Sélectionner le type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -196,13 +249,26 @@ const RegisterCenterPage = () => {
                 </Select>
               </div>
               <div className="md:col-span-2">
-                <Label htmlFor="address">Adresse complète</Label>
-                <Input id="address" placeholder="Adresse complète" />
+                <Label htmlFor="fullAddress">Adresse complète</Label>
+                <Input 
+                  id="fullAddress" 
+                  name="fullAddress"
+                  value={formData.fullAddress}
+                  onChange={handleInputChange}
+                  placeholder="Adresse complète" 
+                  required
+                />
               </div>
               <div>
-                <Label htmlFor="departement">Département</Label>
-                <Select onValueChange={setSelectedDepartement} value={selectedDepartement || ""}>
-                  <SelectTrigger id="departement" disabled={isLoadingData}>
+                <Label htmlFor="department">Département</Label>
+                <Select 
+                  onValueChange={(value) => {
+                    setFormData(prev => ({ ...prev, department: value }));
+                    setSelectedDepartement(value);
+                  }}
+                  value={formData.department}
+                >
+                  <SelectTrigger id="department" disabled={isLoadingData}>
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
                   <SelectContent>
@@ -213,9 +279,13 @@ const RegisterCenterPage = () => {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="commune">Commune</Label>
-                <Select disabled={!selectedDepartement || isLoadingData}>
-                  <SelectTrigger id="commune">
+                <Label htmlFor="municipality">Commune</Label>
+                <Select 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, municipality: value }))}
+                  value={formData.municipality}
+                  disabled={!formData.department || isLoadingData}
+                >
+                  <SelectTrigger id="municipality">
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
                   <SelectContent>
@@ -226,14 +296,15 @@ const RegisterCenterPage = () => {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="centerPhone">Téléphone du centre</Label>
+                <Label htmlFor="phoneNumber">Téléphone du centre</Label>
                 <PhoneInput
                   country={'bj'}
                   value={centerPhone}
                   onChange={(value, data) => handlePhoneChange(value, data as CountryData)}
                   inputProps={{
                     required: true,
-                    id: 'centerPhone'
+                    id: 'phoneNumber',
+                    name: 'phoneNumber'
                   }}
                   containerClass="w-full"
                   inputClass="flex !h-10 !w-full rounded-md border !border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 !rounded-r-md"
@@ -244,7 +315,15 @@ const RegisterCenterPage = () => {
               </div>
               <div className="md:col-span-2">
                 <Label htmlFor="email">Adresse email du centre</Label>
-                <Input id="email" type="email" placeholder="Adresse email du centre" />
+                <Input 
+                  id="email" 
+                  name="email"
+                  type="email" 
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="Adresse email du centre" 
+                  required
+                />
               </div>
             </div>
           </div>
@@ -255,11 +334,25 @@ const RegisterCenterPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="licenseNumber">Numéro de licence d'exploitation</Label>
-                <Input id="licenseNumber" placeholder="Numéro de licence" />
+                <Input 
+                  id="licenseNumber" 
+                  name="licenseNumber"
+                  value={formData.licenseNumber}
+                  onChange={handleInputChange}
+                  placeholder="Numéro de licence" 
+                  required
+                />
               </div>
               <div>
                 <Label htmlFor="taxIdentificationNumber">Numéro d'Identification Fiscale (NIF)</Label>
-                <Input id="taxIdentificationNumber" placeholder="Numéro NIF" />
+                <Input 
+                  id="taxIdentificationNumber" 
+                  name="taxIdentificationNumber"
+                  value={formData.taxIdentificationNumber}
+                  onChange={handleInputChange}
+                  placeholder="Numéro NIF" 
+                  required
+                />
               </div>
             </div>
           </div>
@@ -323,19 +416,67 @@ const RegisterCenterPage = () => {
           {/* 4. Documents justificatifs */}
           <div className="p-6 border rounded-lg shadow-sm">
             <h2 className="text-xl font-semibold mb-4">4. Documents justificatifs obligatoires</h2>
-            <p className="text-sm text-gray-500 mb-4">Veuillez scanner ou prendre en photo les documents suivants :</p>
+            <p className="text-sm text-gray-500 mb-4">Veuillez scanner ou prendre en photo les documents suivants (format PDF ou image) :</p>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="openingAuthorization">Autorisation d'ouverture du centre</Label>
-                <Input id="openingAuthorization" type="file" />
+                <Label htmlFor="extraitRegistreDeCommerce">Extrait du registre de commerce</Label>
+                <Input 
+                  id="extraitRegistreDeCommerce" 
+                  type="file" 
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  required 
+                  className="cursor-pointer"
+                  onChange={(e) => handleFileChange(e, 'extraitRegistreDeCommerce')}
+                />
+                <p className="text-sm text-gray-500 mt-1">Document officiel attestant de l'enregistrement de votre entreprise</p>
               </div>
               <div>
-                <Label htmlFor="centerLogo">Logo du centre (Facultatif)</Label>
-                <Input id="centerLogo" type="file" />
+                <Label htmlFor="attestationImatriculation">Attestation d'immatriculation</Label>
+                <Input 
+                  id="attestationImatriculation" 
+                  type="file" 
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  required 
+                  className="cursor-pointer"
+                  onChange={(e) => handleFileChange(e, 'attestationImatriculation')}
+                />
+                <p className="text-sm text-gray-500 mt-1">Document attestant de l'immatriculation de votre établissement</p>
               </div>
               <div>
-                <Label htmlFor="centerPhotos">Photos du centre (Facultatif)</Label>
-                <Input id="centerPhotos" type="file" multiple />
+                <Label htmlFor="annonceLegale">Annonce légale</Label>
+                <Input 
+                  id="annonceLegale" 
+                  type="file" 
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  required 
+                  className="cursor-pointer"
+                  onChange={(e) => handleFileChange(e, 'annonceLegale')}
+                />
+                <p className="text-sm text-gray-500 mt-1">Publication légale de la création de votre établissement</p>
+              </div>
+              <div>
+                <Label htmlFor="declaration_etablissement_de_entreprise">Déclaration d'établissement d'entreprise</Label>
+                <Input 
+                  id="declaration_etablissement_de_entreprise" 
+                  type="file" 
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  required 
+                  className="cursor-pointer"
+                  onChange={(e) => handleFileChange(e, 'declaration_etablissement_de_entreprise')}
+                />
+                <p className="text-sm text-gray-500 mt-1">Document officiel de déclaration de votre établissement</p>
+              </div>
+              <div>
+                <Label htmlFor="carteProfessionnelle">Carte professionnelle</Label>
+                <Input 
+                  id="carteProfessionnelle" 
+                  type="file" 
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  required 
+                  className="cursor-pointer"
+                  onChange={(e) => handleFileChange(e, 'carteProfessionnelle')}
+                />
+                <p className="text-sm text-gray-500 mt-1">Carte professionnelle du responsable de l'établissement</p>
               </div>
             </div>
           </div>
