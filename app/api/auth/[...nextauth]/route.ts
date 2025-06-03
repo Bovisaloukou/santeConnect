@@ -57,7 +57,6 @@ export const authConfig: NextAuthConfig = {
               return null;
             }
 
-            console.log("Backend login successful, user:", user);
             return user as User;
           } catch (error: any) {
             console.error("Error calling backend login API:", error);
@@ -118,7 +117,10 @@ export const authConfig: NextAuthConfig = {
     },
   },
   secret: process.env.AUTH_SECRET,
-  session: { strategy: "jwt" },
+  session: { 
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60 // 24 heures en secondes
+  },
   useSecureCookies: process.env.NODE_ENV === "production",
 };
 

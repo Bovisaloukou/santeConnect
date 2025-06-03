@@ -59,11 +59,14 @@ export const authApi = {
     return response.data;
   },
 
-  verify2FA: async (userId: string, otp: string) => {
-    const client = getApiClient();
-    const response = await client.post(`/api/auth/2fa/verify/${userId}`, {
-      otp
-    });
-    return response.data;
+  verify2FA: async (userId: string, otp: string): Promise<boolean> => {
+    try {
+      const client = await getApiClient();
+      const response = await client.post(`/auth/verify-2fa`, { userId, otp });
+      return response.status === 200;
+    } catch (error) {
+      console.error("Erreur lors de la vérification 2FA:", error);
+      return false;
+    }
   }
 }; 

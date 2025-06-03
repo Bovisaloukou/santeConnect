@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarIcon, Eye, EyeOff, Camera, UserCircle2 } from "lucide-react";
+import { CalendarIcon, UserCircle2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -31,7 +31,6 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
 import { userApi } from "@/lib/api/user";
-import { UserProfile } from "@/lib/api/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast"
 
@@ -346,9 +345,9 @@ export default function PatientProfilePage() {
                   <SelectValue placeholder="Sélectionner le sexe" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="male">Homme</SelectItem>
-                  <SelectItem value="female">Femme</SelectItem>
-                  <SelectItem value="other">Autre</SelectItem>
+                  <SelectItem value="HOMME">Homme</SelectItem>
+                  <SelectItem value="FEMME">Femme</SelectItem>
+                  <SelectItem value="AUTRE">Autre</SelectItem>
                 </SelectContent>
               </Select>
             </div>

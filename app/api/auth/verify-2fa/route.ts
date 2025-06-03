@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { auth } from "../[...nextauth]/route";
-import { authApi } from "@/lib/api/auth";
+import { getToken } from "next-auth/jwt";
 
 export async function POST(request: Request) {
   try {
     const session = await auth();
+    const token = await getToken({ 
+      req: request as any,
+      secret: process.env.AUTH_SECRET 
+    });
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -22,8 +26,26 @@ export async function POST(request: Request) {
       );
     }
 
-    // Vérifier le code 2FA via l'API existante
-    await authApi.verify2FA(session.user.id, code);
+    // Ajouter l'accessToken aux headers de la requête
+    const headers = new Headers(request.headers);
+    if (token && (token as any).accessToken) {
+      headers.set('Authorization', `Bearer ${(token as any).accessToken}`);
+    }
+    
+    // Vérifier le code 2FA via l'API existante avec les headers modifiés
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/2fa/verify/${session.user.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${(token as any).accessToken}`
+      },
+      body: JSON.stringify({ otp: code })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Erreur lors de la vérification du code 2FA");
+    }
 
     // Mettre à jour le token JWT
     const updatedSession = {
@@ -41,7 +63,6 @@ export async function POST(request: Request) {
     });
 
   } catch (error: any) {
-    console.error("Erreur lors de la vérification 2FA:", error);
     return NextResponse.json(
       { 
         message: error.response?.data?.message || "Erreur lors de la vérification du code 2FA" 

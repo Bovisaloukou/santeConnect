@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useRef, KeyboardEvent, ChangeEvent, useEffect } from "react";
+import { useState, useRef, KeyboardEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/ui/loading-spinner";
-import { authApi } from "@/lib/apiClient";
 import { useSession } from "next-auth/react";
 
 export default function Verify2FAClient() {

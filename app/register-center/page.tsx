@@ -142,7 +142,7 @@ const RegisterCenterPage = () => {
   // --- Fin de la nouvelle logique ---
 
   const handlePhoneChange = (value: string, data: CountryData) => {
-    setCenterPhone(value);
+    setCenterPhone(`+${value}`);
     setCenterSelectedCountryData(data);
   };
 

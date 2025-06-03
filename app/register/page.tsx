@@ -360,21 +360,21 @@ export default function RegisterPage() {
                       <Label>Genre</Label>
                       <div className={`flex space-x-4 ${genreError ? 'border border-red-500 rounded-md p-2' : ''}`}>
                         <div className="flex items-center space-x-2">
-                          <input type="radio" id="male" name="genre" value="male" onChange={(e) => {
+                          <input type="radio" id="male" name="genre" value="HOMME" onChange={(e) => {
                             const result = validateGenre(e.target.value);
                             setGenreError(result.errorMessage);
                           }} />
                           <Label htmlFor="male">Homme</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <input type="radio" id="female" name="genre" value="female" onChange={(e) => {
+                          <input type="radio" id="female" name="genre" value="FEMME" onChange={(e) => {
                             const result = validateGenre(e.target.value);
                             setGenreError(result.errorMessage);
                           }} />
                           <Label htmlFor="female">Femme</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <input type="radio" id="other" name="genre" value="other" onChange={(e) => {
+                          <input type="radio" id="other" name="genre" value="AUTRE" onChange={(e) => {
                             const result = validateGenre(e.target.value);
                             setGenreError(result.errorMessage);
                           }} />
