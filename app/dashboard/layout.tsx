@@ -13,22 +13,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { data: session, status } = useSession()
 
   useEffect(() => {
-    console.log("Dashboard Layout - Auth Status:", {
-      status,
-      hasSession: !!session,
-      user: session?.user,
-      is2FAEnabled: session?.user?.is2FAEnabled,
-      is2FAVerified: session?.user?.is2FAVerified
-    });
-
     if (status === "unauthenticated") {
-      console.log("Dashboard Layout - Redirection vers login");
       router.push("/login")
     }
   }, [status, router, session])
 
   if (status === "loading") {
-    console.log("Dashboard Layout - Loading state");
     return (
       <div className="flex items-center justify-center min-h-screen">
         <LoadingSpinner size="lg" />
@@ -37,7 +27,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   if (!session) {
-    console.log("Dashboard Layout - No session");
     return null
   }
 

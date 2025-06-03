@@ -2,6 +2,7 @@ import axios from 'axios';
 import { API_CONFIG } from '../config';
 import { getSession } from 'next-auth/react';
 import type { ExtendedSession } from './types';
+import { getToken } from 'next-auth/jwt';
 
 // Configuration de base pour les clients Axios
 const baseConfig = {
@@ -32,10 +33,25 @@ browserApiClient.interceptors.request.use(async (config) => {
 
 // Intercepteur pour le client serveur
 serverApiClient.interceptors.request.use(async (config) => {
-  const session = await getSession() as ExtendedSession;
-  if (session?.user?.accessToken) {
-    config.headers.Authorization = `Bearer ${session.user.accessToken}`;
+  try {
+    // Récupérer le token JWT avec les cookies
+    const token = await getToken({ 
+      req: {
+        headers: {
+          cookie: config.headers.cookie
+        }
+      } as any,
+      secret: process.env.AUTH_SECRET
+    });
+
+    // Utiliser l'accessToken du token JWT
+    if (token && (token as any).accessToken) {
+      config.headers.Authorization = `Bearer ${(token as any).accessToken}`;
+    }
+  } catch (error) {
+    console.error("Erreur lors de la récupération du token:", error);
   }
+
   return config;
 });
 

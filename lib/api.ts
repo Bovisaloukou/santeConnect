@@ -89,11 +89,11 @@ async function fetchApi<T>(endpoint: string, options: RequestInit, mockData?: T)
 }
 
 // Fonction pour récupérer le token d'authentification
-const getAuthToken = (): string | null => {
+const getAuthToken = (): string | undefined => {
   if (typeof window !== "undefined") {
-    return localStorage.getItem("auth_token")
+    return localStorage.getItem("auth_token") || undefined
   }
-  return null
+  return undefined
 }
 
 // API Service
