@@ -1,20 +1,35 @@
+"use client";
+
 import { Hospital, Stethoscope, HomeIcon, Phone, MapPin, Clock } from "lucide-react"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import Link from "next/link"
-import React from "react"
+import React, { useEffect, useState } from "react"
+import { healthCenterApi } from "@/lib/api/healthCenter"
 
 export interface MedicalCenter {
   id: string
   name: string
   type: "HOSPITAL" | "CLINIC" | "HEALTH_CENTER" | "DOCTOR_OFFICE"
   isOpen: boolean
-  distance: number // en kilomètres
+  distance: number
   address: string
   phone: string
   icon: React.ElementType
   images: string[]
   services: { name: string; description?: string }[]
+}
+
+interface BackendHealthCenter {
+  uuid: string
+  name: string
+  type: string
+  fullAddress: string
+  phoneNumber: string
+  healthServices: {
+    serviceName: string
+    description: string | null
+  }[]
 }
 
 // Fonction de mapping pour l'affichage des types en français
@@ -28,111 +43,80 @@ const getTypeLabel = (type: MedicalCenter["type"]): string => {
   return typeLabels[type]
 }
 
-export const mockMedicalCenters: MedicalCenter[] = [
-  {
-    id: "1",
-    name: "Centre National Hospitalier et Universitaire (CNHU)",
-    type: "HOSPITAL",
-    isOpen: true,
-    distance: 2.1,
-    address: "Avenue Jean-Paul II, Cotonou",
-    phone: "+229 21 30 06 56",
-    icon: Hospital,
-    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png"],
-    services: [
-      { name: "Médecine Générale", description: "Services hospitaliers généraux et spécialisés." },
-      { name: "Urgences", description: "Service d'urgence 24/7." },
-      { name: "Chirurgie", description: "Interventions chirurgicales diverses." },
-    ],
-  },
-  {
-    id: "2",
-    name: "Centre Hospitalier et Universitaire de la Mère et de l'Enfant Lagune (HOMEL)",
-    type: "HOSPITAL",
-    isOpen: true,
-    distance: 3.5,
-    address: "01 BP 107 Cotonou Bénin",
-    phone: "+229 21 31 31 28",
-    icon: Hospital,
-    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png"],
-    services: [
-      { name: "Maternité", description: "Soins spécialisés pour les mères et les enfants." },
-      { name: "Pédiatrie", description: "Soins pédiatriques spécialisés." },
-      { name: "Gynécologie", description: "Soins gynécologiques et obstétriques." },
-    ],
-  },
-  {
-    id: "3",
-    name: "Clinique Mahouna",
-    type: "CLINIC",
-    isOpen: true,
-    distance: 1.8,
-    address: "Patte d'Oie, Rue 395 et Place du Souvenir, Cotonou",
-    phone: "+229 21 30 14 35",
-    icon: Stethoscope,
-    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png"],
-    services: [
-      { name: "Médecine Générale", description: "Consultations médicales générales." },
-      { name: "Laboratoire", description: "Analyses médicales et tests paludisme." },
-      { name: "Chirurgie Orthopédique", description: "Interventions chirurgicales orthopédiques." },
-    ],
-  },
-  {
-    id: "4",
-    name: "Polyclinique Saint Michel (POSAM)",
-    type: "CLINIC",
-    isOpen: true,
-    distance: 2.3,
-    address: "09 BP 316 Cotonou",
-    phone: "+229 21 31 83 83",
-    icon: Stethoscope,
-    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png"],
-    services: [
-      { name: "Médecine Générale", description: "Toutes les spécialités médicales." },
-      { name: "Procréation Médicalement Assistée", description: "IIU, FIV, ICSI, IMSI." },
-      { name: "Urgences", description: "Service d'urgence 24/7." },
-    ],
-  },
-  {
-    id: "5",
-    name: "Clinique Ophtalmologique La Lumière",
-    type: "CLINIC",
-    isOpen: true,
-    distance: 1.5,
-    address: "04 BP 497 Cotonou",
-    phone: "+229 99 04 05 05",
-    icon: Stethoscope,
-    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png"],
-    services: [
-      { name: "Ophtalmologie", description: "Consultations et chirurgie oculaire." },
-      { name: "Dépistage", description: "Dépistage visuel pour enfants et adultes." },
-      { name: "Chirurgie Oculaire", description: "Cataracte, glaucome, myopie." },
-    ],
-  },
-  {
-    id: "6",
-    name: "Centre Médical Haie Vive",
-    type: "HEALTH_CENTER",
-    isOpen: true,
-    distance: 0.8,
-    address: "Quartier Haie Vive, Cotonou",
-    phone: "+229 91 55 50 50",
-    icon: HomeIcon,
-    images: ["/images/hopital-central-1.png", "/images/hopital-central-2.png", "/images/hopital-central-3.png"],
-    services: [
-      { name: "Médecine Générale", description: "Consultations médicales générales." },
-      { name: "Gynécologie-Obstétrique", description: "Suivi de grossesse et échographies." },
-      { name: "Soins Paramédicaux", description: "Analyses biomédicales, soins infirmiers, kinésithérapie." },
-    ],
-  },
-]
+// Fonction pour mapper les données du backend vers le format attendu par le composant
+const mapBackendToFrontend = (backendData: BackendHealthCenter[]): MedicalCenter[] => {
+  return backendData.map(center => ({
+    id: center.uuid,
+    name: center.name,
+    type: center.type as MedicalCenter["type"],
+    isOpen: true, // À implémenter plus tard
+    distance: 0, // À implémenter plus tard
+    address: center.fullAddress,
+    phone: center.phoneNumber,
+    icon: Hospital, // Par défaut, à adapter selon le type
+    images: ["/images/hopital-central-1.png"], // À implémenter plus tard
+    services: center.healthServices.map(service => ({
+      name: service.serviceName,
+      description: service.description || undefined
+    }))
+  }))
+}
 
 export default function CentresMedicauxPage() {
-  const sortedCenters = [...mockMedicalCenters].sort((a, b) => {
+  const [centers, setCenters] = useState<MedicalCenter[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchCenters = async () => {
+      try {
+        const response = await healthCenterApi.getAll()
+        const mappedCenters = mapBackendToFrontend(response.data)
+        setCenters(mappedCenters)
+      } catch (err) {
+        setError("Erreur lors du chargement des centres médicaux")
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCenters()
+  }, [])
+
+  const sortedCenters = [...centers].sort((a, b) => {
     if (a.isOpen && !b.isOpen) return -1;
     if (!a.isOpen && b.isOpen) return 1;
     return a.distance - b.distance;
   });
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-neutral-light-gray">
+        <Header />
+        <main className="flex-1 py-8 md:py-12">
+          <div className="container mx-auto px-4 text-center">
+            <p>Chargement des centres médicaux...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col min-h-screen bg-neutral-light-gray">
+        <Header />
+        <main className="flex-1 py-8 md:py-12">
+          <div className="container mx-auto px-4 text-center">
+            <p className="text-red-500">{error}</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-neutral-light-gray">

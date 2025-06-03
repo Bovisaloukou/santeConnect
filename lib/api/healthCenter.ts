@@ -30,5 +30,25 @@ export const healthCenterApi = {
     } catch (error) {
       throw error;
     }
+  },
+
+  getAll: async () => {
+    try {
+      const client = getApiClient();
+      const response = await client.get('/api/health-centers');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getById: async (uuid: string) => {
+    try {
+      const client = getApiClient();
+      const response = await client.get(`/api/health-centers/${uuid}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 }; 
