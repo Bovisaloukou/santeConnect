@@ -15,18 +15,12 @@ import { useToast } from "@/components/ui/use-toast";
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { validatePhone } from '@/app/utils/validations/registerValidations';
+import pharmacyApi from '@/lib/api/pharmacy';
 
 const servicesList = [
-  { value: "allopathie", label: "Allopathie" },
-  { value: "cosmetique", label: "Cosmétique" },
-  { value: "generiques", label: "Génériques" },
-  { value: "homeopathie", label: "Homéopathie" },
-  { value: "hygiene", label: "Hygiène" },
-  { value: "produits-veterinaires", label: "Produits vétérinaires" },
-  { value: "zone-assurance", label: "Zone assurance" },
-  { value: "zone-bebe", label: "Zone bébé" },
-  { value: "zone-cosmetique", label: "Zone cosmétique" },
-  { value: "zone-orthopedique", label: "Zone orthopédique" },
+  { value: "consultation", label: "Consultation" },
+  { value: "vente-medicaments", label: "Vente de médicaments" },
+  { value: "tests-rapides", label: "Tests rapides" },
 ];
 
 const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
@@ -72,6 +66,7 @@ const RegisterPharmacyPage = () => {
   const [selectedCountryData, setSelectedCountryData] = useState<CountryData | null>(null);
   const [phoneError, setPhoneError] = useState<string>('');
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
   const [horaires, setHoraires] = useState<Horaires>({
     is24h: true,
     lundiVendredi: {
@@ -94,7 +89,6 @@ const RegisterPharmacyPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     address: '',
-    email: '',
   });
 
   useEffect(() => {
@@ -181,44 +175,65 @@ const RegisterPharmacyPage = () => {
     }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setFiles(prev => {
+        const newFiles = [...prev];
+        const fileIndex = ['extraitRegistreDeCommerce', 'attestationImatriculation', 'annonceLegale', 'declaration_etablissement_de_entreprise', 'carteProfessionnelle'].indexOf(fieldName);
+        if (fileIndex !== -1) {
+          newFiles[fileIndex] = file;
+        }
+        return newFiles;
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const pharmacyData = {
-        ...formData,
-        phoneNumber: pharmacyPhone,
-        services: selectedServices,
-        horaires: horaires.is24h ? 
-          daysOfWeek.map(day => ({ jour: day, heures: "24h/24" })) :
-          [
-            ...(horaires.lundiVendredi?.isOpen ? 
-              ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'].map(day => ({
-                jour: day,
-                heures: `${horaires.lundiVendredi?.debut}-${horaires.lundiVendredi?.fin}`
-              })) : []),
-            ...(horaires.samedi?.isOpen ? [{
-              jour: 'Samedi',
-              heures: `${horaires.samedi?.debut}-${horaires.samedi?.fin}`
-            }] : []),
-            ...(horaires.dimanche?.isOpen ? [{
-              jour: 'Dimanche',
-              heures: `${horaires.dimanche?.debut}-${horaires.dimanche?.fin}`
-            }] : [])
-          ],
-        userUuid: session?.user?.id || '',
-      };
+      const formDataToSend = new FormData();
+      
+      // Ajouter les services un par un
+      selectedServices.forEach(service => {
+        formDataToSend.append('services', service);
+      });
 
-      // TODO: Implémenter l'appel API pour l'enregistrement de la pharmacie
-      // await pharmacyApi.register(pharmacyData);
+      // Ajouter les horaires un par un
+      if (horaires.is24h) {
+        formDataToSend.append('horaires', 'Lundi-Vendredi: 24h/24');
+        formDataToSend.append('horaires', 'Samedi: 24h/24');
+        formDataToSend.append('horaires', 'Dimanche: 24h/24');
+      } else {
+        if (horaires.lundiVendredi?.isOpen) {
+          formDataToSend.append('horaires', `Lundi-Vendredi: ${horaires.lundiVendredi?.debut}-${horaires.lundiVendredi?.fin}`);
+        }
+        if (horaires.samedi?.isOpen) {
+          formDataToSend.append('horaires', `Samedi: ${horaires.samedi?.debut}-${horaires.samedi?.fin}`);
+        }
+        if (horaires.dimanche?.isOpen) {
+          formDataToSend.append('horaires', `Dimanche: ${horaires.dimanche?.debut}-${horaires.dimanche?.fin}`);
+        } else {
+          formDataToSend.append('horaires', 'Dimanche: Fermé');
+        }
+      }
+
+      // Ajouter les autres champs du formulaire
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('adress', formData.address);
+      formDataToSend.append('telephone', `+${pharmacyPhone}`);
+      formDataToSend.append('userUuid', session?.user?.id || '');
+
+      await pharmacyApi.register(formDataToSend, files);
 
       toast({
         title: "Inscription réussie",
         description: "Votre pharmacie a été enregistrée avec succès. Nous allons valider votre compte dans les plus brefs délais.",
       });
 
-      router.push('/dashboard');
+      router.push('/dashboard/patient');
     } catch (error) {
       toast({
         title: "Erreur",
@@ -248,18 +263,6 @@ const RegisterPharmacyPage = () => {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Nom de la pharmacie" 
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email" 
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="Email" 
                   required
                 />
               </div>
@@ -317,9 +320,77 @@ const RegisterPharmacyPage = () => {
             </div>
           </div>
 
-          {/* 3. Horaires d'ouverture */}
+          {/* 3. Documents justificatifs */}
           <div className="p-6 border rounded-lg shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">3. Horaires d'ouverture</h2>
+            <h2 className="text-xl font-semibold mb-4">3. Documents justificatifs obligatoires</h2>
+            <p className="text-sm text-gray-500 mb-4">Veuillez scanner ou prendre en photo les documents suivants (format PDF ou image) :</p>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="extraitRegistreDeCommerce">Extrait du registre de commerce</Label>
+                <Input 
+                  id="extraitRegistreDeCommerce" 
+                  type="file" 
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  required 
+                  className="cursor-pointer"
+                  onChange={(e) => handleFileChange(e, 'extraitRegistreDeCommerce')}
+                />
+                <p className="text-sm text-gray-500 mt-1">Document officiel attestant de l'enregistrement de votre entreprise</p>
+              </div>
+              <div>
+                <Label htmlFor="attestationImatriculation">Attestation d'immatriculation</Label>
+                <Input 
+                  id="attestationImatriculation" 
+                  type="file" 
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  required 
+                  className="cursor-pointer"
+                  onChange={(e) => handleFileChange(e, 'attestationImatriculation')}
+                />
+                <p className="text-sm text-gray-500 mt-1">Document attestant de l'immatriculation de votre établissement</p>
+              </div>
+              <div>
+                <Label htmlFor="annonceLegale">Annonce légale</Label>
+                <Input 
+                  id="annonceLegale" 
+                  type="file" 
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  required 
+                  className="cursor-pointer"
+                  onChange={(e) => handleFileChange(e, 'annonceLegale')}
+                />
+                <p className="text-sm text-gray-500 mt-1">Publication légale de la création de votre établissement</p>
+              </div>
+              <div>
+                <Label htmlFor="declaration_etablissement_de_entreprise">Déclaration d'établissement d'entreprise</Label>
+                <Input 
+                  id="declaration_etablissement_de_entreprise" 
+                  type="file" 
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  required 
+                  className="cursor-pointer"
+                  onChange={(e) => handleFileChange(e, 'declaration_etablissement_de_entreprise')}
+                />
+                <p className="text-sm text-gray-500 mt-1">Document officiel de déclaration de votre établissement</p>
+              </div>
+              <div>
+                <Label htmlFor="carteProfessionnelle">Carte professionnelle</Label>
+                <Input 
+                  id="carteProfessionnelle" 
+                  type="file" 
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  required 
+                  className="cursor-pointer"
+                  onChange={(e) => handleFileChange(e, 'carteProfessionnelle')}
+                />
+                <p className="text-sm text-gray-500 mt-1">Carte professionnelle du responsable de l'établissement</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Horaires d'ouverture */}
+          <div className="p-6 border rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold mb-4">4. Horaires d'ouverture</h2>
             <div className="space-y-6">
               <div className="flex items-center space-x-2">
                 <Checkbox

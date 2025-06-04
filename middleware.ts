@@ -10,6 +10,12 @@ export default auth((req) => {
                     req.nextUrl.pathname.startsWith("/register") ||
                     req.nextUrl.pathname.startsWith("/verify-2fa");
 
+  // Vérification de la session pour les routes protégées
+  if ((req.nextUrl.pathname.startsWith("/register-center") || 
+       req.nextUrl.pathname.startsWith("/register/pharmacy")) && !session) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
   // Si l'utilisateur n'est pas sur une page d'auth et a la 2FA activée mais non vérifiée
   if (!isAuthPage && is2FAEnabled && !is2FAVerified) {
     return NextResponse.redirect(new URL("/verify-2fa", req.url));
@@ -29,5 +35,7 @@ export const config = {
     "/verify-2fa",
     "/settings/:path*",
     "/profile/:path*",
+    "/register-center",
+    "/register/pharmacy",
   ],
 }; 

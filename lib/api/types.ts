@@ -30,8 +30,70 @@ export interface HealthCenter {
   municipality: string;
   phoneNumber: string;
   email: string;
-  licenseNumber: string;
-  taxIdentificationNumber: string;
   userUuid: string;
   services: string[];
+}
+
+export interface Responsable {
+  uuid: string;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  email: string;
+  birthDate: string;
+  contact: string;
+  isEnabled: boolean;
+  is2FAEnabled: boolean;
+}
+
+export interface Medicament {
+  uuid: string;
+  name: string;
+  description: string;
+  prix: number;
+  surOrdonnance: boolean;
+}
+
+export interface Pharmacie {
+  uuid: string;
+  name: string;
+  adress: string;
+  telephone: string;
+  services: string[];
+  horaires: string[];
+  responsable: Responsable;
+  medicaments: Medicament[];
+}
+
+export interface PharmacieResponse {
+  message: string;
+  data: Pharmacie[];
+}
+
+// Types pour les composants
+export interface PharmacieComponent {
+  id: string;
+  nom: string;
+  adresse: string;
+  codePostal: string;
+  ville: string;
+  telephone: string;
+  services: string[];
+  horaires: {
+    lundi: string;
+    samedi: string;
+    dimanche: string;
+  };
+}
+
+export interface MedicamentComponent {
+  id: string;
+  nom: string;
+  description: string;
+  prix: number;
+  image: string;
+  necessiteOrdonnance: boolean;
+  stock: number;
+  categorie: string;
+  pharmacies: string[];
 } 

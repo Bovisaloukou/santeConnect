@@ -30,31 +30,32 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    console.log("UserProvider: useEffect triggered");
     const checkAuth = async () => {
-      console.log("checkAuth: Starting simulation...") // Log pour indiquer que nous sommes en mode simulation
+      console.log("checkAuth: Starting simulation...") 
 
-      // --- Début de la modification ---
-      // Simuler un délai de chargement
-      await new Promise(resolve => setTimeout(resolve, 500)); // Délai fictif
+      try {
+        // Simuler un délai de chargement
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Fournir un utilisateur fictif puisque le backend n'est pas là
-      const mockUser: User = {
-        id: "user-1", // Assurez-vous que cet ID correspond à celui utilisé dans vos données fictives (ex: dans les messages)
-        name: "Patient Fictif",
-        email: "patient@example.com",
-        role: "patient", // Rôle important pour la redirection
-        avatar: "/placeholder-user.jpg",
-      };
+        // Fournir un utilisateur fictif puisque le backend n'est pas là
+        const mockUser: User = {
+          id: "user-1",
+          name: "Patient Fictif",
+          email: "patient@example.com",
+          role: "patient",
+          avatar: "/placeholder-user.jpg",
+        };
 
-      console.log("checkAuth: Providing mock user:", mockUser);
-      setUser(mockUser);
-      setIsLoading(false);
-      // --- Fin de la modification ---
-
-      // Les parties du code qui vérifient localStorage et appellent l'API
-      // sont temporairement ignorées dans ce mode de développement sans backend.
-      // Lorsque le backend sera prêt, vous pourrez restaurer la logique originale.
-
+        console.log("checkAuth: About to set mock user:", mockUser);
+        setUser(mockUser);
+        console.log("checkAuth: User set, about to set isLoading to false");
+        setIsLoading(false);
+        console.log("checkAuth: isLoading set to false");
+      } catch (error) {
+        console.error("checkAuth: Error during simulation:", error);
+        setIsLoading(false);
+      }
     };
 
     checkAuth();
