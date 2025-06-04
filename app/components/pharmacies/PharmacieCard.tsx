@@ -1,4 +1,4 @@
-import { Pharmacie } from "@/app/data/pharmacies"
+import { PharmacieComponent } from "@/lib/api/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -6,7 +6,7 @@ import { MapPin, Phone, Clock, ShoppingCart } from "lucide-react"
 import Link from "next/link"
 
 interface PharmacieCardProps {
-  pharmacie: Pharmacie
+  pharmacie: PharmacieComponent
 }
 
 export function PharmacieCard({ pharmacie }: PharmacieCardProps) {

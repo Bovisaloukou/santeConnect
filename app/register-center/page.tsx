@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -85,8 +84,6 @@ const RegisterCenterPage = () => {
     department: '',
     municipality: '',
     email: '',
-    licenseNumber: '',
-    taxIdentificationNumber: '',
   });
 
   useEffect(() => {
@@ -203,8 +200,6 @@ const RegisterCenterPage = () => {
       formDataToSend.append('department', formData.department);
       formDataToSend.append('municipality', formData.municipality);
       formDataToSend.append('email', formData.email);
-      formDataToSend.append('licenseNumber', formData.licenseNumber);
-      formDataToSend.append('taxIdentificationNumber', formData.taxIdentificationNumber);
       formDataToSend.append('phoneNumber', centerPhone);
       formDataToSend.append('userUuid', session?.user?.id || '');
 
@@ -346,38 +341,9 @@ const RegisterCenterPage = () => {
             </div>
           </div>
 
-          {/* 2. Informations légales */}
+          {/* 2. Services proposés */}
           <div className="p-6 border rounded-lg shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">2. Informations légales</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="licenseNumber">Numéro de licence d'exploitation</Label>
-                <Input 
-                  id="licenseNumber" 
-                  name="licenseNumber"
-                  value={formData.licenseNumber}
-                  onChange={handleInputChange}
-                  placeholder="Numéro de licence" 
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="taxIdentificationNumber">Numéro d'Identification Fiscale (NIF)</Label>
-                <Input 
-                  id="taxIdentificationNumber" 
-                  name="taxIdentificationNumber"
-                  value={formData.taxIdentificationNumber}
-                  onChange={handleInputChange}
-                  placeholder="Numéro NIF" 
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 3. Services proposés */}
-          <div className="p-6 border rounded-lg shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">3. Services proposés</h2>
+            <h2 className="text-xl font-semibold mb-4">2. Services proposés</h2>
             <div className="space-y-4">
               <div>
                 <Label htmlFor="medicalSpecialties">Spécialités médicales disponibles</Label>
@@ -431,9 +397,9 @@ const RegisterCenterPage = () => {
             </div>
           </div>
 
-          {/* 4. Documents justificatifs */}
+          {/* 3. Documents justificatifs */}
           <div className="p-6 border rounded-lg shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">4. Documents justificatifs obligatoires</h2>
+            <h2 className="text-xl font-semibold mb-4">3. Documents justificatifs obligatoires</h2>
             <p className="text-sm text-gray-500 mb-4">Veuillez scanner ou prendre en photo les documents suivants (format PDF ou image) :</p>
             <div className="space-y-4">
               <div>

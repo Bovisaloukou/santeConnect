@@ -133,44 +133,6 @@ export default function PatientDocumentsPage() {
 
         <TabsContent value="all">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Télécharger un document</CardTitle>
-                <CardDescription>Ajoutez un nouveau document à votre dossier médical</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleUpload} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="documentName">Nom du document</Label>
-                    <Input id="documentName" name="documentName" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="documentType">Type de document</Label>
-                    <select id="documentType" name="documentType" className="w-full p-2 border rounded-md" required>
-                      <option value="prescription">Ordonnance</option>
-                      <option value="analysis">Analyse</option>
-                      <option value="report">Rapport</option>
-                      <option value="other">Autre</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="documentFile">Fichier</Label>
-                    <Input id="documentFile" name="documentFile" type="file" required />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isUploading}>
-                    {isUploading ? (
-                      <span className="flex items-center">
-                        <LoadingSpinner size="sm" className="mr-2" />
-                        Téléchargement...
-                      </span>
-                    ) : (
-                      "Télécharger"
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-
             {filteredDocuments.map((doc) => (
               <DocumentCard key={doc.id} document={doc} onDelete={handleDelete} />
             ))}
