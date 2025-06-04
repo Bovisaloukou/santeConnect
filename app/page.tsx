@@ -39,13 +39,25 @@ export default function Home() {
               Découvrez une nouvelle expérience de soins, élégante, fluide et connectée.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              {!session || (session.user.is2FAEnabled && !session.user.is2FAVerified) ? (
+              {!session ? (
                 <Button size="lg" className="bg-neutral-white text-primary-blue shadow-xl hover:bg-accent-turquoise hover:text-neutral-white hover:bg-opacity-90 transition-all text-xl px-12 py-6 rounded-full font-semibold tracking-wide">
                   <Link href="/register" className="flex items-center">
                     S'inscrire maintenant <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-              ) : null}
+              ) : session.user.is2FAEnabled && !session.user.is2FAVerified ? (
+                <Button size="lg" className="bg-neutral-white text-primary-blue shadow-xl hover:bg-accent-turquoise hover:text-neutral-white hover:bg-opacity-90 transition-all text-xl px-12 py-6 rounded-full font-semibold tracking-wide">
+                  <Link href="/register" className="flex items-center">
+                    S'inscrire maintenant <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              ) : (
+                <Button size="lg" className="bg-neutral-white text-primary-blue shadow-xl hover:bg-accent-turquoise hover:text-neutral-white hover:bg-opacity-90 transition-all text-xl px-12 py-6 rounded-full font-semibold tracking-wide">
+                  <Link href="/register/pharmacy" className="flex items-center">
+                    Inscrire une pharmacie <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              )}
               <Button size="lg" className="bg-accent-turquoise text-neutral-white shadow-xl hover:bg-neutral-white hover:text-primary-blue hover:bg-opacity-90 transition-all text-xl px-12 py-6 rounded-full font-semibold tracking-wide">
                 <Link href="/register-center" className="flex items-center">
                   Inscrire un centre <ArrowRight className="ml-2 h-4 w-4" />

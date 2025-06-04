@@ -165,7 +165,14 @@ const RegisterCenterPage = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setFiles(prev => [...prev, file]);
+      setFiles(prev => {
+        const newFiles = [...prev];
+        const fileIndex = ['extraitRegistreDeCommerce', 'attestationImatriculation', 'annonceLegale', 'declaration_etablissement_de_entreprise', 'carteProfessionnelle'].indexOf(fieldName);
+        if (fileIndex !== -1) {
+          newFiles[fileIndex] = file;
+        }
+        return newFiles;
+      });
     }
   };
 
@@ -182,22 +189,33 @@ const RegisterCenterPage = () => {
     setIsLoading(true);
 
     try {
-      const healthCenterData: HealthCenter = {
-        ...formData,
-        type: formData.type,
-        phoneNumber: centerPhone,
-        userUuid: session?.user?.id || '',
-        services: selectedSpecialties.map(s => s.label)
-      };
+      const formDataToSend = new FormData();
+      
+      // Ajouter les services un par un
+      selectedSpecialties.forEach(specialty => {
+        formDataToSend.append('services', specialty.label);
+      });
 
-      await healthCenterApi.register(healthCenterData, files);
+      // Ajouter les autres champs du formulaire
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('type', formData.type);
+      formDataToSend.append('fullAddress', formData.fullAddress);
+      formDataToSend.append('department', formData.department);
+      formDataToSend.append('municipality', formData.municipality);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('licenseNumber', formData.licenseNumber);
+      formDataToSend.append('taxIdentificationNumber', formData.taxIdentificationNumber);
+      formDataToSend.append('phoneNumber', centerPhone);
+      formDataToSend.append('userUuid', session?.user?.id || '');
+
+      await healthCenterApi.register(formDataToSend, files);
 
       toast({
         title: "Inscription réussie",
         description: "Votre centre de santé a été enregistré avec succès. Nous allons valider votre compte dans les plus brefs délais.",
       });
 
-      router.push('/dashboard');
+      router.push('/dashboard/patient');
     } catch (error) {
       toast({
         title: "Erreur",

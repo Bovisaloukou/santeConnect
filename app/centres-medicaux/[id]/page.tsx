@@ -10,41 +10,126 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { healthCenterApi } from '@/lib/api/healthCenter';
 
-// Importation temporaire des données fictives
-// Idéalement, ces données viendraient d'une API ou d'une source centrale
-import { mockMedicalCenters, MedicalCenter } from "../page"
+interface BackendHealthCenterDetail {
+  uuid: string;
+  name: string;
+  type: string;
+  fullAddress: string;
+  phoneNumber: string;
+  email: string;
+  department: string;
+  municipality: string;
+  licenseNumber: string;
+  taxIdentificationNumber: string;
+  responsable: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    contact: string;
+  };
+  healthServices: {
+    uuid: string;
+    serviceName: string;
+    description: string | null;
+    etat: string;
+  }[];
+}
+
+export interface MedicalCenter {
+  id: string;
+  name: string;
+  type: "HOSPITAL" | "CLINIC" | "HEALTH_CENTER" | "DOCTOR_OFFICE";
+  isOpen: boolean;
+  distance: number;
+  address: string;
+  phone: string;
+  icon: React.ElementType;
+  images: string[];
+  services: { name: string; description?: string }[];
+}
+
+// Fonction pour mapper les données du backend vers le format attendu par le composant
+const mapBackendDetailToFrontend = (backendData: BackendHealthCenterDetail): MedicalCenter => {
+  // Tableau d'images disponibles
+  const availableImages = [
+    "/images/hopital-central-1.png",
+    "/images/hopital-central-2.png",
+    "/images/hopital-central-3.png",
+    "/images/hopital-central-4.png"
+  ];
+
+  // Sélectionner les images de manière cyclique en fonction du nombre de services
+  const selectedImages = availableImages.slice(0, Math.min(backendData.healthServices.length, availableImages.length));
+
+  return {
+    id: backendData.uuid,
+    name: backendData.name,
+    type: backendData.type as MedicalCenter["type"],
+    isOpen: true, // À implémenter plus tard
+    distance: 0, // À implémenter plus tard
+    address: backendData.fullAddress,
+    phone: backendData.phoneNumber,
+    icon: Hospital, // Par défaut, à adapter selon le type
+    images: selectedImages,
+    services: backendData.healthServices.map(service => ({
+      name: service.serviceName,
+      description: service.description || undefined
+    }))
+  };
+};
 
 export default function MedicalCenterDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
-  const center = mockMedicalCenters.find((c: MedicalCenter) => c.id === id);
   const router = useRouter();
   const { user, isLoading } = useAuth();
 
-  const [api, setApi] = useState<CarouselApi>()
-  const [current, setCurrent] = useState(0)
+  const [center, setCenter] = useState<MedicalCenter | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    const fetchCenter = async () => {
+      try {
+        const response = await healthCenterApi.getById(id);
+        const mappedCenter = mapBackendDetailToFrontend(response.data);
+        setCenter(mappedCenter);
+      } catch (err) {
+        setError("Erreur lors du chargement des détails du centre médical");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCenter();
+  }, [id]);
+
+  useEffect(() => {
     if (!api) {
-      return
+      return;
     }
 
-    setCurrent(api.selectedScrollSnap() + 1)
+    setCurrent(api.selectedScrollSnap() + 1);
 
     api.on("select", () => {
-      setCurrent(api.selectedScrollSnap() + 1)
-    })
-  }, [api])
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
       },
-      { threshold: 0.5 } // Adjust threshold as needed
+      { threshold: 0.5 }
     );
 
     if (carouselRef.current) {
@@ -67,7 +152,7 @@ export default function MedicalCenterDetailPage() {
         } else {
           api.scrollNext();
         }
-      }, 5000); // Défilement toutes les 5 secondes
+      }, 5000);
     }
     return () => {
       if (interval) {
@@ -76,14 +161,30 @@ export default function MedicalCenterDetailPage() {
     };
   }, [api, isVisible]);
 
-  if (!center) {
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-neutral-light-gray">
+        <Header />
+        <main className="flex-1 py-8 md:py-12">
+          <div className="container mx-auto px-4 text-center">
+            <p>Chargement des détails du centre médical...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !center) {
     return (
       <div className="flex flex-col min-h-screen bg-neutral-light-gray">
         <Header />
         <main className="flex-1 py-8 md:py-12">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-3xl font-bold text-red-600 mb-4">Centre Médical Introuvable</h1>
-            <p className="text-lg text-neutral-dark-gray">Désolé, le centre médical avec l'identifiant "{id}" n'a pas été trouvé.</p>
+            <p className="text-lg text-neutral-dark-gray">
+              {error || `Désolé, le centre médical avec l'identifiant "${id}" n'a pas été trouvé.`}
+            </p>
           </div>
         </main>
         <Footer />
@@ -147,7 +248,6 @@ export default function MedicalCenterDetailPage() {
                 <Phone className="w-5 h-5 text-primary-blue flex-shrink-0" />
                 <span>Téléphone : <a href={`tel:${center.phone}`} className="text-primary-blue hover:underline">{center.phone}</a></span>
               </div>
-              {/* Ajoutez d'autres détails ici si disponibles dans les données */}
             </div>
           </div>
 
@@ -210,7 +310,7 @@ export default function MedicalCenterDetailPage() {
           {/* Section Orientation */}
           <div className="p-5 rounded-xl text-center">
             <p className="text-lg text-neutral-dark-gray mb-4">
-            Vous ne savez pas exactement de quoi vous souffrez ? Discutez avec un médecin généraliste pour identifier vos symptômes et être orienté vers le service médical le plus adapté.
+              Vous ne savez pas exactement de quoi vous souffrez ? Discutez avec un médecin généraliste pour identifier vos symptômes et être orienté vers le service médical le plus adapté.
             </p>
             <Button
               size="lg"
@@ -226,10 +326,9 @@ export default function MedicalCenterDetailPage() {
               Consultation
             </Button>
           </div>
-
         </div>
       </main>
       <Footer />
     </div>
-  )
+  );
 } 
