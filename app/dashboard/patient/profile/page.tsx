@@ -170,7 +170,6 @@ export default function PatientProfilePage() {
       await userApi.updateProfile(session.user.id, userData);
 
       if (profileImageFile) {
-        console.log("Fichier image de profil à uploader :", profileImageFile);
         // TODO: Implémenter l'upload de l'image
       }
       

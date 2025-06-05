@@ -89,8 +89,6 @@ export default function ProfessionalFolder() {
   const [showPrescriptionForm, setShowPrescriptionForm] = useState(false);
 
   const handlePrescriptionSubmit = (prescription: any) => {
-    console.log("Nouvelle ordonnance:", prescription);
-    // TODO: Implémenter la logique de sauvegarde de l'ordonnance
     setShowPrescriptionForm(false);
   };
 

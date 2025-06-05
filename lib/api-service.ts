@@ -71,8 +71,6 @@ async function apiRequest<T>(
 
 // Simuler les appels API pour le développement frontend
 async function simulateApiCall<T>(endpoint: string, method: string, body?: any): Promise<ApiResponse<T>> {
-  console.log(`Simulation d'appel API: ${method} ${endpoint}`, body)
-
   // Attendre un délai aléatoire pour simuler la latence réseau
   await new Promise((resolve) => setTimeout(resolve, Math.random() * 500 + 200))
 

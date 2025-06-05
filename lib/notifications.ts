@@ -14,21 +14,18 @@ export interface Notification {
 // Simuler l'envoi d'une notification par email
 export async function sendEmail(to: string, subject: string, body: string): Promise<boolean> {
   // Dans une application réelle, vous utiliseriez un service comme SendGrid, Mailgun, etc.
-  console.log(`Envoi d'un email à ${to}:`, { subject, body })
   return true
 }
 
 // Simuler l'envoi d'une notification par SMS
 export async function sendSMS(to: string, message: string): Promise<boolean> {
   // Dans une application réelle, vous utiliseriez un service comme Twilio, Vonage, etc.
-  console.log(`Envoi d'un SMS à ${to}:`, message)
   return true
 }
 
 // Simuler l'envoi d'une notification push
 export async function sendPushNotification(userId: string, title: string, body: string): Promise<boolean> {
   // Dans une application réelle, vous utiliseriez un service comme Firebase Cloud Messaging, OneSignal, etc.
-  console.log(`Envoi d'une notification push à l'utilisateur ${userId}:`, { title, body })
   return true
 }
 
@@ -44,7 +41,6 @@ export async function createNotification(
     createdAt: new Date(),
   }
 
-  console.log("Notification créée:", newNotification)
   return newNotification
 }
 
@@ -76,7 +72,6 @@ export async function getUserNotifications(userId: string): Promise<Notification
 // Marquer une notification comme lue
 export async function markNotificationAsRead(notificationId: string): Promise<boolean> {
   // Dans une application réelle, vous mettriez à jour la notification dans la base de données
-  console.log(`Notification ${notificationId} marquée comme lue`)
   return true
 }
 

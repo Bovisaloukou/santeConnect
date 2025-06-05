@@ -6,8 +6,9 @@ import { LogOut, Pill, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth/AuthContext"
 import { getNavigationItems } from "@/lib/utils/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
+import { userApi } from "@/lib/api/user"
 
 interface SidebarProps {
   forMobile?: boolean
@@ -18,8 +19,41 @@ export function Sidebar({ forMobile = false, onClose }: SidebarProps) {
   const pathname = usePathname()
   const { user, logout } = useAuth()
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({})
+  const [userRoles, setUserRoles] = useState<string[]>(['PATIENT'])
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  if (!user) return null
+  useEffect(() => {
+    const fetchUserRoles = async () => {
+      if (!user?.id) {
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        const profile = await userApi.getProfile(user.id)
+        
+        if (!profile?.roles || !Array.isArray(profile.roles)) {
+          setError('Format de rôles invalide')
+          return
+        }
+
+        setUserRoles(profile.roles)
+        setError(null)
+      } catch (error) {
+        setError('Erreur lors de la récupération des rôles')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchUserRoles()
+  }, [user?.id])
+
+  if (!user) {
+    return null
+  }
 
   const toggleSubMenu = (label: string) => {
     setExpandedMenus(prev => ({
@@ -28,7 +62,7 @@ export function Sidebar({ forMobile = false, onClose }: SidebarProps) {
     }))
   }
 
-  const navLinks = getNavigationItems()
+  const navLinks = getNavigationItems(userRoles)
 
   return (
     <aside className="flex flex-col h-full bg-white border-r">
@@ -38,6 +72,16 @@ export function Sidebar({ forMobile = false, onClose }: SidebarProps) {
           <span className="text-xl font-bold text-primary">SantéConnect</span>
         </Link>
       </div>
+      {isLoading && (
+        <div className="p-4 text-sm text-gray-500">
+          Chargement des rôles...
+        </div>
+      )}
+      {error && (
+        <div className="p-4 bg-red-50 text-red-600 text-sm">
+          {error}
+        </div>
+      )}
       <nav className="flex-1 p-4 space-y-1 overflow-auto">
         {navLinks.map((link) => (
           <div key={link.href}>

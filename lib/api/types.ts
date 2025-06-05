@@ -20,6 +20,7 @@ export interface UserProfile {
   contact: string;
   isEnabled: boolean;
   is2FAEnabled: boolean;
+  roles: string[];
 }
 
 export interface HealthCenter {

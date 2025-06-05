@@ -120,7 +120,6 @@ const CenterSubmissionsPage = () => {
   const [rejectionReason, setRejectionReason] = useState('');
 
   const handleValidate = (id: string) => {
-    console.log(`Validation de la soumission ${id}`);
     setSubmissions(submissions.map(submission =>
       submission.id === id ? { ...submission, status: 'Validé' } : submission
     ));
@@ -128,7 +127,6 @@ const CenterSubmissionsPage = () => {
   };
 
   const handleReject = (id: string) => {
-    console.log(`Rejet de la soumission ${id}`, { reason: rejectionReason });
     setSubmissions(submissions.map(submission =>
       submission.id === id ? { ...submission, status: 'Rejeté' } : submission
     ));

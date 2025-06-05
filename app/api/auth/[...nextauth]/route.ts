@@ -51,6 +51,7 @@ export const authConfig: NextAuthConfig = {
               is2FAEnabled: data.user.is2FAEnabled || false,
               is2FAVerified: data.user.is2FAVerified || false,
               accessToken: data.accessToken,
+              roles: data.user.roles || ['PATIENT'],
             };
 
             if (!user.isEnabled) {
@@ -94,11 +95,13 @@ export const authConfig: NextAuthConfig = {
         token.is2FAEnabled = (user as any).is2FAEnabled;
         token.is2FAVerified = (user as any).is2FAVerified;
         token.error = (user as any).error;
+        token.roles = (user as any).roles;
       }
       
       // Mise à jour du token si la session a été mise à jour
       if (trigger === "update" && session) {
         token.is2FAVerified = session.user.is2FAVerified;
+        token.roles = session.user.roles;
       }
       
       return token;
@@ -112,6 +115,7 @@ export const authConfig: NextAuthConfig = {
         (session.user as any).is2FAEnabled = token.is2FAEnabled;
         (session.user as any).is2FAVerified = token.is2FAVerified;
         (session.user as any).error = token.error;
+        (session.user as any).roles = token.roles;
       }
       return session;
     },
