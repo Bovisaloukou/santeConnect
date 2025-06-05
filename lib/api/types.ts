@@ -21,6 +21,10 @@ export interface UserProfile {
   isEnabled: boolean;
   is2FAEnabled: boolean;
   roles: string[];
+  healthCenters: Array<{
+    uuid: string;
+    name: string;
+  }>;
 }
 
 export interface HealthCenter {

@@ -21,17 +21,14 @@ export function Sidebar({ forMobile = false, onClose }: SidebarProps) {
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({})
   const [userRoles, setUserRoles] = useState<string[]>(['PATIENT'])
   const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchUserRoles = async () => {
       if (!user?.id) {
-        setIsLoading(false)
         return
       }
 
       try {
-        setIsLoading(true)
         const profile = await userApi.getProfile(user.id)
         
         if (!profile?.roles || !Array.isArray(profile.roles)) {
@@ -43,8 +40,6 @@ export function Sidebar({ forMobile = false, onClose }: SidebarProps) {
         setError(null)
       } catch (error) {
         setError('Erreur lors de la récupération des rôles')
-      } finally {
-        setIsLoading(false)
       }
     }
 
@@ -72,11 +67,6 @@ export function Sidebar({ forMobile = false, onClose }: SidebarProps) {
           <span className="text-xl font-bold text-primary">SantéConnect</span>
         </Link>
       </div>
-      {isLoading && (
-        <div className="p-4 text-sm text-gray-500">
-          Chargement des rôles...
-        </div>
-      )}
       {error && (
         <div className="p-4 bg-red-50 text-red-600 text-sm">
           {error}

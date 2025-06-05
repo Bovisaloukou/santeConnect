@@ -49,5 +49,15 @@ export const healthCenterApi = {
     } catch (error) {
       throw error;
     }
+  },
+
+  update: async (uuid: string, data: Partial<HealthCenter>) => {
+    try {
+      const client = getApiClient();
+      const response = await client.patch(`/api/health-centers/${uuid}`, data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 }; 
