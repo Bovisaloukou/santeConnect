@@ -3,28 +3,137 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Building2, Users, Stethoscope, FileText, Phone, Mail, MapPin, Building, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { userApi } from "@/lib/api/user"
+import { healthCenterApi } from "@/lib/api/healthCenter"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
-// Données fictives du centre de santé
-const initialHealthCenterData = {
-  type: "DOCTOR_OFFICE",
-  name: "Centre Médical Saint-Joseph",
-  fullAddress: "123 Avenue de la Santé",
-  department: "Paris",
-  municipality: "75001",
-  phoneNumber: "01 23 45 67 89",
-  email: "contact@stjoseph-medical.fr"
+interface HealthCenter {
+  uuid: string
+  name: string
+  type: string
+  fullAddress: string
+  department: string
+  municipality: string
+  email: string
+  phoneNumber: string
+  healthServices: Array<{
+    uuid: string
+    serviceName: string
+    description: string | null
+    etat: string
+  }>
+}
+
+// Fonction de mapping pour l'affichage des types en français
+const getTypeLabel = (type: string): string => {
+  const typeLabels: Record<string, string> = {
+    HOSPITAL: "Hôpital",
+    CLINIC: "Clinique",
+    HEALTH_CENTER: "Centre de santé",
+    DOCTOR_OFFICE: "Cabinet médical"
+  }
+  return typeLabels[type] || type
 }
 
 export default function HealthCenterPage() {
+  const router = useRouter()
+  const { data: session, status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      router.push('/auth/login')
+    },
+  })
   const [isEditing, setIsEditing] = useState(false)
-  const [healthCenterData, setHealthCenterData] = useState(initialHealthCenterData)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [healthCenterData, setHealthCenterData] = useState<HealthCenter | null>(null)
 
-  const handleSave = () => {
-    // Ici, vous pourriez ajouter la logique pour sauvegarder les données
-    setIsEditing(false)
+  const loadHealthCenterData = useCallback(async () => {
+    if (status !== "authenticated" || !session?.user?.id) return
+
+    try {
+      setLoading(true)
+      // Récupérer le profil utilisateur
+      const userProfile = await userApi.getProfile(session.user.id)
+      
+      // Vérifier si l'utilisateur a un centre de santé
+      if (!userProfile.healthCenters || userProfile.healthCenters.length === 0) {
+        throw new Error("Aucun centre de santé trouvé pour cet utilisateur")
+      }
+
+      // Récupérer le premier centre de santé
+      const healthCenterUuid = userProfile.healthCenters[0].uuid
+      const healthCenterResponse = await healthCenterApi.getById(healthCenterUuid)
+      
+      // Mettre à jour l'état avec les données du centre
+      setHealthCenterData(healthCenterResponse.data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue")
+    } finally {
+      setLoading(false)
+    }
+  }, [session?.user?.id, status])
+
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.id) {
+      loadHealthCenterData()
+    }
+  }, [status, session?.user?.id])
+
+  const handleSave = async () => {
+    try {
+      if (!healthCenterData) return;
+      
+      await healthCenterApi.update(healthCenterData.uuid, {
+        name: healthCenterData.name,
+        type: healthCenterData.type,
+        fullAddress: healthCenterData.fullAddress,
+        department: healthCenterData.department,
+        municipality: healthCenterData.municipality,
+        email: healthCenterData.email,
+        phoneNumber: healthCenterData.phoneNumber
+      });
+
+      setIsEditing(false);
+      // Recharger les données pour s'assurer d'avoir les dernières informations
+      await loadHealthCenterData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue lors de la mise à jour");
+    }
+  }
+
+  if (status === "loading" || loading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center h-64">
+          <p>Chargement des données...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center h-64">
+          <p className="text-red-500">Erreur: {error}</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!healthCenterData) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center h-64">
+          <p>Aucune donnée disponible</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -72,7 +181,7 @@ export default function HealthCenterPage() {
                       className="mt-1"
                     />
                   ) : (
-                    <p className="text-base">{healthCenterData.type}</p>
+                    <p className="text-base">{getTypeLabel(healthCenterData.type)}</p>
                   )}
                 </div>
               </div>
@@ -160,7 +269,7 @@ export default function HealthCenterPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{healthCenterData.healthServices?.length || 0}</div>
             <p className="text-xs text-muted-foreground">Services actifs</p>
           </CardContent>
         </Card>

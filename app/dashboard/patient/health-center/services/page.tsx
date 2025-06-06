@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -22,12 +22,18 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Pencil, Trash2 } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { userApi } from "@/lib/api/user"
+import { healthCenterApi } from "@/lib/api/healthCenter"
+import { healthServiceApi } from "@/lib/api/healthService"
 
 interface Service {
-  id: string
-  name: string
-  description: string
+  uuid: string
+  serviceName: string
+  description: string | null
   etat: "NORMAL" | "UNDERSTAFFED" | "OVERLOADED" | "CRITICAL" | "TEMP_CLOSED"
+  healthCenterUuid: string
 }
 
 const getEtatLabel = (etat: Service["etat"]): string => {
@@ -42,77 +48,137 @@ const getEtatLabel = (etat: Service["etat"]): string => {
 }
 
 export default function ServicesPage() {
-  const [services, setServices] = useState<Service[]>([
-    {
-      id: "1",
-      name: "Cardiologie",
-      description: "Service spécialisé en cardiologie",
-      etat: "NORMAL"
+  const router = useRouter()
+  const { data: session, status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      router.push('/auth/login')
     },
-    {
-      id: "2",
-      name: "Dermatologie",
-      description: "Consultation et traitement des affections cutanées",
-      etat: "OVERLOADED"
-    },
-    {
-      id: "3",
-      name: "Pédiatrie",
-      description: "Soins médicaux pour les enfants et adolescents",
-      etat: "UNDERSTAFFED"
-    },
-    {
-      id: "4",
-      name: "Urgences",
-      description: "Service d'urgence 24/7",
-      etat: "CRITICAL"
-    },
-    {
-      id: "5",
-      name: "Radiologie",
-      description: "Service d'imagerie médicale",
-      etat: "TEMP_CLOSED"
-    }
-  ])
+  })
+  const [services, setServices] = useState<Service[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [serviceToDelete, setServiceToDelete] = useState<string | null>(null)
   const [editingService, setEditingService] = useState<Service | null>(null)
   const [formData, setFormData] = useState<Partial<Service>>({
-    name: "",
+    serviceName: "",
     description: "",
     etat: "NORMAL"
   })
 
-  const handleAddService = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (editingService) {
-      setServices(services.map(s => s.id === editingService.id ? { ...formData, id: editingService.id } as Service : s))
-    } else {
-      setServices([...services, { ...formData, id: Date.now().toString() } as Service])
+  const loadServices = async () => {
+    if (status !== "authenticated" || !session?.user?.id) return
+
+    try {
+      setLoading(true)
+      // Récupérer le profil utilisateur
+      const userProfile = await userApi.getProfile(session.user.id)
+      
+      // Vérifier si l'utilisateur a un centre de santé
+      if (!userProfile.healthCenters || userProfile.healthCenters.length === 0) {
+        throw new Error("Aucun centre de santé trouvé pour cet utilisateur")
+      }
+
+      // Récupérer le premier centre de santé
+      const healthCenterUuid = userProfile.healthCenters[0].uuid
+      const healthCenterResponse = await healthCenterApi.getById(healthCenterUuid)
+      
+      // Mettre à jour l'état avec les services du centre
+      setServices(healthCenterResponse.data.healthServices)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue")
+    } finally {
+      setLoading(false)
     }
-    setIsDialogOpen(false)
-    setFormData({ name: "", description: "", etat: "NORMAL" })
-    setEditingService(null)
+  }
+
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.id) {
+      loadServices()
+    }
+  }, [status, session?.user?.id])
+
+  const handleAddService = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      if (editingService) {
+        await healthServiceApi.update(editingService.uuid, {
+          serviceName: formData.serviceName!,
+          description: formData.description || undefined,
+          etat: formData.etat!,
+          healthCenterUuid: editingService.healthCenterUuid
+        })
+        await loadServices()
+      } else {
+        const userProfile = await userApi.getProfile(session?.user?.id || '')
+        if (!userProfile.healthCenters || userProfile.healthCenters.length === 0) {
+          throw new Error("Aucun centre de santé trouvé pour cet utilisateur")
+        }
+        const healthCenterUuid = userProfile.healthCenters[0].uuid
+        await healthServiceApi.create({
+          serviceName: formData.serviceName!,
+          description: formData.description!,
+          etat: formData.etat!,
+          healthCenterUuid
+        })
+        await loadServices()
+      }
+      setIsDialogOpen(false)
+      setFormData({ serviceName: "", description: "", etat: "NORMAL" })
+      setEditingService(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue")
+    }
   }
 
   const handleEditService = (service: Service) => {
     setEditingService(service)
-    setFormData(service)
+    setFormData({
+      serviceName: service.serviceName,
+      description: service.description || "",
+      etat: service.etat
+    })
     setIsDialogOpen(true)
   }
 
-  const handleDeleteService = (id: string) => {
-    setServiceToDelete(id)
+  const handleDeleteService = (uuid: string) => {
+    setServiceToDelete(uuid)
     setIsDeleteDialogOpen(true)
   }
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (serviceToDelete) {
-      setServices(services.filter(s => s.id !== serviceToDelete))
-      setIsDeleteDialogOpen(false)
-      setServiceToDelete(null)
+      try {
+        await healthServiceApi.delete(serviceToDelete)
+        await loadServices()
+        setIsDeleteDialogOpen(false)
+        setServiceToDelete(null)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Une erreur est survenue")
+      }
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center h-64">
+          <p>Chargement des services...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center h-64">
+          <p className="text-red-500">Erreur: {error}</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -134,12 +200,12 @@ export default function ServicesPage() {
             </DialogHeader>
             <form onSubmit={handleAddService} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Nom du service</Label>
+                <Label htmlFor="serviceName">Nom du service</Label>
                 <Input 
-                  id="name" 
+                  id="serviceName" 
                   placeholder="Ex: Consultation générale"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  value={formData.serviceName}
+                  onChange={(e) => setFormData({ ...formData, serviceName: e.target.value })}
                   required
                 />
               </div>
@@ -148,7 +214,7 @@ export default function ServicesPage() {
                 <Textarea
                   id="description"
                   placeholder="Description détaillée du service..."
-                  value={formData.description}
+                  value={formData.description || ""}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   required
                 />
@@ -175,7 +241,7 @@ export default function ServicesPage() {
                   variant="outline"
                   onClick={() => {
                     setIsDialogOpen(false)
-                    setFormData({ name: "", description: "", etat: "NORMAL" })
+                    setFormData({ serviceName: "", description: "", etat: "NORMAL" })
                     setEditingService(null)
                   }}
                 >
@@ -210,9 +276,9 @@ export default function ServicesPage() {
                 </TableRow>
               ) : (
                 services.map((service) => (
-                  <TableRow key={service.id}>
-                    <TableCell>{service.name}</TableCell>
-                    <TableCell>{service.description}</TableCell>
+                  <TableRow key={service.uuid}>
+                    <TableCell>{service.serviceName}</TableCell>
+                    <TableCell>{service.description || "Aucune description"}</TableCell>
                     <TableCell>{getEtatLabel(service.etat)}</TableCell>
                     <TableCell className="text-right">
                       <Button
@@ -225,7 +291,7 @@ export default function ServicesPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDeleteService(service.id)}
+                        onClick={() => handleDeleteService(service.uuid)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

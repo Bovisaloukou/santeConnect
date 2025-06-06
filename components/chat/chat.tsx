@@ -6,6 +6,10 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { v4 as uuidv4 } from "uuid";
 import ReactMarkdown from "react-markdown";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { ExtendedSession } from "@/lib/api/types";
+import { patientApi } from "@/lib/api/patient";
 
 interface Message {
   id: string;
@@ -37,7 +41,11 @@ export function Chat() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [userId] = useState(() => uuidv4());
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [dossierUuid, setDossierUuid] = useState<string | null>(null);
   const scrollRef = useChatScroll(messages);
+  const router = useRouter();
+  const { data: session } = useSession();
 
   useEffect(() => {
     const sendInitialMessage = async () => {
@@ -93,7 +101,7 @@ export function Chat() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || isRedirecting) return;
 
     const userMessage: Message = {
       id: uuidv4(),
@@ -129,6 +137,59 @@ export function Chat() {
         role: "assistant",
       };
       setMessages((prev) => [...prev, assistantMessage]);
+
+      if (data.data?.stop) {
+        setIsRedirecting(true);
+
+        // Appel à l'API pour créer le patient et le dossier via la nouvelle fonction
+        if (session?.user?.healthServiceUuid) {
+          try {
+            const response = await patientApi.create({
+              service_uuid: session.user.healthServiceUuid
+            });
+
+            if (response?.data?.dossiers?.[0]?.uuid) {
+              setDossierUuid(response.data.dossiers[0].uuid);
+            } else {
+               // Gérer le cas où l'UUID du dossier n'est pas retourné
+                const errorMessage: Message = {
+                  id: uuidv4(),
+                  content: "Désolé, une erreur s'est produite lors de la création du dossier. Veuillez réessayer.",
+                  role: "assistant",
+                };
+                setMessages((prev) => [...prev, errorMessage]);
+            }
+
+          } catch (patientError) {
+            // Gérer les erreurs de l'appel API
+             const errorMessage: Message = {
+                id: uuidv4(),
+                content: "Désolé, une erreur s'est produite lors de l'appel API pour créer le patient. Veuillez réessayer.",
+                role: "assistant",
+              };
+              setMessages((prev) => [...prev, errorMessage]);
+          }
+        } else {
+           console.error("healthServiceUuid not found in session.");
+            const errorMessage: Message = {
+                id: uuidv4(),
+                content: "Désolé, je n'ai pas pu trouver les informations de service nécessaires dans votre session.",
+                role: "assistant",
+              };
+              setMessages((prev) => [...prev, errorMessage]);
+        }
+
+        const redirectMessage: Message = {
+          id: uuidv4(),
+          content: "Vos informations ont été transmises au centre de santé. Un professionnel de santé vous contactera prochainement pour vous orienter vers le service approprié et vous mettre en relation avec un médecin. Vous recevrez une notification dès que cela sera fait.",
+          role: "assistant",
+        };
+        setMessages((prev) => [...prev, redirectMessage]);
+        
+        setTimeout(() => {
+          router.push("/dashboard/patient");
+        }, 20000);
+      }
     } catch (error) {
       console.error("Erreur:", error);
       const errorMessage: Message = {
@@ -179,9 +240,9 @@ export function Chat() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Posez votre question..."
-            disabled={isLoading}
+            disabled={isLoading || isRedirecting}
           />
-          <Button type="submit" disabled={isLoading || !input.trim()}>
+          <Button type="submit" disabled={isLoading || !input.trim() || isRedirecting}>
             Envoyer
           </Button>
         </div>

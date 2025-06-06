@@ -37,8 +37,6 @@ export default function ProfessionalRegisterPage() {
       healthcareCenter: healthcareCenter,
     }
 
-    console.log("Professional Registration Data:", professionalData);
-    
     // Simuler une soumission (remplacez par votre logique d'API)
     await new Promise((resolve) => setTimeout(resolve, 2000))
 

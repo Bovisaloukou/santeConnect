@@ -1,7 +1,7 @@
 // Types centralisés pour l'application
 
 // Types d'utilisateurs
-export type UserRole = "patient" | "healthcare" | "pharmacy" | "admin"
+export type UserRole = "PATIENT" | "HOSPITAL_OWNER" | "PHARMACY_OWNER" | "HEALTHCARE_PROFESSIONNAL"
 
 export interface User {
   id: string
@@ -15,6 +15,8 @@ export interface User {
   isEnabled: boolean
   is2FAEnabled: boolean
   is2FAVerified: boolean
+  roles: UserRole[]
+  pharmacyUuid?: string
 }
 
 // Types pour les patients

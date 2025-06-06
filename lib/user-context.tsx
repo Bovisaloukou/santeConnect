@@ -30,10 +30,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    console.log("UserProvider: useEffect triggered");
     const checkAuth = async () => {
-      console.log("checkAuth: Starting simulation...") 
-
       try {
         // Simuler un délai de chargement
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -47,13 +44,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
           avatar: "/placeholder-user.jpg",
         };
 
-        console.log("checkAuth: About to set mock user:", mockUser);
         setUser(mockUser);
-        console.log("checkAuth: User set, about to set isLoading to false");
         setIsLoading(false);
-        console.log("checkAuth: isLoading set to false");
       } catch (error) {
-        console.error("checkAuth: Error during simulation:", error);
         setIsLoading(false);
       }
     };

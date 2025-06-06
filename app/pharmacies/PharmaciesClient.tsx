@@ -1,12 +1,11 @@
 "use client";
 
-import { PharmacieSearch } from "@/app/components/pharmacies/PharmacieSearch"
 import { MedicamentCard } from "@/app/components/pharmacies/MedicamentCard"
 import { PharmacieCard } from "@/app/components/pharmacies/PharmacieCard"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import { useEffect, useState } from "react"
-import pharmacyApi from "@/lib/api/pharmacy"
+import { pharmacyApi } from "@/lib/api/pharmacy"
 import { PharmacieComponent, MedicamentComponent } from "@/lib/api/types"
 
 export default function PharmaciesClient() {
@@ -101,8 +100,6 @@ export default function PharmaciesClient() {
           <p className="text-lg text-neutral-dark-gray max-w-3xl text-center mb-8 md:mb-12 mx-auto">
             Accédez à la liste des pharmacies partenaires, consultez leurs horaires et disponibilités, et trouvez la pharmacie la plus proche de chez vous.
           </p>
-
-          <PharmacieSearch />
 
           <div className="mb-12">
             <h2 className="text-2xl font-semibold mb-6 text-neutral-dark-gray">Pharmacies partenaires</h2>
