@@ -30,11 +30,10 @@ const AdminDashboard = () => {
       color: "bg-green-100"
     },
     {
-      title: "Rapports",
-      description: "Consulter les statistiques et rapports d'activité",
+      title: "Soumission de pharmacies",
+      description: "Gérer les demandes d'inscription des pharmacies",
       icon: FileText,
-      badge: "Bientôt disponible",
-      path: "/admin/reports",
+      path: "/admin/pharmacy-submissions",
       color: "bg-purple-100"
     },
     {

@@ -277,15 +277,6 @@ export default function MedicalCenterDetailPage() {
                       >
                         Prendre rendez-vous
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          router.push(`/centres-medicaux/${center.id}/services/${index}`);
-                        }}
-                      >
-                        Voir les détails
-                      </Button>
                       <div className="relative group">
                         <Button
                           variant="outline"

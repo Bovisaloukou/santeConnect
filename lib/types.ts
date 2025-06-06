@@ -16,6 +16,7 @@ export interface User {
   is2FAEnabled: boolean
   is2FAVerified: boolean
   roles: UserRole[]
+  pharmacyUuid?: string
 }
 
 // Types pour les patients

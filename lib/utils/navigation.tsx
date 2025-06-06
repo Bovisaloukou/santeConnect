@@ -64,6 +64,11 @@ const baseNavigationItems: NavigationItem[] = [
     requiredRole: "PHARMACY_OWNER",
     subItems: [
       {
+        href: "/dashboard/patient/pharmacy",
+        icon: <Home className="h-4 w-4" />,
+        label: "Vue d'ensemble"
+      },
+      {
         href: "/dashboard/patient/pharmacy/products",
         icon: <List className="h-4 w-4" />,
         label: "Liste des médicaments"

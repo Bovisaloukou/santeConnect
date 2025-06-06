@@ -10,7 +10,7 @@ interface PharmacyData {
   userUuid: string;
 }
 
-const pharmacyApi = {
+export const pharmacyApi = {
   register: async (formData: FormData, files: File[]) => {
     try {
       // Ajouter les fichiers avec les bonnes clés
@@ -58,7 +58,25 @@ const pharmacyApi = {
     } catch (error) {
       throw error;
     }
-  }
-};
+  },
 
-export default pharmacyApi; 
+  update: async (uuid: string, data: Partial<Pharmacie>) => {
+    try {
+      const client = getApiClient();
+      const response = await client.patch(`/api/pharmacies/${uuid}`, data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  delete: async (uuid: string) => {
+    try {
+      const client = getApiClient();
+      const response = await client.delete(`/api/pharmacies/${uuid}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+}; 

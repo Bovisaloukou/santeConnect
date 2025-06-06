@@ -6,6 +6,7 @@ export interface ExtendedSession extends Omit<Session, 'user'> {
     id?: string;
     is2FAEnabled?: boolean;
     is2FAVerified?: boolean;
+    healthServiceUuid?: string;
   };
 }
 
@@ -22,6 +23,10 @@ export interface UserProfile {
   is2FAEnabled: boolean;
   roles: string[];
   healthCenters: Array<{
+    uuid: string;
+    name: string;
+  }>;
+  pharmacies: Array<{
     uuid: string;
     name: string;
   }>;
@@ -101,4 +106,21 @@ export interface MedicamentComponent {
   stock: number;
   categorie: string;
   pharmacies: string[];
+}
+
+export interface Patient {
+  uuid: string;
+  nom: string;
+  prenom: string;
+  dateNaissance: string;
+  adresse: string;
+  telephone: string;
+  email: string;
+  numeroSecuriteSociale: string;
+  userUuid: string;
+}
+
+export interface PatientResponse {
+  message: string;
+  data: Patient[];
 } 

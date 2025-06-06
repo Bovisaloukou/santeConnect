@@ -10,7 +10,7 @@ export type Medicament = {
   nom: string
   description: string
   prix: number
-  stock: number
+  stock: boolean
 }
 
 export const columns: ColumnDef<Medicament>[] = [
@@ -34,10 +34,10 @@ export const columns: ColumnDef<Medicament>[] = [
     accessorKey: "stock",
     header: "Stock",
     cell: ({ row }) => {
-      const stock = row.getValue("stock") as number
+      const stock = row.getValue("stock") as boolean
       return (
-        <Badge variant={stock > 10 ? "default" : stock > 0 ? "secondary" : "destructive"}>
-          {stock > 10 ? "En stock" : stock > 0 ? "Stock faible" : "Épuisé"}
+        <Badge variant={stock ? "default" : "destructive"}>
+          {stock ? "En stock" : "Épuisé"}
         </Badge>
       )
     },

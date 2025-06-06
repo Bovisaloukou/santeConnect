@@ -15,107 +15,89 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-// Exemple de données de soumissions de centres (à remplacer par les données réelles)
+// Données fictives pour les soumissions de pharmacies
 const initialSubmissions = [
   {
     id: '1',
-    centerName: 'Centre Médical Alpha',
-    responsibleName: 'Dr. Jean Dupont',
+    pharmacyName: 'Pharmacie du Bonheur',
+    responsibleName: 'M. Pierre Martin',
     status: 'En attente',
-    submissionDate: '2023-10-26',
+    submissionDate: '2024-03-20',
     details: {
-      structureType: 'Clinique',
-      address: '123 Rue de la Santé, Cotonou',
+      address: '123 Rue des Médicaments, Cotonou',
       departement: 'Littoral',
       commune: 'Cotonou',
-      centerPhone: '+229 90 00 00 00',
-      centerEmail: 'contact@centrealpha.bj',
-      agreementNumber: 'AGR-2023-001',
-      nifNumber: 'NIF-2023-001',
-      specialties: ['Médecine générale', 'Gynécologie', 'Pédiatrie'],
-      hasTeleconsultation: true,
+      phone: '+229 90 00 00 00',
+      email: 'contact@pharmaciedubonheur.bj',
+      nifNumber: 'NIF-2024-001',
+      services: ['Vente de médicaments', 'Conseil pharmaceutique', 'Livraison à domicile'],
+      horaires: [
+        'Lundi: 8h-20h',
+        'Mardi: 8h-20h',
+        'Mercredi: 8h-20h',
+        'Jeudi: 8h-20h',
+        'Vendredi: 8h-20h',
+        'Samedi: 8h-18h',
+        'Dimanche: 9h-13h'
+      ],
       documents: {
-        openingAuthorization: '/documents/auth-1.pdf',
-        responsibleId: '/documents/id-1.pdf',
-        centerLogo: '/documents/logo-1.png',
-        centerPhotos: ['/documents/photo-1.jpg', '/documents/photo-2.jpg']
+        extraitRegistreDeCommerce: '/documents/erc-1.pdf',
+        attestationImatriculation: '/documents/ai-1.pdf',
+        annonceLegale: '/documents/al-1.pdf',
+        declarationEtablissement: '/documents/de-1.pdf',
+        carteProfessionnelle: '/documents/cp-1.pdf'
       },
       responsible: {
-        lastName: 'Dupont',
-        firstName: 'Jean',
-        function: 'Médecin Directeur',
+        lastName: 'Martin',
+        firstName: 'Pierre',
+        function: 'Pharmacien',
         phone: '+229 90 00 00 01',
-        email: 'jean.dupont@centrealpha.bj'
+        email: 'pierre.martin@pharmaciedubonheur.bj'
       }
     }
   },
   {
     id: '2',
-    centerName: 'Clinique Beta',
-    responsibleName: 'Dr. Marie Curie',
+    pharmacyName: 'Pharmacie de la Paix',
+    responsibleName: 'Mme Sophie Dubois',
     status: 'Validé',
-    submissionDate: '2023-10-25',
+    submissionDate: '2024-03-19',
     details: {
-      structureType: 'Cabinet médical',
-      address: '456 Avenue de la Paix, Porto-Novo',
+      address: '456 Avenue de la Santé, Porto-Novo',
       departement: 'Ouémé',
       commune: 'Porto-Novo',
-      centerPhone: '+229 90 00 00 02',
-      centerEmail: 'contact@clinicbeta.bj',
-      agreementNumber: 'AGR-2023-002',
-      nifNumber: 'NIF-2023-002',
-      specialties: ['Médecine générale', 'Dermatologie'],
-      hasTeleconsultation: false,
+      phone: '+229 90 00 00 02',
+      email: 'contact@pharmaciedelapaix.bj',
+      nifNumber: 'NIF-2024-002',
+      services: ['Vente de médicaments', 'Conseil pharmaceutique'],
+      horaires: [
+        'Lundi: 8h-19h',
+        'Mardi: 8h-19h',
+        'Mercredi: 8h-19h',
+        'Jeudi: 8h-19h',
+        'Vendredi: 8h-19h',
+        'Samedi: 8h-17h',
+        'Dimanche: Fermé'
+      ],
       documents: {
-        openingAuthorization: '/documents/auth-2.pdf',
-        responsibleId: '/documents/id-2.pdf',
-        centerLogo: '/documents/logo-2.png',
-        centerPhotos: ['/documents/photo-3.jpg']
+        extraitRegistreDeCommerce: '/documents/erc-2.pdf',
+        attestationImatriculation: '/documents/ai-2.pdf',
+        annonceLegale: '/documents/al-2.pdf',
+        declarationEtablissement: '/documents/de-2.pdf',
+        carteProfessionnelle: '/documents/cp-2.pdf'
       },
       responsible: {
-        lastName: 'Curie',
-        firstName: 'Marie',
-        function: 'Médecin',
-        phone: '+229 90 00 00 03',
-        email: 'marie.curie@clinicbeta.bj'
-      }
-    }
-  },
-  {
-    id: '3',
-    centerName: 'Centre de Santé Gamma',
-    responsibleName: 'Mme Sophie Martin',
-    status: 'Rejeté',
-    submissionDate: '2023-10-24',
-    details: {
-      structureType: 'Centre de santé',
-      address: '789 Boulevard de la Santé, Parakou',
-      departement: 'Borgou',
-      commune: 'Parakou',
-      centerPhone: '+229 90 00 00 04',
-      centerEmail: 'contact@centregamma.bj',
-      agreementNumber: 'AGR-2023-003',
-      nifNumber: 'NIF-2023-003',
-      specialties: ['Médecine générale', 'Pédiatrie'],
-      hasTeleconsultation: true,
-      documents: {
-        openingAuthorization: '/documents/auth-3.pdf',
-        responsibleId: '/documents/id-3.pdf',
-        centerLogo: '/documents/logo-3.png',
-        centerPhotos: ['/documents/photo-4.jpg', '/documents/photo-5.jpg']
-      },
-      responsible: {
-        lastName: 'Martin',
+        lastName: 'Dubois',
         firstName: 'Sophie',
-        function: 'Directrice',
-        phone: '+229 90 00 00 05',
-        email: 'sophie.martin@centregamma.bj'
+        function: 'Pharmacienne',
+        phone: '+229 90 00 00 03',
+        email: 'sophie.dubois@pharmaciedelapaix.bj'
       }
     }
-  },
+  }
 ];
 
-const CenterSubmissionsPage = () => {
+const PharmacySubmissionsPage = () => {
   const router = useRouter();
   const [submissions, setSubmissions] = useState(initialSubmissions);
   const [selectedSubmission, setSelectedSubmission] = useState<typeof initialSubmissions[0] | null>(null);
@@ -156,7 +138,7 @@ const CenterSubmissionsPage = () => {
             <ArrowLeft className="h-4 w-4" />
             Retour
           </Button>
-          <h1 className="text-2xl font-bold text-center flex-1">Gestion des soumissions de centres de santé</h1>
+          <h1 className="text-2xl font-bold text-center flex-1">Gestion des soumissions de pharmacies</h1>
         </div>
         <Card>
           <CardHeader>
@@ -166,7 +148,7 @@ const CenterSubmissionsPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nom du centre</TableHead>
+                  <TableHead>Nom de la pharmacie</TableHead>
                   <TableHead>Responsable</TableHead>
                   <TableHead>Date de soumission</TableHead>
                   <TableHead>Statut</TableHead>
@@ -176,7 +158,7 @@ const CenterSubmissionsPage = () => {
               <TableBody>
                 {submissions.map(submission => (
                   <TableRow key={submission.id}>
-                    <TableCell>{submission.centerName}</TableCell>
+                    <TableCell>{submission.pharmacyName}</TableCell>
                     <TableCell>{submission.responsibleName}</TableCell>
                     <TableCell>{submission.submissionDate}</TableCell>
                     <TableCell>
@@ -214,23 +196,18 @@ const CenterSubmissionsPage = () => {
           {selectedSubmission && (
             <ScrollArea className="h-[calc(90vh-8rem)]">
               <Tabs defaultValue="identification" className="w-full">
-                <TabsList className="grid w-full grid-cols-5">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="identification">Identification</TabsTrigger>
                   <TabsTrigger value="legal">Informations légales</TabsTrigger>
-                  <TabsTrigger value="services">Services</TabsTrigger>
+                  <TabsTrigger value="services">Services & Horaires</TabsTrigger>
                   <TabsTrigger value="documents">Documents</TabsTrigger>
-                  <TabsTrigger value="responsible">Responsable</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="identification" className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <h3 className="font-semibold">Nom du centre</h3>
-                      <p>{selectedSubmission.centerName}</p>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">Type de structure</h3>
-                      <p>{selectedSubmission.details.structureType}</p>
+                      <h3 className="font-semibold">Nom de la pharmacie</h3>
+                      <p>{selectedSubmission.pharmacyName}</p>
                     </div>
                     <div className="col-span-2">
                       <h3 className="font-semibold">Adresse</h3>
@@ -246,21 +223,17 @@ const CenterSubmissionsPage = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold">Téléphone</h3>
-                      <p>{selectedSubmission.details.centerPhone}</p>
+                      <p>{selectedSubmission.details.phone}</p>
                     </div>
                     <div>
                       <h3 className="font-semibold">Email</h3>
-                      <p>{selectedSubmission.details.centerEmail}</p>
+                      <p>{selectedSubmission.details.email}</p>
                     </div>
                   </div>
                 </TabsContent>
 
                 <TabsContent value="legal" className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="font-semibold">Numéro d'agrément</h3>
-                      <p>{selectedSubmission.details.agreementNumber}</p>
-                    </div>
                     <div>
                       <h3 className="font-semibold">Numéro NIF</h3>
                       <p>{selectedSubmission.details.nifNumber}</p>
@@ -270,77 +243,54 @@ const CenterSubmissionsPage = () => {
 
                 <TabsContent value="services" className="space-y-4">
                   <div>
-                    <h3 className="font-semibold">Spécialités</h3>
+                    <h3 className="font-semibold">Services proposés</h3>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {selectedSubmission.details.specialties.map((specialty, index) => (
-                        <Badge key={index} variant="secondary">{specialty}</Badge>
+                      {selectedSubmission.details.services.map((service, index) => (
+                        <Badge key={index} variant="secondary">{service}</Badge>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <h3 className="font-semibold">Téléconsultation</h3>
-                    <p>{selectedSubmission.details.hasTeleconsultation ? 'Disponible' : 'Non disponible'}</p>
+                    <h3 className="font-semibold">Horaires d'ouverture</h3>
+                    <div className="mt-2 space-y-1">
+                      {selectedSubmission.details.horaires.map((horaire, index) => (
+                        <p key={index}>{horaire}</p>
+                      ))}
+                    </div>
                   </div>
                 </TabsContent>
 
                 <TabsContent value="documents" className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <h3 className="font-semibold">Autorisation d'ouverture</h3>
+                      <h3 className="font-semibold">Extrait du registre de commerce</h3>
                       <Button variant="outline" size="sm" className="mt-2">
                         Voir le document
                       </Button>
                     </div>
                     <div>
-                      <h3 className="font-semibold">Carte d'identité du responsable</h3>
+                      <h3 className="font-semibold">Attestation d'immatriculation</h3>
                       <Button variant="outline" size="sm" className="mt-2">
                         Voir le document
                       </Button>
                     </div>
-                    {selectedSubmission.details.documents.centerLogo && (
-                      <div>
-                        <h3 className="font-semibold">Logo du centre</h3>
-                        <Button variant="outline" size="sm" className="mt-2">
-                          Voir le logo
-                        </Button>
-                      </div>
-                    )}
-                    {selectedSubmission.details.documents.centerPhotos && (
-                      <div>
-                        <h3 className="font-semibold">Photos du centre</h3>
-                        <div className="flex gap-2 mt-2">
-                          {selectedSubmission.details.documents.centerPhotos.map((photo, index) => (
-                            <Button key={index} variant="outline" size="sm">
-                              Photo {index + 1}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="responsible" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <h3 className="font-semibold">Nom</h3>
-                      <p>{selectedSubmission.details.responsible.lastName}</p>
+                      <h3 className="font-semibold">Annonce légale</h3>
+                      <Button variant="outline" size="sm" className="mt-2">
+                        Voir le document
+                      </Button>
                     </div>
                     <div>
-                      <h3 className="font-semibold">Prénom</h3>
-                      <p>{selectedSubmission.details.responsible.firstName}</p>
+                      <h3 className="font-semibold">Déclaration d'établissement</h3>
+                      <Button variant="outline" size="sm" className="mt-2">
+                        Voir le document
+                      </Button>
                     </div>
                     <div>
-                      <h3 className="font-semibold">Fonction</h3>
-                      <p>{selectedSubmission.details.responsible.function}</p>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">Téléphone</h3>
-                      <p>{selectedSubmission.details.responsible.phone}</p>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">Email</h3>
-                      <p>{selectedSubmission.details.responsible.email}</p>
+                      <h3 className="font-semibold">Carte professionnelle</h3>
+                      <Button variant="outline" size="sm" className="mt-2">
+                        Voir le document
+                      </Button>
                     </div>
                   </div>
                 </TabsContent>
@@ -380,4 +330,4 @@ const CenterSubmissionsPage = () => {
   );
 };
 
-export default CenterSubmissionsPage; 
+export default PharmacySubmissionsPage; 
