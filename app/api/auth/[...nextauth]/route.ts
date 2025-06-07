@@ -57,6 +57,8 @@ export const authConfig: NextAuthConfig = {
               healthServiceUuid: data.user.healthCenters?.[0]?.healthServices?.[0]?.uuid || null,
             };
 
+            console.log('healthServiceUuid:', data.user.healthCenters?.[0]?.healthServices?.[0]?.uuid);
+
             if (!user.isEnabled) {
               return null;
             }

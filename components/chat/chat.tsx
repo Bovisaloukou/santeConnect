@@ -10,6 +10,9 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ExtendedSession } from "@/lib/api/types";
 import { patientApi } from "@/lib/api/patient";
+import { visiteApi } from "@/lib/api/visite";
+import { consultationApi } from "@/lib/api/consultation";
+import { N8nResponse } from "@/lib/api/types";
 
 interface Message {
   id: string;
@@ -129,7 +132,7 @@ export function Chat() {
         throw new Error("Erreur lors de l'envoi du message");
       }
 
-      const data = await response.json();
+      const data = await response.json() as N8nResponse;
       
       const assistantMessage: Message = {
         id: uuidv4(),
@@ -149,7 +152,49 @@ export function Chat() {
             });
 
             if (response?.data?.dossiers?.[0]?.uuid) {
-              setDossierUuid(response.data.dossiers[0].uuid);
+              const dossierUuid = response.data.dossiers[0].uuid;
+              setDossierUuid(dossierUuid);
+              console.log("UUID du dossier créé:", dossierUuid);
+
+              // Création de la visite
+              try {
+                const visiteResponse = await visiteApi.create({
+                  date_visite: data.data.date_visite,
+                  motif: data.data.motif,
+                  anamnese: data.data.anamnese,
+                  antecedants_medicaux: data.data.antecedants_medicaux,
+                  enquete_socioculturelle: data.data.enquete_socioculturelle || "",
+                  dossier_uuid: dossierUuid
+                });
+                console.log("Visite créée avec succès");
+
+                // Création de la consultation
+                if (visiteResponse?.data?.uuid) {
+                  try {
+                    await consultationApi.create({
+                      motif: "EXTERNAL",
+                      visite_uuid: visiteResponse.data.uuid
+                    });
+                    console.log("Consultation créée avec succès");
+                  } catch (consultationError) {
+                    console.error("Erreur lors de la création de la consultation:", consultationError);
+                    const errorMessage: Message = {
+                      id: uuidv4(),
+                      content: "Désolé, une erreur s'est produite lors de la création de la consultation. Veuillez réessayer.",
+                      role: "assistant",
+                    };
+                    setMessages((prev) => [...prev, errorMessage]);
+                  }
+                }
+              } catch (visiteError) {
+                console.error("Erreur lors de la création de la visite:", visiteError);
+                const errorMessage: Message = {
+                  id: uuidv4(),
+                  content: "Désolé, une erreur s'est produite lors de la création de la visite. Veuillez réessayer.",
+                  role: "assistant",
+                };
+                setMessages((prev) => [...prev, errorMessage]);
+              }
             } else {
                // Gérer le cas où l'UUID du dossier n'est pas retourné
                 const errorMessage: Message = {
