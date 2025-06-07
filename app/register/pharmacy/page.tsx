@@ -15,7 +15,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { validatePhone } from '@/app/utils/validations/registerValidations';
-import pharmacyApi from '@/lib/api/pharmacy';
+import { pharmacyApi } from '@/lib/api/pharmacy';
 
 const servicesList = [
   { value: "consultation", label: "Consultation" },

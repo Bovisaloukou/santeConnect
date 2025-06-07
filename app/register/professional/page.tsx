@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -25,7 +25,6 @@ export default function ProfessionalRegisterPage() {
   const router = useRouter()
   const { toast } = useToast()
   const { data: session } = useSession()
-  const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
   const [specialty, setSpecialty] = useState("")
   const [doctorRole, setDoctorRole] = useState("")
@@ -36,6 +35,7 @@ export default function ProfessionalRegisterPage() {
 
     const formData = new FormData(e.currentTarget)
     const formValues = Object.fromEntries(formData.entries())
+    const searchParams = new URLSearchParams(window.location.search)
     const serviceUuid = searchParams.get('serviceUuid')
 
     if (!serviceUuid) {
