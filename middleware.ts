@@ -12,7 +12,8 @@ export default auth((req) => {
 
   // Vérification de la session pour les routes protégées
   if ((req.nextUrl.pathname.startsWith("/register-center") || 
-       req.nextUrl.pathname.startsWith("/register/pharmacy")) && !session) {
+       req.nextUrl.pathname.startsWith("/register/pharmacy") ||
+       req.nextUrl.pathname.startsWith("/register/professional")) && !session) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
@@ -37,5 +38,6 @@ export const config = {
     "/profile/:path*",
     "/register-center",
     "/register/pharmacy",
+    "/register/professional",
   ],
 }; 

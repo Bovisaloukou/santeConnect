@@ -2,9 +2,9 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,16 +13,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
+import { medecinApi } from "@/lib/api/medecin"
+import { useSession } from "next-auth/react"
 
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { doctorRoles } from "./doctorRoles"
+import { specialties } from "./specialties"
 
 export default function ProfessionalRegisterPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { data: session } = useSession()
   const [isLoading, setIsLoading] = useState(false)
   const [specialty, setSpecialty] = useState("")
-  const [healthcareCenter, setHealthcareCenter] = useState("")
+  const [doctorRole, setDoctorRole] = useState("")
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -30,40 +35,58 @@ export default function ProfessionalRegisterPage() {
 
     const formData = new FormData(e.currentTarget)
     const formValues = Object.fromEntries(formData.entries())
+    const searchParams = new URLSearchParams(window.location.search)
+    const serviceUuid = searchParams.get('serviceUuid')
 
-    const professionalData = {
-      professionalOrderNumber: formValues.professionalOrderNumber as string,
-      specialty: specialty,
-      healthcareCenter: healthcareCenter,
+    if (!serviceUuid) {
+      toast({
+        title: "Erreur",
+        description: "L'identifiant du service est manquant",
+        variant: "destructive"
+      })
+      setIsLoading(false)
+      return
     }
 
-    // Simuler une soumission (remplacez par votre logique d'API)
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    if (!session?.user?.id) {
+      toast({
+        title: "Erreur",
+        description: "Vous devez être connecté pour effectuer cette action",
+        variant: "destructive"
+      })
+      setIsLoading(false)
+      return
+    }
 
-    toast({
-      title: "Informations professionnelles enregistrées!",
-      description: "Vos informations professionnelles ont été enregistrées avec succès.",
-    })
+    const professionalData = {
+      numeroOrdre: formValues.professionalOrderNumber as string,
+      role: doctorRole,
+      specialite: specialty,
+      userUuid: session.user.id,
+      serviceUuid: serviceUuid
+    }
 
-    setTimeout(() => {
-      router.push("/dashboard/professional") // Rediriger vers le tableau de bord professionnel
-    }, 2000)
+    try {
+      await medecinApi.create(professionalData)
+      
+      toast({
+        title: "Informations professionnelles enregistrées!",
+        description: "Vos informations professionnelles ont été enregistrées avec succès.",
+      })
+
+      setTimeout(() => {
+        router.push("/dashboard/patient")
+      }, 2000)
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'enregistrement des informations",
+        variant: "destructive"
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
-
-  // Données de remplacement pour les listes déroulantes
-  const specialties = [
-    { value: "general-practitioner", label: "Médecin Généraliste" },
-    { value: "cardiologist", label: "Cardiologue" },
-    { value: "dermatologist", label: "Dermatologue" },
-    { value: "pediatrician", label: "Pédiatre" },
-    { value: "surgeon", label: "Chirurgien" },
-  ];
-
-  const healthcareCenters = [
-    { value: "center-a", label: "Centre Hospitalier A" },
-    { value: "clinic-b", label: "Clinique B" },
-    { value: "hospital-c", label: "Hôpital C" },
-  ];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -79,9 +102,32 @@ export default function ProfessionalRegisterPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="professionalOrderNumber">Numéro d'ordre professionnel</Label>
-                    <Input id="professionalOrderNumber" name="professionalOrderNumber" required />
-                  </div>
-                  <div className="space-y-2">
+                    <Input 
+                      id="professionalOrderNumber" 
+                      name="professionalOrderNumber" 
+                      placeholder="1234-25"
+                      required 
+                    />
+                    <p className="text-sm text-gray-500">
+                      Numéro d'ordre du médecin inscrit à l'ONMB (ex: 1234-25)
+                    </p>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="doctorRole">Rôle du médecin</Label>
+                    <Select onValueChange={setDoctorRole} value={doctorRole} required>
+                      <SelectTrigger id="doctorRole">
+                        <SelectValue placeholder="Sélectionner un rôle" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {doctorRoles.map((role) => (
+                          <SelectItem key={role.value} value={role.value}>
+                            {role.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
                     <Label htmlFor="specialty">Spécialité</Label>
                     <Select onValueChange={setSpecialty} value={specialty} required>
                       <SelectTrigger id="specialty">
@@ -96,21 +142,6 @@ export default function ProfessionalRegisterPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="healthcareCenter">Centre de santé</Label>
-                    <Select onValueChange={setHealthcareCenter} value={healthcareCenter} required>
-                      <SelectTrigger id="healthcareCenter">
-                        <SelectValue placeholder="Sélectionner un centre de santé" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {healthcareCenters.map((c) => (
-                          <SelectItem key={c.value} value={c.value}>
-                            {c.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
               </CardContent>
               <CardFooter className="flex flex-col space-y-4">
                 <Button type="submit" className="w-full" disabled={isLoading}>
@@ -118,7 +149,7 @@ export default function ProfessionalRegisterPage() {
                 </Button>
                  <p className="text-center text-sm text-gray-600">
                    <Link href="/dashboard/patient" className="text-emerald-600 hover:underline">
-                     Retour au tableau de bord patient
+                     Retour au tableau de bord
                    </Link>
                  </p>
               </CardFooter>

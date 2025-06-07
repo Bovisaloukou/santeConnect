@@ -47,7 +47,11 @@ export interface MedicalCenter {
   phone: string;
   icon: React.ElementType;
   images: string[];
-  services: { name: string; description?: string }[];
+  services: { 
+    name: string; 
+    description?: string;
+    uuid: string;
+  }[];
 }
 
 // Fonction pour mapper les données du backend vers le format attendu par le composant
@@ -75,7 +79,8 @@ const mapBackendDetailToFrontend = (backendData: BackendHealthCenterDetail): Med
     images: selectedImages,
     services: backendData.healthServices.map(service => ({
       name: service.serviceName,
-      description: service.description || undefined
+      description: service.description || undefined,
+      uuid: service.uuid
     }))
   };
 };
@@ -256,7 +261,7 @@ export default function MedicalCenterDetailPage() {
             <div className="mb-8">
               <h2 className="text-2xl font-semibold text-neutral-dark-gray mb-4">Services Proposés</h2>
               <div className="grid grid-cols-1 gap-4">
-                {center.services.map((service: { name: string; description?: string }, index: number) => (
+                {center.services.map((service: { name: string; description?: string; uuid: string }, index: number) => (
                   <div key={index} className="bg-neutral-light-gray p-4 rounded-md border border-neutral-medium-gray/20 flex items-center justify-between">
                     <div className="flex-1">
                       <span className="text-neutral-dark-gray font-medium">{service.name}</span>
@@ -282,7 +287,7 @@ export default function MedicalCenterDetailPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            router.push("/register/professional");
+                            router.push(`/register/professional?serviceUuid=${service.uuid}`);
                           }}
                         >
                           S'affilier au centre

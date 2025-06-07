@@ -123,4 +123,55 @@ export interface Patient {
 export interface PatientResponse {
   message: string;
   data: Patient[];
+}
+
+export interface N8nResponse {
+  message: string;
+  data: {
+    stop: boolean;
+    date_visite: string;
+    motif: string;
+    anamnese: string;
+    antecedants_medicaux: string;
+    enquete_socioculturelle: string | null;
+    identite: {
+      nom: string;
+      prenom: string;
+      age: string;
+      sexe: string;
+    };
+  };
+  status: string;
+}
+
+export interface Consultation {
+  motif: string;
+  visite_uuid: string;
+  date_heure?: string;
+  symptomes?: string;
+  diagnostic?: string;
+  examens_physique?: string;
+  observations?: string;
+  actes_realises?: string;
+  rendez_vous?: string;
+  medecin_uuid?: string;
+  care_uuid?: string;
+}
+
+export interface ConsultationResponse {
+  message: string;
+  data: Consultation;
+}
+
+export interface Medecin {
+  numeroOrdre: string;
+  role: string;
+  specialite: string;
+  userUuid: string;
+  serviceUuid: string;
+}
+
+export interface MedecinResponse {
+  message: string;
+  data: Medecin;
 } 
