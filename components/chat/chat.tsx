@@ -176,7 +176,7 @@ export function Chat() {
                       date_visite: data.data.date_visite,
                       motif: data.data.motif,
                       anamnese: data.data.anamnese,
-                      antecedants_medicaux: data.data.antecedents_medicaux,
+                      antecedants_medicaux: data.data.antecedants_medicaux,
                       enquete_socioculturelle: data.data.enquete_socioculturelle || "",
                       dossier_uuid: dossierUuid
                     });
@@ -185,7 +185,7 @@ export function Chat() {
                       date_visite: data.data.date_visite,
                       motif: data.data.motif,
                       anamnese: data.data.anamnese,
-                      antecedants_medicaux: data.data.antecedents_medicaux,
+                      antecedants_medicaux: data.data.antecedants_medicaux,
                       enquete_socioculturelle: data.data.enquete_socioculturelle || "",
                       dossier_uuid: dossierUuid
                     });
@@ -287,7 +287,7 @@ export function Chat() {
         
         setTimeout(() => {
           router.push("/dashboard/patient");
-        }, 30000);
+        }, 50000);
       }
     } catch (error) {
       console.error("Erreur:", error);
