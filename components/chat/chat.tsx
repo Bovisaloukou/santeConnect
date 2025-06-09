@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { v4 as uuidv4 } from "uuid";
 import ReactMarkdown from "react-markdown";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ExtendedSession } from "@/lib/api/types";
 import { patientApi } from "@/lib/api/patient";
 import { visiteApi } from "@/lib/api/visite";
 import { consultationApi } from "@/lib/api/consultation";
 import { N8nResponse } from "@/lib/api/types";
+import { healthServiceApi, HealthService } from "@/lib/api/healthService";
 
 interface Message {
   id: string;
@@ -48,6 +49,8 @@ export function Chat() {
   const [dossierUuid, setDossierUuid] = useState<string | null>(null);
   const scrollRef = useChatScroll(messages);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const centerId = searchParams.get('centerId');
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -144,84 +147,135 @@ export function Chat() {
       if (data.data?.stop) {
         setIsRedirecting(true);
 
-        // Appel à l'API pour créer le patient et le dossier via la nouvelle fonction
-        if (session?.user?.healthServiceUuid) {
+        // Vérifier si le service suggéré est disponible dans le centre
+        if (centerId && data.data.service_suggere) {
           try {
-            const response = await patientApi.create({
-              service_uuid: session.user.healthServiceUuid
-            });
+            const servicesResponse = await healthServiceApi.getByHealthCenter(centerId);
+            const services = servicesResponse.data;
+            
+            // Recherche du service suggéré dans la liste des services
+            const suggestedService = services.find((service: HealthService) => 
+              service.serviceName.toLowerCase().includes(data.data.service_suggere?.toLowerCase() || '')
+            );
 
-            if (response?.data?.dossiers?.[0]?.uuid) {
-              const dossierUuid = response.data.dossiers[0].uuid;
-              setDossierUuid(dossierUuid);
-              console.log("UUID du dossier créé:", dossierUuid);
-
-              // Création de la visite
+            if (suggestedService) {
+              // Le service est disponible, on peut créer le patient
               try {
-                const visiteResponse = await visiteApi.create({
-                  date_visite: data.data.date_visite,
-                  motif: data.data.motif,
-                  anamnese: data.data.anamnese,
-                  antecedants_medicaux: data.data.antecedants_medicaux,
-                  enquete_socioculturelle: data.data.enquete_socioculturelle || "",
-                  dossier_uuid: dossierUuid
+                const response = await patientApi.create({
+                  service_uuid: suggestedService.uuid
                 });
-                console.log("Visite créée avec succès");
 
-                // Création de la consultation
-                if (visiteResponse?.data?.uuid) {
+                if (response?.data?.dossiers?.[0]?.uuid) {
+                  const dossierUuid = response.data.dossiers[0].uuid;
+                  setDossierUuid(dossierUuid);
+                  console.log("UUID du dossier créé:", dossierUuid);
+
+                  // Création de la visite
                   try {
-                    await consultationApi.create({
-                      motif: "EXTERNAL",
-                      visite_uuid: visiteResponse.data.uuid
+                    console.log("Tentative de création de la visite avec les données:", {
+                      date_visite: data.data.date_visite,
+                      motif: data.data.motif,
+                      anamnese: data.data.anamnese,
+                      antecedants_medicaux: data.data.antecedents_medicaux,
+                      enquete_socioculturelle: data.data.enquete_socioculturelle || "",
+                      dossier_uuid: dossierUuid
                     });
-                    console.log("Consultation créée avec succès");
-                  } catch (consultationError) {
-                    console.error("Erreur lors de la création de la consultation:", consultationError);
+
+                    const visiteResponse = await visiteApi.create({
+                      date_visite: data.data.date_visite,
+                      motif: data.data.motif,
+                      anamnese: data.data.anamnese,
+                      antecedants_medicaux: data.data.antecedents_medicaux,
+                      enquete_socioculturelle: data.data.enquete_socioculturelle || "",
+                      dossier_uuid: dossierUuid
+                    });
+                    console.log("Réponse de l'API visite:", visiteResponse);
+
+                    // Création de la consultation
+                    if (visiteResponse?.data?.uuid) {
+                      console.log("UUID de la visite créée:", visiteResponse.data.uuid);
+                      try {
+                        console.log("Tentative de création de la consultation avec les données:", {
+                          motif: "EXTERNAL",
+                          visite_uuid: visiteResponse.data.uuid
+                        });
+                        const consultationResponse = await consultationApi.create({
+                          motif: "EXTERNAL",
+                          visite_uuid: visiteResponse.data.uuid
+                        });
+                        console.log("Réponse de l'API consultation:", consultationResponse);
+                      } catch (consultationError) {
+                        console.error("Erreur détaillée lors de la création de la consultation:", {
+                          error: consultationError,
+                          message: consultationError instanceof Error ? consultationError.message : 'Erreur inconnue',
+                          stack: consultationError instanceof Error ? consultationError.stack : undefined
+                        });
+                        const errorMessage: Message = {
+                          id: uuidv4(),
+                          content: "Désolé, une erreur s'est produite lors de la création de la consultation. Veuillez réessayer.",
+                          role: "assistant",
+                        };
+                        setMessages((prev) => [...prev, errorMessage]);
+                      }
+                    }
+                  } catch (visiteError) {
+                    console.error("Erreur détaillée lors de la création de la visite:", {
+                      error: visiteError,
+                      message: visiteError instanceof Error ? visiteError.message : 'Erreur inconnue',
+                      stack: visiteError instanceof Error ? visiteError.stack : undefined,
+                      response: (visiteError as any)?.response?.data
+                    });
                     const errorMessage: Message = {
                       id: uuidv4(),
-                      content: "Désolé, une erreur s'est produite lors de la création de la consultation. Veuillez réessayer.",
+                      content: "Désolé, une erreur s'est produite lors de la création de la visite. Veuillez réessayer.",
                       role: "assistant",
                     };
                     setMessages((prev) => [...prev, errorMessage]);
                   }
+                } else {
+                  const errorMessage: Message = {
+                    id: uuidv4(),
+                    content: "Désolé, une erreur s'est produite lors de la création du dossier. Veuillez réessayer.",
+                    role: "assistant",
+                  };
+                  setMessages((prev) => [...prev, errorMessage]);
                 }
-              } catch (visiteError) {
-                console.error("Erreur lors de la création de la visite:", visiteError);
+              } catch (patientError) {
                 const errorMessage: Message = {
                   id: uuidv4(),
-                  content: "Désolé, une erreur s'est produite lors de la création de la visite. Veuillez réessayer.",
+                  content: "Désolé, une erreur s'est produite lors de l'appel API pour créer le patient. Veuillez réessayer.",
                   role: "assistant",
                 };
                 setMessages((prev) => [...prev, errorMessage]);
               }
             } else {
-               // Gérer le cas où l'UUID du dossier n'est pas retourné
-                const errorMessage: Message = {
-                  id: uuidv4(),
-                  content: "Désolé, une erreur s'est produite lors de la création du dossier. Veuillez réessayer.",
-                  role: "assistant",
-                };
-                setMessages((prev) => [...prev, errorMessage]);
-            }
-
-          } catch (patientError) {
-            // Gérer les erreurs de l'appel API
-             const errorMessage: Message = {
+              // Le service n'est pas disponible
+              const errorMessage: Message = {
                 id: uuidv4(),
-                content: "Désolé, une erreur s'est produite lors de l'appel API pour créer le patient. Veuillez réessayer.",
+                content: `Le service "${data.data.service_suggere}" n'est pas disponible dans ce centre médical. Veuillez consulter la page des centres médicaux pour trouver un centre proposant ce service.`,
                 role: "assistant",
               };
               setMessages((prev) => [...prev, errorMessage]);
+              return;
+            }
+          } catch (error) {
+            console.error("Erreur lors de la récupération des services:", error);
+            const errorMessage: Message = {
+              id: uuidv4(),
+              content: "Désolé, une erreur s'est produite lors de la vérification des services disponibles. Veuillez réessayer.",
+              role: "assistant",
+            };
+            setMessages((prev) => [...prev, errorMessage]);
+            return;
           }
         } else {
-           console.error("healthServiceUuid not found in session.");
-            const errorMessage: Message = {
-                id: uuidv4(),
-                content: "Désolé, je n'ai pas pu trouver les informations de service nécessaires dans votre session.",
-                role: "assistant",
-              };
-              setMessages((prev) => [...prev, errorMessage]);
+          const errorMessage: Message = {
+            id: uuidv4(),
+            content: "Désolé, je n'ai pas pu trouver les informations nécessaires pour vous orienter vers le bon service.",
+            role: "assistant",
+          };
+          setMessages((prev) => [...prev, errorMessage]);
+          return;
         }
 
         const redirectMessage: Message = {
@@ -233,7 +287,7 @@ export function Chat() {
         
         setTimeout(() => {
           router.push("/dashboard/patient");
-        }, 20000);
+        }, 30000);
       }
     } catch (error) {
       console.error("Erreur:", error);

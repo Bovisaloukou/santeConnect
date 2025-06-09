@@ -313,7 +313,7 @@ export default function MedicalCenterDetailPage() {
               className="bg-accent-turquoise hover:bg-accent-turquoise/90 text-neutral-white"
               onClick={() => {
                 if (user) {
-                  router.push("/chat");
+                  router.push(`/chat?centerId=${center.id}`);
                 } else {
                   router.push("/login");
                 }

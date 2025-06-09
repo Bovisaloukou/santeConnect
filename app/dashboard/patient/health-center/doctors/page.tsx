@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -20,45 +21,103 @@ import {
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Check, X, UserPlus } from "lucide-react"
+import { healthCenterApi } from "@/lib/api/healthCenter"
 
 interface Doctor {
-  id: string
+  uuid: string
+  numeroOrdre: string
+  role: string
+  specialite: string
+  userProfile: {
+    firstName: string
+    lastName: string
+    email: string
+  }
+}
+
+interface HealthService {
+  uuid: string
+  serviceName: string
+  medecins: Doctor[]
+}
+
+interface HealthCenter {
+  uuid: string
   name: string
-  specialty: string
-  status: "pending" | "approved" | "rejected"
-  email: string
+  healthServices: HealthService[]
 }
 
 export default function DoctorsPage() {
-  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const { data: session, status } = useSession()
+  const [healthCenter, setHealthCenter] = useState<HealthCenter | null>(null)
+  const [loading, setLoading] = useState(true)
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
+  useEffect(() => {
+    const fetchHealthCenter = async () => {
+      if (status === "loading") return
+      
+      try {
+        if (session?.user?.healthCenterUuid) {
+          const response = await healthCenterApi.getById(session.user.healthCenterUuid)
+          setHealthCenter(response.data)
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération du centre de santé:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchHealthCenter()
+  }, [session?.user?.healthCenterUuid, status])
+
   const handleApproveDoctor = (id: string) => {
-    setDoctors(doctors.map(d => 
-      d.id === id ? { ...d, status: "approved" } : d
-    ))
+    setHealthCenter(prevHealthCenter => ({
+      ...prevHealthCenter!,
+      healthServices: prevHealthCenter!.healthServices.map(service => ({
+        ...service,
+        medecins: service.medecins.map(d => 
+          d.uuid === id ? { ...d, role: "approved" } : d
+        )
+      }))
+    }))
   }
 
   const handleRejectDoctor = (id: string) => {
-    setDoctors(doctors.map(d => 
-      d.id === id ? { ...d, status: "rejected" } : d
-    ))
+    setHealthCenter(prevHealthCenter => ({
+      ...prevHealthCenter!,
+      healthServices: prevHealthCenter!.healthServices.map(service => ({
+        ...service,
+        medecins: service.medecins.map(d => 
+          d.uuid === id ? { ...d, role: "rejected" } : d
+        )
+      }))
+    }))
   }
 
-  const getStatusBadge = (status: Doctor["status"]) => {
+  const getStatusBadge = (status: string) => {
     const statusConfig = {
       pending: { label: "En attente", variant: "warning" },
       approved: { label: "Approuvé", variant: "success" },
       rejected: { label: "Rejeté", variant: "destructive" },
     }
 
-    const config = statusConfig[status]
+    const config = statusConfig[status as keyof typeof statusConfig]
     return (
       <Badge variant={config.variant as any}>
         {config.label}
       </Badge>
     )
+  }
+
+  if (status === "loading" || loading) {
+    return <div className="container mx-auto p-6">Chargement...</div>
+  }
+
+  if (status === "unauthenticated") {
+    return <div className="container mx-auto p-6">Veuillez vous connecter pour accéder à cette page.</div>
   }
 
   return (
@@ -83,42 +142,11 @@ export default function DoctorsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {doctors.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    Aucune demande d'affiliation
-                  </TableCell>
-                </TableRow>
-              ) : (
-                doctors.map((doctor) => (
-                  <TableRow key={doctor.id}>
-                    <TableCell>{doctor.name}</TableCell>
-                    <TableCell>{doctor.specialty}</TableCell>
-                    <TableCell>{doctor.email}</TableCell>
-                    <TableCell>{getStatusBadge(doctor.status)}</TableCell>
-                    <TableCell className="text-right">
-                      {doctor.status === "pending" && (
-                        <div className="flex justify-end space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleApproveDoctor(doctor.id)}
-                          >
-                            <Check className="h-4 w-4 text-green-500" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRejectDoctor(doctor.id)}
-                          >
-                            <X className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </div>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8">
+                  Aucune demande d'affiliation
+                </TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         </CardContent>
@@ -136,41 +164,27 @@ export default function DoctorsPage() {
                 <TableHead>Spécialité</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Services</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {doctors.filter(d => d.status === "approved").length === 0 ? (
+              {healthCenter?.healthServices.map((service) => (
+                service.medecins.map((doctor) => (
+                  <TableRow key={doctor.uuid}>
+                    <TableCell>{`${doctor.userProfile.lastName} ${doctor.userProfile.firstName}`}</TableCell>
+                    <TableCell>{doctor.specialite}</TableCell>
+                    <TableCell>{doctor.userProfile.email}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{service.serviceName}</Badge>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ))}
+              {!healthCenter?.healthServices.some(service => service.medecins.length > 0) && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
+                  <TableCell colSpan={4} className="text-center py-8">
                     Aucun médecin affilié
                   </TableCell>
                 </TableRow>
-              ) : (
-                doctors
-                  .filter(d => d.status === "approved")
-                  .map((doctor) => (
-                    <TableRow key={doctor.id}>
-                      <TableCell>{doctor.name}</TableCell>
-                      <TableCell>{doctor.specialty}</TableCell>
-                      <TableCell>{doctor.email}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">Consultation</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelectedDoctor(doctor)
-                            setIsDialogOpen(true)
-                          }}
-                        >
-                          <UserPlus className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
               )}
             </TableBody>
           </Table>
@@ -185,7 +199,7 @@ export default function DoctorsPage() {
           {selectedDoctor && (
             <div className="space-y-4">
               <p>
-                Gérer les services pour le Dr. {selectedDoctor.name}
+                Gérer les services pour le Dr. {selectedDoctor.userProfile.firstName} {selectedDoctor.userProfile.lastName}
               </p>
               {/* Ajouter ici la liste des services disponibles avec des cases à cocher */}
             </div>

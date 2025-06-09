@@ -132,8 +132,9 @@ export interface N8nResponse {
     date_visite: string;
     motif: string;
     anamnese: string;
-    antecedants_medicaux: string;
+    antecedents_medicaux: string;
     enquete_socioculturelle: string | null;
+    service_suggere?: string;
     identite: {
       nom: string;
       prenom: string;
