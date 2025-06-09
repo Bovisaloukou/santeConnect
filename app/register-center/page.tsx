@@ -27,7 +27,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 const medicalSpecialtiesList = [
-  { value: "medecine-generale", label: "Médecine générale" },
+  { value: "medecine-generale", label: "Médecine Générale" },
   { value: "gynecologie", label: "Gynécologie" },
   { value: "pediatrie", label: "Pédiatrie" },
   { value: "cardiologie", label: "Cardiologie" },
@@ -38,9 +38,17 @@ const medicalSpecialtiesList = [
   { value: "psychiatrie", label: "Psychiatrie" },
   { value: "radiologie", label: "Radiologie" },
   { value: "urologie", label: "Urologie" },
+  { value: "gastro-enterologie", label: "Gastro-entérologie et Hépatologie" },
+  { value: "pneumologie", label: "Pneumologie" },
+  { value: "rhumatologie", label: "Rhumatologie" },
+  { value: "endocrinologie", label: "Endocrinologie-Diabétologie-Nutrition" },
+  { value: "nephrologie", label: "Néphrologie" },
+  { value: "oncologie", label: "Oncologie" },
+  { value: "chirurgie-generale", label: "Chirurgie Générale et Digestive" },
+  { value: "chirurgie-orthopedique", label: "Chirurgie Orthopédique et Traumatologique" },
+  { value: "medecine-urgence", label: "Médecine d'Urgence" },
   { value: "kinesitherapie", label: "Kinésithérapie" },
   { value: "dentaire", label: "Chirurgie Dentaire" },
-  // Add more specialties here
 ];
 
 const structureTypes = [
