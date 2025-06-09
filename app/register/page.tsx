@@ -45,6 +45,7 @@ export default function RegisterPage() {
   const [selectedYear, setSelectedYear] = useState<string>("")
   const [isBirthdateTouched, setIsBirthdateTouched] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   // State variables for errors
   const [firstNameError, setFirstNameError] = useState<string>("")
@@ -97,6 +98,15 @@ export default function RegisterPage() {
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    if (!termsAccepted) {
+      toast({
+        title: "Erreur",
+        description: "Vous devez accepter les conditions d'utilisation pour continuer.",
+        variant: "destructive",
+      })
+      return
+    }
 
     const formData = new FormData(e.currentTarget)
     const formValues = Object.fromEntries(formData.entries())
@@ -442,6 +452,22 @@ export default function RegisterPage() {
                         </button>
                       </div>
                       {confirmPasswordError && <p className="text-red-500 text-sm">{confirmPasswordError}</p>}
+                    </div>
+                    <div className="flex items-center space-x-2 mb-4">
+                      <input
+                        type="checkbox"
+                        id="terms"
+                        checked={termsAccepted}
+                        onChange={(e) => setTermsAccepted(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue"
+                        required
+                      />
+                      <label htmlFor="terms" className="text-sm text-gray-600">
+                        J'accepte les{" "}
+                        <Link href="/terms" className="text-primary-blue hover:underline" target="_blank">
+                          conditions d'utilisation
+                        </Link>
+                      </label>
                     </div>
                     <CardFooter className="flex flex-col space-y-4 px-0 pb-0">
                       <Button type="submit" className="w-full" disabled={isLoading}>
