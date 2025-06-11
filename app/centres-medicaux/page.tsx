@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer"
 import Link from "next/link"
 import React, { useEffect, useState } from "react"
 import { healthCenterApi } from "@/lib/api/healthCenter"
+import LoadingSpinner from "@/components/ui/loading-spinner"
 
 export interface MedicalCenter {
   id: string
@@ -96,7 +97,9 @@ export default function CentresMedicauxPage() {
         <Header />
         <main className="flex-1 py-8 md:py-12">
           <div className="container mx-auto px-4 text-center">
-            <p>Chargement des centres médicaux...</p>
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <LoadingSpinner size="lg" />
+            </div>
           </div>
         </main>
         <Footer />

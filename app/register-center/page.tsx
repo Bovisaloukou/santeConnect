@@ -25,6 +25,7 @@ import { healthCenterApi } from '@/lib/api/healthCenter';
 import { HealthCenter } from '@/lib/api/types';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import LoadingSpinner from "@/components/ui/loading-spinner"
 
 const medicalSpecialtiesList = [
   { value: "medecine-generale", label: "Médecine Générale" },
@@ -476,7 +477,12 @@ const RegisterCenterPage = () => {
           {/* Bouton de soumission */}
           <div className="flex justify-center mt-6">
             <Button type="submit" disabled={isLoading || isLoadingData}>
-              {isLoading ? "Envoi en cours..." : "Inscrire le centre"}
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <LoadingSpinner size="sm" className="mr-2" />
+                  <span>Envoi en cours...</span>
+                </div>
+              ) : "Inscrire le centre"}
             </Button>
           </div>
         </form>

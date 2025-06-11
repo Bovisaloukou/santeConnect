@@ -14,6 +14,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { useToast } from "@/components/ui/use-toast"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
+import LoadingSpinner from "@/components/ui/loading-spinner"
 
 import { Eye, EyeOff } from "lucide-react"
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton"
@@ -471,7 +472,12 @@ export default function RegisterPage() {
                     </div>
                     <CardFooter className="flex flex-col space-y-4 px-0 pb-0">
                       <Button type="submit" className="w-full" disabled={isLoading}>
-                        {isLoading ? "Inscription en cours..." : "S'inscrire"}
+                        {isLoading ? (
+                          <div className="flex items-center justify-center">
+                            <LoadingSpinner size="sm" className="mr-2" />
+                            <span>Inscription en cours...</span>
+                          </div>
+                        ) : "S'inscrire"}
                       </Button>
                       <p className="text-center text-sm text-gray-600">
                         Déjà inscrit?{" "}

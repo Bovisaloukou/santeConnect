@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer"
 import { useEffect, useState } from "react"
 import { pharmacyApi } from "@/lib/api/pharmacy"
 import { PharmacieComponent, MedicamentComponent } from "@/lib/api/types"
+import LoadingSpinner from "@/components/ui/loading-spinner"
 
 export default function PharmaciesClient() {
   const [pharmacies, setPharmacies] = useState<PharmacieComponent[]>([]);
@@ -66,8 +67,10 @@ export default function PharmaciesClient() {
       <div className="flex flex-col min-h-screen bg-neutral-light-gray">
         <Header />
         <main className="flex-1 py-8 md:py-12">
-          <div className="container mx-auto px-4 text-center">
-            <p>Chargement des pharmacies...</p>
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-center min-h-[40vh]">
+              <LoadingSpinner size="lg" />
+            </div>
           </div>
         </main>
         <Footer />

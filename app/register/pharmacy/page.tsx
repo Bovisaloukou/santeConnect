@@ -16,6 +16,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { validatePhone } from '@/app/utils/validations/registerValidations';
 import { pharmacyApi } from '@/lib/api/pharmacy';
+import LoadingSpinner from "@/components/ui/loading-spinner"
 
 const servicesList = [
   { value: "consultation", label: "Consultation" },
@@ -564,7 +565,12 @@ const RegisterPharmacyPage = () => {
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Enregistrement en cours..." : "Enregistrer la pharmacie"}
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <LoadingSpinner size="sm" className="mr-2" />
+                <span>Enregistrement en cours...</span>
+              </div>
+            ) : "Enregistrer la pharmacie"}
           </Button>
         </form>
       </main>

@@ -15,6 +15,7 @@ import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import { medecinApi } from "@/lib/api/medecin"
 import { useSession } from "next-auth/react"
+import LoadingSpinner from "@/components/ui/loading-spinner"
 
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
@@ -145,7 +146,12 @@ export default function ProfessionalRegisterPage() {
               </CardContent>
               <CardFooter className="flex flex-col space-y-4">
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Enregistrement..." : "Enregistrer les informations professionnelles"}
+                  {isLoading ? (
+                    <div className="flex items-center justify-center">
+                      <LoadingSpinner size="sm" className="mr-2" />
+                      <span>Enregistrement...</span>
+                    </div>
+                  ) : "Enregistrer les informations professionnelles"}
                 </Button>
                  <p className="text-center text-sm text-gray-600">
                    <Link href="/dashboard/patient" className="text-emerald-600 hover:underline">
