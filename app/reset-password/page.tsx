@@ -4,11 +4,12 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Suspense } from 'react';
 import ResetPasswordForm from './ResetPasswordForm';
+import LoadingSpinner from "@/components/ui/loading-spinner"
 
 function LoadingFallback() {
   return (
-    <div className="w-full max-w-md text-center p-8">
-      <p>Chargement du formulaire de réinitialisation...</p>
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <LoadingSpinner size="lg" />
     </div>
   );
 }
