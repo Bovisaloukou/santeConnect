@@ -9,14 +9,17 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { medicamentsApi } from "@/lib/api/medicaments"
 import { Medicament as ApiMedicament } from "@/lib/api/types"
+import LoadingSpinner from "@/components/ui/loading-spinner"
 
 export default function ProductsPage() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [medicaments, setMedicaments] = useState<Medicament[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (status === "loading") return
+
     const loadMedicaments = async () => {
       try {
         if (session?.user?.pharmacyUuid) {
@@ -26,7 +29,7 @@ export default function ProductsPage() {
             nom: med.name,
             description: med.description,
             prix: med.prix,
-            stock: true // Valeur par défaut en stock
+            stock: true
           }))
           setMedicaments(transformedData)
         }
@@ -38,10 +41,11 @@ export default function ProductsPage() {
     }
 
     loadMedicaments()
-  }, [session])
+  }, [session?.user?.pharmacyUuid, status])
 
-  if (loading) {
-    return <div>Chargement...</div>
+  if (status === "unauthenticated") {
+    router.push("/login")
+    return null
   }
 
   return (
@@ -54,11 +58,17 @@ export default function ProductsPage() {
         </Button>
       </div>
       
-      <DataTable 
-        columns={columns} 
-        data={medicaments}
-        searchKey="name"
-      />
+      {loading ? (
+        <div className="flex items-center justify-center h-[400px]">
+          <LoadingSpinner size="lg" />
+        </div>
+      ) : (
+        <DataTable 
+          columns={columns} 
+          data={medicaments}
+          searchKey="name"
+        />
+      )}
     </div>
   )
 } 

@@ -61,5 +61,15 @@ export const patientApi = {
     } catch (error) {
       throw error;
     }
+  },
+
+  getByServiceUuid: async (serviceUuid: string) => {
+    try {
+      const client = getApiClient();
+      const response = await client.get(`/api/patients/services/${serviceUuid}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 }; 
