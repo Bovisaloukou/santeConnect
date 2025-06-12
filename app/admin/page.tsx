@@ -22,27 +22,11 @@ const AdminDashboard = () => {
       color: "bg-blue-100"
     },
     {
-      title: "Gestion des utilisateurs",
-      description: "Gérer les comptes utilisateurs et leurs permissions",
-      icon: Users,
-      badge: "Nouveau",
-      path: "/admin/users",
-      color: "bg-green-100"
-    },
-    {
       title: "Soumission de pharmacies",
       description: "Gérer les demandes d'inscription des pharmacies",
       icon: FileText,
       path: "/admin/pharmacy-submissions",
       color: "bg-purple-100"
-    },
-    {
-      title: "Paramètres",
-      description: "Configurer les paramètres du système",
-      icon: Settings,
-      badge: "Bientôt disponible",
-      path: "/admin/settings",
-      color: "bg-orange-100"
     }
   ];
 
