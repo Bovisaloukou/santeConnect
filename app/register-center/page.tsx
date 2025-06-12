@@ -204,8 +204,8 @@ const RegisterCenterPage = () => {
     }
 
     const options = {
-      enableHighAccuracy: true, // Demande la meilleure précision possible
-      timeout: 30000, // Augmente le timeout à 30 secondes
+      enableHighAccuracy: false,
+      timeout: 50000, // Augmente le timeout à 10 secondes
       maximumAge: 0 // Ne pas utiliser de position en cache
     };
 
