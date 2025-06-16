@@ -133,7 +133,7 @@ export default function CentresMedicauxPage() {
             Trouvez rapidement les informations essentielles sur les établissements de santé autour de vous.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedCenters.map((center) => (
               <div key={center.id} className="bg-neutral-white p-5 rounded-xl shadow-lg border border-neutral-medium-gray/20 flex flex-col h-full hover:shadow-primary-blue/20 transition-shadow duration-300">
                 <div className="flex justify-between items-start mb-3">

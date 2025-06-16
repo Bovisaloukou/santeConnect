@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "next-auth/react";
 import { patientApi } from "@/lib/api/patient";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 interface UserProfile {
   uuid: string;
@@ -95,15 +96,41 @@ export default function ProfessionalFolder() {
   }, [status, session?.user?.healthServiceUuid]);
 
   if (status === "loading" || loading) {
-    return <div>Chargement...</div>;
+    return (
+      <div className="flex flex-col min-h-screen bg-neutral-light-gray">
+        <main className="flex-1 py-8 md:py-12">
+          <div className="container mx-auto px-4 text-center">
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <LoadingSpinner size="lg" />
+            </div>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   if (status === "unauthenticated") {
-    return <div>Veuillez vous connecter pour accéder à cette page</div>;
+    return (
+      <div className="flex flex-col min-h-screen bg-neutral-light-gray">
+        <main className="flex-1 py-8 md:py-12">
+          <div className="container mx-auto px-4 text-center">
+            <p className="text-red-500">Veuillez vous connecter pour accéder à cette page</p>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Erreur: {error}</div>;
+    return (
+      <div className="flex flex-col min-h-screen bg-neutral-light-gray">
+        <main className="flex-1 py-8 md:py-12">
+          <div className="container mx-auto px-4 text-center">
+            <p className="text-red-500">{error}</p>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   return (
