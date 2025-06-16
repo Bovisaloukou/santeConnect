@@ -68,6 +68,9 @@ const RegisterPharmacyPage = () => {
   const [phoneError, setPhoneError] = useState<string>('');
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [horaires, setHoraires] = useState<Horaires>({
     is24h: true,
     lundiVendredi: {
@@ -190,8 +193,88 @@ const RegisterPharmacyPage = () => {
     }
   };
 
+  const getLocation = () => {
+    setIsGettingLocation(true);
+    setLocationError(null);
+
+    if (!navigator.geolocation) {
+      setLocationError("La géolocalisation n'est pas supportée par votre navigateur");
+      setIsGettingLocation(false);
+      return;
+    }
+
+    const options = {
+      enableHighAccuracy: false,
+      timeout: 50000,
+      maximumAge: 0
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log("Position obtenue:", position);
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        });
+        setIsGettingLocation(false);
+        toast({
+          title: "Localisation obtenue",
+          description: "Votre position a été enregistrée avec succès.",
+        });
+      },
+      (error) => {
+        console.error("Erreur de géolocalisation:", error);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setLocationError("Vous devez autoriser la géolocalisation dans les paramètres de votre navigateur pour continuer");
+            toast({
+              title: "Permission refusée",
+              description: "Veuillez autoriser la géolocalisation dans les paramètres de votre navigateur",
+              variant: "destructive",
+            });
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setLocationError("Les informations de localisation ne sont pas disponibles. Veuillez vérifier votre connexion internet et réessayer.");
+            toast({
+              title: "Position indisponible",
+              description: "Impossible d'obtenir votre position. Veuillez réessayer.",
+              variant: "destructive",
+            });
+            break;
+          case error.TIMEOUT:
+            setLocationError("La demande de géolocalisation a expiré. Veuillez réessayer.");
+            toast({
+              title: "Délai dépassé",
+              description: "La demande de géolocalisation a pris trop de temps. Veuillez réessayer.",
+              variant: "destructive",
+            });
+            break;
+          default:
+            setLocationError("Une erreur est survenue lors de la géolocalisation. Veuillez réessayer.");
+            toast({
+              title: "Erreur",
+              description: "Une erreur inattendue est survenue. Veuillez réessayer.",
+              variant: "destructive",
+            });
+        }
+        setIsGettingLocation(false);
+      },
+      options
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!location) {
+      toast({
+        title: "Erreur",
+        description: "Vous devez obtenir votre localisation avant de soumettre le formulaire",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -226,6 +309,8 @@ const RegisterPharmacyPage = () => {
       formDataToSend.append('adress', formData.address);
       formDataToSend.append('telephone', `+${pharmacyPhone}`);
       formDataToSend.append('userUuid', session?.user?.id || '');
+      formDataToSend.append('latitude', location.latitude.toString());
+      formDataToSend.append('longitude', location.longitude.toString());
 
       await pharmacyApi.register(formDataToSend, files);
 
@@ -251,6 +336,38 @@ const RegisterPharmacyPage = () => {
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8 max-w-3xl">
         <h1 className="text-2xl font-bold mb-6 text-center">Inscription d'une pharmacie</h1>
+        
+        {/* Message de géolocalisation */}
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-blue-800 mb-2">
+            Pour une meilleure expérience, nous avons besoin de votre localisation. 
+            Veuillez vous assurer d'être physiquement présent dans la pharmacie 
+            avant de continuer.
+          </p>
+          <div className="flex items-center gap-4">
+            <Button 
+              onClick={getLocation} 
+              disabled={isGettingLocation}
+              variant="outline"
+            >
+              {isGettingLocation ? (
+                <div className="flex items-center">
+                  <LoadingSpinner size="sm" className="mr-2" />
+                  <span>Obtention de la localisation...</span>
+                </div>
+              ) : "Obtenir ma localisation"}
+            </Button>
+            {location && (
+              <span className="text-sm text-green-600">
+                Localisation obtenue ✓
+              </span>
+            )}
+          </div>
+          {locationError && (
+            <p className="text-red-600 text-sm mt-2">{locationError}</p>
+          )}
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* 1. Informations de base */}
           <div className="p-6 border rounded-lg shadow-sm">

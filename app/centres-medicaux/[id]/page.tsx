@@ -7,6 +7,7 @@ import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import { Button } from "@/components/ui/button"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel"
+import LoadingSpinner from "@/components/ui/loading-spinner"
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -52,6 +53,17 @@ export interface MedicalCenter {
     description?: string;
     uuid: string;
   }[];
+}
+
+// Fonction de mapping pour l'affichage des types en français
+const getTypeLabel = (type: MedicalCenter["type"]): string => {
+  const typeLabels: Record<MedicalCenter["type"], string> = {
+    HOSPITAL: "Hôpital",
+    CLINIC: "Clinique",
+    HEALTH_CENTER: "Centre de santé",
+    DOCTOR_OFFICE: "Cabinet médical"
+  }
+  return typeLabels[type]
 }
 
 // Fonction pour mapper les données du backend vers le format attendu par le composant
@@ -172,7 +184,9 @@ export default function MedicalCenterDetailPage() {
         <Header />
         <main className="flex-1 py-8 md:py-12">
           <div className="container mx-auto px-4 text-center">
-            <p>Chargement des détails du centre médical...</p>
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <LoadingSpinner size="lg" />
+            </div>
           </div>
         </main>
         <Footer />
@@ -239,7 +253,7 @@ export default function MedicalCenterDetailPage() {
             <div className="space-y-3 text-neutral-dark-gray/90">
               <div className="flex items-center space-x-2">
                 {React.createElement(center.icon, { className: "w-5 h-5 text-primary-blue flex-shrink-0" })}
-                <span>Type : {center.type}</span>
+                <span>Type : {getTypeLabel(center.type)}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="w-5 h-5 text-primary-blue flex-shrink-0" />
