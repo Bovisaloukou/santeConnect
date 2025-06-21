@@ -94,6 +94,13 @@ export default function ServicesPage() {
     etat: "NORMAL"
   })
 
+  const getAvailableServices = () => {
+    const existingServiceNames = services.map(service => service.serviceName)
+    return medicalSpecialtiesList.filter(specialty => 
+      !existingServiceNames.includes(specialty.label)
+    )
+  }
+
   const loadServices = async () => {
     if (status !== "authenticated" || !session?.user?.id) return
 
@@ -213,7 +220,7 @@ export default function ServicesPage() {
         <h1 className="text-3xl font-bold">Gestion des Services</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button disabled={getAvailableServices().length === 0}>
               <Plus className="h-4 w-4 mr-2" />
               Ajouter un service
             </Button>
@@ -233,18 +240,37 @@ export default function ServicesPage() {
                     setFormData({ ...formData, serviceName: selectedService?.label || "" })
                   }}
                   value={medicalSpecialtiesList.find(s => s.label === formData.serviceName)?.value || ""}
+                  disabled={editingService !== null}
                 >
                   <SelectTrigger id="serviceName">
-                    <SelectValue placeholder="Sélectionner un service" />
+                    <SelectValue placeholder={
+                      editingService 
+                        ? editingService.serviceName 
+                        : "Sélectionner un service"
+                    } />
                   </SelectTrigger>
                   <SelectContent>
-                    {medicalSpecialtiesList.map((specialty) => (
-                      <SelectItem key={specialty.value} value={specialty.value}>
-                        {specialty.label}
+                    {editingService ? (
+                      <SelectItem 
+                        key={medicalSpecialtiesList.find(s => s.label === editingService.serviceName)?.value} 
+                        value={medicalSpecialtiesList.find(s => s.label === editingService.serviceName)?.value || ""}
+                      >
+                        {editingService.serviceName}
                       </SelectItem>
-                    ))}
+                    ) : (
+                      getAvailableServices().map((specialty) => (
+                        <SelectItem key={specialty.value} value={specialty.value}>
+                          {specialty.label}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
+                {!editingService && getAvailableServices().length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    Tous les services médicaux ont déjà été ajoutés
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
