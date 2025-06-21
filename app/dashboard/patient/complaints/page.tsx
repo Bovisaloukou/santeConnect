@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ComplaintForm } from "@/components/complaint-form"
 import { useApi } from "@/lib/hooks/use-api"
 import { AlertCircle, CheckCircle, Clock, HelpCircle } from "lucide-react"
+import LoadingSpinner from "@/components/ui/loading-spinner"
 
 // Type pour les plaintes
 interface Complaint {
@@ -60,7 +61,11 @@ export default function PatientComplaintsPage() {
   }
 
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-[60vh]">Chargement des plaintes...</div>
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
   }
 
   return (

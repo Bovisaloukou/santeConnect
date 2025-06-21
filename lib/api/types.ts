@@ -42,6 +42,14 @@ export interface HealthCenter {
   email: string;
   userUuid: string;
   services: string[];
+  healthServices?: HealthService[];
+}
+
+export interface HealthService {
+  uuid: string;
+  serviceName: string;
+  description?: string | null;
+  medecins: Medecin[];
 }
 
 export interface Responsable {
@@ -165,11 +173,18 @@ export interface ConsultationResponse {
 }
 
 export interface Medecin {
+  uuid: string;
   numeroOrdre: string;
   role: string;
   specialite: string;
   userUuid: string;
-  serviceUuid: string;
+  serviceUuid?: string;
+  joursConsultation?: string[];
+  userProfile: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }
 
 export interface MedecinResponse {
