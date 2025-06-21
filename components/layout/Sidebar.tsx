@@ -25,14 +25,18 @@ export function Sidebar({ forMobile = false, onClose }: SidebarProps) {
   useEffect(() => {
     const fetchUserRoles = async () => {
       if (!user?.id) {
+        console.log('Aucun user.id trouvé', user)
         return
       }
 
       try {
+        console.log('Appel à userApi.getProfile avec user.id:', user.id)
         const profile = await userApi.getProfile(user.id)
+        console.log('Réponse de userApi.getProfile:', profile)
         
         if (!profile?.roles || !Array.isArray(profile.roles)) {
           setError('Format de rôles invalide')
+          console.log('Format de rôles invalide:', profile)
           return
         }
 
@@ -40,6 +44,7 @@ export function Sidebar({ forMobile = false, onClose }: SidebarProps) {
         setError(null)
       } catch (error) {
         setError('Erreur lors de la récupération des rôles')
+        console.log('Erreur lors de la récupération des rôles:', error)
       }
     }
 
