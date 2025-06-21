@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Pencil, Trash2 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -35,6 +36,31 @@ interface Service {
   etat: "NORMAL" | "UNDERSTAFFED" | "OVERLOADED" | "CRITICAL" | "TEMP_CLOSED"
   healthCenterUuid: string
 }
+
+const medicalSpecialtiesList = [
+  { value: "medecine-generale", label: "Médecine Générale" },
+  { value: "gynecologie", label: "Gynécologie" },
+  { value: "pediatrie", label: "Pédiatrie" },
+  { value: "cardiologie", label: "Cardiologie" },
+  { value: "dermatologie", label: "Dermatologie" },
+  { value: "neurologie", label: "Neurologie" },
+  { value: "ophtalmologie", label: "Ophtalmologie" },
+  { value: "orl", label: "ORL" },
+  { value: "psychiatrie", label: "Psychiatrie" },
+  { value: "radiologie", label: "Radiologie" },
+  { value: "urologie", label: "Urologie" },
+  { value: "gastro-enterologie", label: "Gastro-entérologie et Hépatologie" },
+  { value: "pneumologie", label: "Pneumologie" },
+  { value: "rhumatologie", label: "Rhumatologie" },
+  { value: "endocrinologie", label: "Endocrinologie-Diabétologie-Nutrition" },
+  { value: "nephrologie", label: "Néphrologie" },
+  { value: "oncologie", label: "Oncologie" },
+  { value: "chirurgie-generale", label: "Chirurgie Générale et Digestive" },
+  { value: "chirurgie-orthopedique", label: "Chirurgie Orthopédique et Traumatologique" },
+  { value: "medecine-urgence", label: "Médecine d'Urgence" },
+  { value: "kinesitherapie", label: "Kinésithérapie" },
+  { value: "dentaire", label: "Chirurgie Dentaire" },
+];
 
 const getEtatLabel = (etat: Service["etat"]): string => {
   const etats: Record<Service["etat"], string> = {
@@ -200,14 +226,25 @@ export default function ServicesPage() {
             </DialogHeader>
             <form onSubmit={handleAddService} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="serviceName">Nom du service</Label>
-                <Input 
-                  id="serviceName" 
-                  placeholder="Ex: Consultation générale"
-                  value={formData.serviceName}
-                  onChange={(e) => setFormData({ ...formData, serviceName: e.target.value })}
-                  required
-                />
+                <Label htmlFor="serviceName">Service médical</Label>
+                <Select 
+                  onValueChange={(value) => {
+                    const selectedService = medicalSpecialtiesList.find(s => s.value === value)
+                    setFormData({ ...formData, serviceName: selectedService?.label || "" })
+                  }}
+                  value={medicalSpecialtiesList.find(s => s.label === formData.serviceName)?.value || ""}
+                >
+                  <SelectTrigger id="serviceName">
+                    <SelectValue placeholder="Sélectionner un service" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {medicalSpecialtiesList.map((specialty) => (
+                      <SelectItem key={specialty.value} value={specialty.value}>
+                        {specialty.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
@@ -216,7 +253,6 @@ export default function ServicesPage() {
                   placeholder="Description détaillée du service..."
                   value={formData.description || ""}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  required
                 />
               </div>
               <div className="space-y-2">
