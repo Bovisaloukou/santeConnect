@@ -10,6 +10,7 @@ import { userApi } from "@/lib/api/user"
 import { healthCenterApi } from "@/lib/api/healthCenter"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import LoadingSpinner from "@/components/ui/loading-spinner"
 
 interface HealthCenter {
   uuid: string
@@ -110,7 +111,7 @@ export default function HealthCenterPage() {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
-          <p>Chargement des données...</p>
+          <LoadingSpinner size="lg" />
         </div>
       </div>
     )
