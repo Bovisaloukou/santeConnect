@@ -26,6 +26,12 @@ interface HealthCenter {
     serviceName: string
     description: string | null
     etat: string
+    medecins?: Array<{
+      uuid: string
+      nom: string
+      prenom: string
+      statutActivation: boolean
+    }>
   }>
 }
 
@@ -136,6 +142,15 @@ export default function HealthCenterPage() {
       </div>
     )
   }
+
+  // Calcul du nombre de médecins affiliés et de demandes en attente
+  const medecinsAffilies = healthCenterData.healthServices
+    ?.flatMap(service => service.medecins || [])
+    .filter(medecin => medecin.statutActivation === true).length || 0
+
+  const demandesEnAttente = healthCenterData.healthServices
+    ?.flatMap(service => service.medecins || [])
+    .filter(medecin => medecin.statutActivation === false).length || 0
 
   return (
     <div className="container mx-auto p-6">
@@ -280,7 +295,7 @@ export default function HealthCenterPage() {
             <Stethoscope className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{medecinsAffilies}</div>
             <p className="text-xs text-muted-foreground">Médecins affiliés</p>
           </CardContent>
         </Card>
@@ -300,7 +315,7 @@ export default function HealthCenterPage() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{demandesEnAttente}</div>
             <p className="text-xs text-muted-foreground">Demandes en attente</p>
           </CardContent>
         </Card>
