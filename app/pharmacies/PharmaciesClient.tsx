@@ -10,6 +10,7 @@ import { PharmacieComponent, MedicamentComponent } from "@/lib/api/types"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
+import type { Pharmacie, Medicament } from "@/lib/api/types"
 
 export default function PharmaciesClient() {
   const [pharmacies, setPharmacies] = useState<PharmacieComponent[]>([]);
@@ -113,7 +114,7 @@ export default function PharmaciesClient() {
       }
 
       // Transformer les données de l'API en format compatible avec les composants
-      const transformedPharmacies = response.map(pharmacie => ({
+      const transformedPharmacies = response.map((pharmacie: Pharmacie) => ({
         id: pharmacie.uuid,
         nom: pharmacie.name,
         adresse: pharmacie.adress,
@@ -129,8 +130,8 @@ export default function PharmaciesClient() {
       }));
 
       // Transformer les médicaments (sécurisé)
-      const transformedMedicaments = response.flatMap(pharmacie => 
-        (pharmacie.medicaments || []).map(medicament => ({
+      const transformedMedicaments = response.flatMap((pharmacie: Pharmacie) => 
+        (pharmacie.medicaments || []).map((medicament: Medicament) => ({
           id: medicament.uuid,
           nom: medicament.name,
           description: medicament.description,
