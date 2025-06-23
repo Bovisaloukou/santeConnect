@@ -8,58 +8,148 @@ import { useEffect, useState } from "react"
 import { pharmacyApi } from "@/lib/api/pharmacy"
 import { PharmacieComponent, MedicamentComponent } from "@/lib/api/types"
 import LoadingSpinner from "@/components/ui/loading-spinner"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function PharmaciesClient() {
   const [pharmacies, setPharmacies] = useState<PharmacieComponent[]>([]);
   const [medicaments, setMedicaments] = useState<MedicamentComponent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null)
+  const [locationError, setLocationError] = useState<string | null>(null)
+  const [isGettingLocation, setIsGettingLocation] = useState(false)
+  const { toast } = useToast()
 
-  useEffect(() => {
-    const fetchPharmacies = async () => {
-      try {
-        const response = await pharmacyApi.getAll();
-        // Transformer les données de l'API en format compatible avec les composants
-        const transformedPharmacies = response.data.map(pharmacie => ({
-          id: pharmacie.uuid,
-          nom: pharmacie.name,
-          adresse: pharmacie.adress,
-          codePostal: "", // À remplir si disponible dans l'API
-          ville: "", // À remplir si disponible dans l'API
-          telephone: pharmacie.telephone,
-          services: pharmacie.services,
-          horaires: {
-            lundi: pharmacie.horaires[0] || "Non spécifié",
-            samedi: pharmacie.horaires[1] || "Non spécifié",
-            dimanche: pharmacie.horaires[2] || "Non spécifié"
-          }
-        }));
+  const getLocation = () => {
+    setIsGettingLocation(true);
+    setLocationError(null);
 
-        // Transformer les médicaments
-        const transformedMedicaments = response.data.flatMap(pharmacie => 
-          pharmacie.medicaments.map(medicament => ({
-            id: medicament.uuid,
-            nom: medicament.name,
-            description: medicament.description,
-            prix: medicament.prix,
-            image: "", // À remplir si disponible dans l'API
-            necessiteOrdonnance: medicament.surOrdonnance,
-            stock: 0, // À remplir si disponible dans l'API
-            categorie: "", // À remplir si disponible dans l'API
-            pharmacies: [pharmacie.uuid]
-          }))
-        );
+    if (!navigator.geolocation) {
+      setLocationError("La géolocalisation n'est pas supportée par votre navigateur");
+      setIsGettingLocation(false);
+      return;
+    }
 
-        setPharmacies(transformedPharmacies);
-        setMedicaments(transformedMedicaments);
-      } catch (err) {
-        setError("Erreur lors du chargement des pharmacies");
-      } finally {
-        setLoading(false);
-      }
+    const options = {
+      enableHighAccuracy: false,
+      timeout: 50000,
+      maximumAge: 0
     };
 
-    fetchPharmacies();
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log("Position obtenue:", position);
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        });
+        setIsGettingLocation(false);
+        toast({
+          title: "Localisation obtenue",
+          description: "Votre position a été enregistrée avec succès.",
+        });
+        // Recharger les pharmacies avec la nouvelle position
+        fetchPharmacies(position.coords.latitude, position.coords.longitude);
+      },
+      (error) => {
+        console.error("Erreur de géolocalisation:", error);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setLocationError("Vous devez autoriser la géolocalisation dans les paramètres de votre navigateur pour continuer");
+            toast({
+              title: "Permission refusée",
+              description: "Veuillez autoriser la géolocalisation dans les paramètres de votre navigateur",
+              variant: "destructive",
+            });
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setLocationError("Les informations de localisation ne sont pas disponibles. Veuillez vérifier votre connexion internet et réessayer.");
+            toast({
+              title: "Position indisponible",
+              description: "Impossible d'obtenir votre position. Veuillez réessayer.",
+              variant: "destructive",
+            });
+            break;
+          case error.TIMEOUT:
+            setLocationError("La demande de géolocalisation a expiré. Veuillez réessayer.");
+            toast({
+              title: "Délai dépassé",
+              description: "La demande de géolocalisation a pris trop de temps. Veuillez réessayer.",
+              variant: "destructive",
+            });
+            break;
+          default:
+            setLocationError("Une erreur est survenue lors de la géolocalisation. Veuillez réessayer.");
+            toast({
+              title: "Erreur",
+              description: "Une erreur inattendue est survenue. Veuillez réessayer.",
+              variant: "destructive",
+            });
+        }
+        setIsGettingLocation(false);
+      },
+      options
+    );
+  };
+
+  const fetchPharmacies = async (latitude?: number, longitude?: number) => {
+    try {
+      setLoading(true);
+      let response;
+      
+      if (latitude && longitude) {
+        // Appel avec les coordonnées géographiques
+        response = await pharmacyApi.getAll(latitude, longitude);
+      } else {
+        // Appel sans coordonnées (fallback)
+        response = await pharmacyApi.getAll();
+      }
+      
+      // Transformer les données de l'API en format compatible avec les composants
+      const transformedPharmacies = response.data.map(pharmacie => ({
+        id: pharmacie.uuid,
+        nom: pharmacie.name,
+        adresse: pharmacie.adress,
+        codePostal: "", // À remplir si disponible dans l'API
+        ville: "", // À remplir si disponible dans l'API
+        telephone: pharmacie.telephone,
+        services: pharmacie.services,
+        horaires: {
+          lundi: pharmacie.horaires[0] || "Non spécifié",
+          samedi: pharmacie.horaires[1] || "Non spécifié",
+          dimanche: pharmacie.horaires[2] || "Non spécifié"
+        }
+      }));
+
+      // Transformer les médicaments
+      const transformedMedicaments = response.data.flatMap(pharmacie => 
+        pharmacie.medicaments.map(medicament => ({
+          id: medicament.uuid,
+          nom: medicament.name,
+          description: medicament.description,
+          prix: medicament.prix,
+          image: "", // À remplir si disponible dans l'API
+          necessiteOrdonnance: medicament.surOrdonnance,
+          stock: 0, // À remplir si disponible dans l'API
+          categorie: "", // À remplir si disponible dans l'API
+          pharmacies: [pharmacie.uuid]
+        }))
+      );
+
+      setPharmacies(transformedPharmacies);
+      setMedicaments(transformedMedicaments);
+    } catch (err) {
+      setError("Erreur lors du chargement des pharmacies");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Essayer d'obtenir la localisation automatiquement au chargement
+    getLocation();
   }, []);
 
   if (loading) {

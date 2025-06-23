@@ -31,10 +31,17 @@ export const healthCenterApi = {
     }
   },
 
-  getAll: async () => {
+  getAll: async (latitude?: number, longitude?: number) => {
     try {
       const client = getApiClient();
-      const response = await client.get('/api/health-centers');
+      let url = '/api/health-centers';
+      
+      // Ajouter les paramètres de géolocalisation si disponibles
+      if (latitude !== undefined && longitude !== undefined) {
+        url += `?latitude=${latitude}&longitude=${longitude}`;
+      }
+      
+      const response = await client.get(url);
       return response.data;
     } catch (error) {
       throw error;
