@@ -97,17 +97,23 @@ export default function PharmaciesClient() {
     try {
       setLoading(true);
       let response;
-      
-      if (latitude && longitude) {
-        // Appel avec les coordonnées géographiques
-        response = await pharmacyApi.getAll(latitude, longitude);
-      } else {
-        // Appel sans coordonnées (fallback)
-        response = await pharmacyApi.getAll();
+
+      try {
+        if (latitude && longitude) {
+          response = await pharmacyApi.getAll(latitude, longitude);
+        } else {
+          response = await pharmacyApi.getAll();
+        }
+        console.log("Réponse brute de l'API:", response);
+      } catch (apiError) {
+        console.error("Erreur lors de l'appel à l'API:", apiError);
+        setError("Erreur lors de l'appel à l'API");
+        setLoading(false);
+        return;
       }
-      
+
       // Transformer les données de l'API en format compatible avec les composants
-      const transformedPharmacies = response.data.map(pharmacie => ({
+      const transformedPharmacies = response.map(pharmacie => ({
         id: pharmacie.uuid,
         nom: pharmacie.name,
         adresse: pharmacie.adress,
@@ -122,9 +128,9 @@ export default function PharmaciesClient() {
         }
       }));
 
-      // Transformer les médicaments
-      const transformedMedicaments = response.data.flatMap(pharmacie => 
-        pharmacie.medicaments.map(medicament => ({
+      // Transformer les médicaments (sécurisé)
+      const transformedMedicaments = response.flatMap(pharmacie => 
+        (pharmacie.medicaments || []).map(medicament => ({
           id: medicament.uuid,
           nom: medicament.name,
           description: medicament.description,
@@ -141,7 +147,7 @@ export default function PharmaciesClient() {
       setMedicaments(transformedMedicaments);
     } catch (err) {
       setError("Erreur lors du chargement des pharmacies");
-      console.error(err);
+      console.error("Erreur globale dans fetchPharmacies:", err);
     } finally {
       setLoading(false);
     }
