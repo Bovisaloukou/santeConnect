@@ -26,6 +26,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
+import { medecinApi } from "@/lib/api/medecin"
 
 interface Doctor {
   uuid: string
@@ -38,6 +39,7 @@ interface Doctor {
     lastName: string
     email: string
   }
+  statutActivation: boolean
 }
 
 interface HealthService {
@@ -70,6 +72,9 @@ export default function DoctorsPage() {
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedDays, setSelectedDays] = useState<string[]>([])
+  const [selectedPendingDoctor, setSelectedPendingDoctor] = useState<Doctor | null>(null)
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false)
+  const [isApproving, setIsApproving] = useState(false)
 
   useEffect(() => {
     const fetchHealthCenter = async () => {
@@ -185,6 +190,11 @@ export default function DoctorsPage() {
     )
   }
 
+  // Médecins en attente d'activation
+  const pendingDoctors = healthCenter?.healthServices
+    .flatMap(service => service.medecins.map(medecin => ({ ...medecin, serviceName: service.serviceName })))
+    .filter(medecin => medecin.statutActivation === false) || []
+
   if (status === "loading" || loading) {
     return (
       <div className="flex h-full min-h-[60vh] items-center justify-center p-6">
@@ -214,16 +224,30 @@ export default function DoctorsPage() {
                 <TableHead>Nom</TableHead>
                 <TableHead>Spécialité</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Statut</TableHead>
+                <TableHead>Service</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
-                  Aucune demande d'affiliation
-                </TableCell>
-              </TableRow>
+              {pendingDoctors.length > 0 ? pendingDoctors.map(doctor => (
+                <TableRow key={doctor.uuid}>
+                  <TableCell>{`${doctor.userProfile.lastName} ${doctor.userProfile.firstName}`}</TableCell>
+                  <TableCell>{doctor.specialite}</TableCell>
+                  <TableCell>{doctor.userProfile.email}</TableCell>
+                  <TableCell>{doctor.serviceName}</TableCell>
+                  <TableCell className="text-right">
+                    <Button onClick={() => { setSelectedPendingDoctor(doctor); setIsDetailsDialogOpen(true); }}>
+                      Voir détails
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8">
+                    Aucune demande d'affiliation
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -247,31 +271,33 @@ export default function DoctorsPage() {
             </TableHeader>
             <TableBody>
               {healthCenter?.healthServices.map(service =>
-                service.medecins.map(doctor => (
-                  <TableRow key={doctor.uuid}>
-                    <TableCell>{`${doctor.userProfile.lastName} ${doctor.userProfile.firstName}`}</TableCell>
-                    <TableCell>{doctor.specialite}</TableCell>
-                    <TableCell>{doctor.userProfile.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{service.serviceName}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      {doctor.joursConsultation?.join(", ") || "Non défini"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleOpenEditDialog(doctor)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
+                service.medecins
+                  .filter(doctor => doctor.statutActivation === true)
+                  .map(doctor => (
+                    <TableRow key={doctor.uuid}>
+                      <TableCell>{`${doctor.userProfile.lastName} ${doctor.userProfile.firstName}`}</TableCell>
+                      <TableCell>{doctor.specialite}</TableCell>
+                      <TableCell>{doctor.userProfile.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{service.serviceName}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        {doctor.joursConsultation?.join(", ") || "Non défini"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleOpenEditDialog(doctor)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
               )}
               {!healthCenter?.healthServices.some(
-                service => service.medecins.length > 0
+                service => service.medecins.some(doctor => doctor.statutActivation === true)
               ) && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
@@ -331,6 +357,77 @@ export default function DoctorsPage() {
                 <LoadingSpinner className="mr-2 h-4 w-4 animate-spin" />
               )}
               Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modale de détails du médecin en attente */}
+      <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Détails du médecin</DialogTitle>
+          </DialogHeader>
+          {selectedPendingDoctor && (
+            <div className="space-y-2 py-4">
+              <p><span className="font-semibold">Nom :</span> {selectedPendingDoctor.userProfile.lastName} {selectedPendingDoctor.userProfile.firstName}</p>
+              <p><span className="font-semibold">Email :</span> {selectedPendingDoctor.userProfile.email}</p>
+              <p><span className="font-semibold">Spécialité :</span> {selectedPendingDoctor.specialite}</p>
+              <p><span className="font-semibold">Numéro d'ordre :</span> {selectedPendingDoctor.numeroOrdre}</p>
+              <p><span className="font-semibold">Rôle :</span> {selectedPendingDoctor.role}</p>
+              {/* Ajouter d'autres infos si besoin */}
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDetailsDialogOpen(false)}
+              disabled={isApproving}
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!selectedPendingDoctor) return;
+                setIsApproving(true);
+                try {
+                  await medecinApi.update(selectedPendingDoctor.uuid, { statutActivation: true });
+                  toast.success("Le médecin a été approuvé avec succès.");
+                  // Mettre à jour l'état local pour refléter le changement
+                  setHealthCenter(prev => {
+                    if (!prev) return prev;
+                    return {
+                      ...prev,
+                      healthServices: prev.healthServices.map(service => ({
+                        ...service,
+                        medecins: service.medecins.map(med =>
+                          med.uuid === selectedPendingDoctor.uuid
+                            ? { ...med, statutActivation: true }
+                            : med
+                        )
+                      }))
+                    }
+                  });
+                  setIsDetailsDialogOpen(false);
+                  setSelectedPendingDoctor(null);
+                } catch (error) {
+                  toast.error("Erreur lors de l'approbation du médecin.");
+                } finally {
+                  setIsApproving(false);
+                }
+              }}
+              disabled={isApproving}
+            >
+              {isApproving ? <LoadingSpinner className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Confirmer
+            </Button>
+            {/* Bouton Refuser (optionnel, ici il ferme juste la modale) */}
+            <Button
+              variant="destructive"
+              onClick={() => { setIsDetailsDialogOpen(false); setSelectedPendingDoctor(null); }}
+              disabled={isApproving}
+            >
+              Refuser
             </Button>
           </DialogFooter>
         </DialogContent>

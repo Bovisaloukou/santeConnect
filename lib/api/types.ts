@@ -185,6 +185,7 @@ export interface Medecin {
     lastName: string;
     email: string;
   };
+  statutActivation: boolean;
 }
 
 export interface MedecinResponse {

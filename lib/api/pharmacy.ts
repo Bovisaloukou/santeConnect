@@ -40,10 +40,16 @@ export const pharmacyApi = {
     }
   },
 
-  getAll: async (): Promise<PharmacieResponse> => {
+  getAll: async (latitude?: number, longitude?: number): Promise<PharmacieResponse> => {
     try {
       const client = getApiClient();
-      const response = await client.get<PharmacieResponse>('/api/pharmacies');
+      let url = '/api/pharmacies';
+      
+      if (latitude && longitude) {
+        url += `?latitude=${latitude}&longitude=${longitude}`;
+      }
+      
+      const response = await client.get<PharmacieResponse>(url);
       return response.data;
     } catch (error) {
       throw error;

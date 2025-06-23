@@ -80,11 +80,11 @@ const baseNavigationItems: NavigationItem[] = [
       }
     ]
   },
-  {
+  /*{
     href: "/dashboard/patient/complaints",
     icon: <FileQuestion className="h-5 w-5" />,
     label: "Réclamations",
-  },
+  },*/
   {
     href: "/dashboard/patient/health-center",
     icon: <Building2 className="h-5 w-5" />,

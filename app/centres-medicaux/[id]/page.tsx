@@ -255,10 +255,6 @@ export default function MedicalCenterDetailPage() {
                 {React.createElement(center.icon, { className: "w-5 h-5 text-primary-blue flex-shrink-0" })}
                 <span>Type : {getTypeLabel(center.type)}</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <MapPin className="w-5 h-5 text-primary-blue flex-shrink-0" />
-                <span>Distance : {`${center.distance} km`}</span>
-              </div>
               <div className="flex items-start space-x-2">
                 <MapPin className="w-5 h-5 text-primary-blue flex-shrink-0 mt-0.5" />
                 <span>Adresse : {center.address}</span>
@@ -296,20 +292,15 @@ export default function MedicalCenterDetailPage() {
                       >
                         Prendre rendez-vous
                       </Button>
-                      <div className="relative group">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            router.push(`/register/professional?serviceUuid=${service.uuid}`);
-                          }}
-                        >
-                          S'affilier au centre
-                        </Button>
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-neutral-dark-gray text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-64 text-center">
-                          Pour les médecins qui souhaitent s'affilier à ce service dans ce centre
-                        </div>
-                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          router.push(`/register/professional?serviceUuid=${service.uuid}`);
+                        }}
+                      >
+                        S'affilier au centre
+                      </Button>
                     </div>
                   </div>
                 ))}
