@@ -49,6 +49,8 @@ export interface HealthService {
   uuid: string;
   serviceName: string;
   description?: string | null;
+  etat: "NORMAL" | "UNDERSTAFFED" | "OVERLOADED" | "CRITICAL" | "TEMP_CLOSED";
+  healthCenterUuid: string;
   medecins: Medecin[];
 }
 
@@ -191,4 +193,30 @@ export interface Medecin {
 export interface MedecinResponse {
   message: string;
   data: Medecin;
+}
+
+export interface Ordonnance {
+  uuid: string;
+  type: 'MEDICAMENT' | 'EXAMEN' | 'CONSULTATION';
+  contenu: string;
+  date_emission: string;
+  date_expiration: string;
+  est_delivree: boolean;
+  consultation_uuid: string;
+  medecin_uuid: string;
+}
+
+export interface OrdonnanceData {
+  type: 'MEDICAMENT' | 'EXAMEN' | 'CONSULTATION';
+  contenu: string;
+  date_emission: string;
+  date_expiration: string;
+  est_delivree: boolean;
+  consultation_uuid: string;
+  medecin_uuid: string;
+}
+
+export interface OrdonnanceResponse {
+  message: string;
+  data: Ordonnance;
 } 

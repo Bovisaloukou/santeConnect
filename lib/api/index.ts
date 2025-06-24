@@ -4,4 +4,6 @@ export * from './auth';
 export * from './user';
 export * from './healthCenter';
 export * from './healthService';
-export { default as pharmacyApi } from './pharmacy'; 
+export * from './pharmacy';
+export * from './ordonnance';
+export * from './notification'; 
