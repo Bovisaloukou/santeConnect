@@ -1,12 +1,5 @@
 import { getApiClient } from './config';
-
-export interface HealthService {
-  uuid: string;
-  serviceName: string;
-  description: string | null;
-  etat: "NORMAL" | "UNDERSTAFFED" | "OVERLOADED" | "CRITICAL" | "TEMP_CLOSED";
-  healthCenterUuid: string;
-}
+import { HealthService } from './types';
 
 export interface CreateHealthServiceDto {
   serviceName: string;
