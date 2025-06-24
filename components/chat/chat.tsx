@@ -8,12 +8,11 @@ import { v4 as uuidv4 } from "uuid";
 import ReactMarkdown from "react-markdown";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ExtendedSession } from "@/lib/api/types";
+import { ExtendedSession, N8nResponse, HealthService } from "@/lib/api/types";
 import { patientApi } from "@/lib/api/patient";
 import { visiteApi } from "@/lib/api/visite";
 import { consultationApi } from "@/lib/api/consultation";
-import { N8nResponse } from "@/lib/api/types";
-import { healthServiceApi, HealthService } from "@/lib/api/healthService";
+import { healthServiceApi } from "@/lib/api/healthService";
 
 interface Message {
   id: string;
@@ -173,7 +172,6 @@ export function Chat() {
                   // Création de la visite
                   try {
                     console.log("Tentative de création de la visite avec les données:", {
-                      date_visite: data.data.date_visite,
                       motif: data.data.motif,
                       anamnese: data.data.anamnese,
                       antecedants_medicaux: data.data.antecedants_medicaux,
@@ -182,7 +180,6 @@ export function Chat() {
                     });
 
                     const visiteResponse = await visiteApi.create({
-                      date_visite: data.data.date_visite,
                       motif: data.data.motif,
                       anamnese: data.data.anamnese,
                       antecedants_medicaux: data.data.antecedants_medicaux,
