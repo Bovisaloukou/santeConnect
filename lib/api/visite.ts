@@ -1,7 +1,7 @@
 import { getApiClient } from './config';
 
 export interface Visite {
-  date_visite: string;
+  date_visite?: string;
   motif: string;
   anamnese: string;
   antecedants_medicaux: string;
